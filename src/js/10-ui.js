@@ -260,6 +260,7 @@
     U.clear(main);
     ui.rooms[room](main);
     main.appendChild(ui.footer());
+    if (!quiet && E.sound) E.sound.play("page");
     if (!quiet) { try { main.focus({ preventScroll: true }); } catch (e) { } window.scrollTo(0, 0); }
   };
   ui.refresh = function () { if (ui.current && document.getElementById("room")) { var y = window.scrollY; ui.go(ui.current, true); window.scrollTo(0, y); } };
@@ -313,7 +314,7 @@
     var night = document.documentElement.getAttribute("data-theme") === "night";
     return h("div#fabs.fabs", null, [
       h("button.fab#fabTheme", { type: "button", "data-tip": t("top.dayNight"), "aria-label": t("top.dayNight"), onclick: function () {
-        U.prefSet("theme", night ? "day" : "night"); ui.applyLook(); ui.refreshTop();
+        U.prefSet("theme", night ? "day" : "night"); ui.applyLook(); ui.refreshTop(); if (E.sound) E.sound.play("lamp");
       } }, ui.emo(night ? "☀️" : "🌙")),
       h("button.fab#fabLock", { type: "button", "data-tip": t("top.lock"), "aria-label": t("top.lock"), onclick: function () { B.lock("hand"); } }, ui.emo("🔒"))]);
   };
@@ -351,6 +352,8 @@
       row(t("set.size"), ui.seg([["m", t("set.sizeM")], ["l", t("set.sizeL")], ["xl", t("set.sizeXL")]], U.prefGet("size", "m"), function (v) { U.prefSet("size", v); ui.applyLook(); }, t("set.size"))),
       row(t("set.calm"), ui.seg([["0", t("off")], ["1", t("on")]], U.prefGet("calm", "0"), function (v) { U.prefSet("calm", v); ui.applyLook(); }, t("set.calm"))),
       row(t("disp.menu"), ui.seg([["0", t("disp.menu.full")], ["1", t("disp.menu.icons")]], U.prefGet("fold", "0"), function (v) { U.prefSet("fold", v); ui.applyLook(); }, t("disp.menu"))),
+      row(t("disp.sound"), ui.seg([["1", t("on")], ["0", t("off")]], U.prefGet("sound", "1"), function (v) { U.prefSet("sound", v); if (v === "1" && E.sound) E.sound.play("welcome"); }, t("disp.sound"))),
+      row(t("disp.vol"), ui.seg([["0.35", t("disp.vol.soft")], ["0.7", t("disp.vol.mid")], ["1", t("disp.vol.full")]], U.prefGet("soundVol", "0.7"), function (v) { U.prefSet("soundVol", v); if (E.sound) E.sound.play("sale"); }, t("disp.vol"))),
       h("p.hint", null, t("set.calmHint"))]), actions: [{ label: t("close"), kind: "primary" }] });
   };
   ui.about = function () {

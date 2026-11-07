@@ -6,6 +6,7 @@
   E.app = {
     opened: function (fresh) {
       ui.openedAt = new Date();
+      if (E.sound) E.sound.play("welcome");
       ui.applyLook(); ui.shell();
       var st = B.state();
       if (fresh && B.mode !== "practice") ui.toast(t("app.welcome"), "good");

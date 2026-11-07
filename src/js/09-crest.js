@@ -131,6 +131,7 @@
     if (still()) return;
     if (!name) { root.__n = ((root.__n || 0) + 1) % ORDER.length; name = ORDER[(root.__n + ORDER.length - 1) % ORDER.length]; }
     (FL[name] || FL.spin)(root);
+    if (E.sound && name !== "rise") E.sound.play(name === "spin" ? "whirl" : name === "turn" ? "page" : "soft");
   };
   K.order = ORDER.slice();
 })();
