@@ -36,12 +36,16 @@ def main():
         sys.exit("build stopped: a script that does not belong")
 
     js = js.replace('"/*@@BUILD@@*/"', json.dumps(build)).replace('"/*@@DATE@@*/"', json.dumps(date))
+    # the mark: the Spiral, seven layers at depth, by day and by night (drawn once, kept in src/brand/lakay-mark)
+    MARK = os.path.join(SRC, "brand", "lakay-mark")
+    def b64png(name):
+        with open(os.path.join(MARK, name), "rb") as f:
+            return "data:image/png;base64," + base64.b64encode(f.read()).decode("ascii")
+    mark = {th: [b64png("spiral-%s-%d.png" % (th, i)) for i in range(7)] for th in ("day", "night")}
+    js = js.replace('"/*@@MARK@@*/"', json.dumps(mark))
     if "@@" in js:
         sys.exit("build stopped: a placeholder was left in the code")
-    # the crest, flat (written from src/js/09-crest.js by tools/crest.js), is the page's icon
-    with open(os.path.join(SRC, "brand", "lakay-crest.svg"), encoding="utf-8") as f:
-        svg = f.read().strip()
-    favicon = "data:image/svg+xml;base64," + base64.b64encode(svg.encode("utf-8")).decode("ascii")
+    favicon = b64png("spiral-day-icon.png")
     if "</script" in js.lower():
         sys.exit("build stopped: the code contains a closing script tag")
     digest = base64.b64encode(hashlib.sha256(js.encode("utf-8")).digest()).decode("ascii")
@@ -54,8 +58,6 @@ def main():
     sha = hashlib.sha256(out.encode("utf-8")).hexdigest()
     with open(path + ".sha256", "w", encoding="ascii", newline="\n") as f:
         f.write("%s  Lakay.html\n" % sha)
-    with open(os.path.join(HERE, "app", "svg_seal.svg"), "w", encoding="utf-8", newline="\n") as f:
-        f.write(svg)
     print("Lakay build %s (%s): app/Lakay.html, %d bytes, SHA-256 %s" % (build, date, len(out.encode("utf-8")), sha))
 
 
