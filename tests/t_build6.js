@@ -130,6 +130,12 @@ const OWNER_PW = "kreyol and coffee 2026", FIRST_PW = "first one for rose", ROSE
   await p2.click("#statusPill"); await p2.click("#signOutKey");
   await p2.waitForSelector("#lockDoor #ldName", { state: "visible", timeout: 20000 });
   ok(/Rose clocked out/.test(await p2.textContent("#lockDoor")), "the door says Rose clocked out and signed out");
+  await p2.fill("#ldName", "Yannie"); await p2.fill("#ldPw", OWNER_PW); await p2.click("#ldGo");
+  await p2.waitForSelector(".shell", { timeout: 60000 });
+  await p2.click("#statusPill"); await p2.click("#signOutKey");
+  await p2.waitForSelector("#lockDoor #ldName", { state: "visible", timeout: 20000 });
+  const plain = await p2.textContent("#signedOutLine");
+  ok(/Yannie signed out\./.test(plain) && !/clock/.test(plain), "the owner, not on the clock, is simply signed out (" + plain.trim() + ")");
 
   console.log("The owner signs in by ID, and sees it all");
   await p2.fill("#ldName", "1001"); await p2.fill("#ldPw", OWNER_PW); await p2.click("#ldGo");

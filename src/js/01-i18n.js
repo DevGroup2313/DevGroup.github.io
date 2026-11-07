@@ -673,6 +673,7 @@
     ["signout.stay", "Sign out, stay on the clock", "Se déconnecter, rester en service", "Dekonekte, rete nan sèvis"],
     ["signout.clocked", "{name} clocked out at {t} after {h} of work, and signed out.", "{name} a pointé son départ à {t} après {h} de travail, et s'est déconnecté.", "{name} soti nan sèvis a {t} apre {h} travay, epi li dekonekte."],
     ["signout.only", "{name} signed out and is still on the clock.", "{name} s'est déconnecté et reste en service.", "{name} dekonekte epi li toujou nan sèvis."],
+    ["signout.plain", "{name} signed out.", "{name} s'est déconnecté.", "{name} dekonekte."],
     ["status.tip", "Who is at the counter, the clock, and signing out", "Qui est au comptoir, le pointage et la déconnexion", "Ki moun ki nan kontwa a, lè travay, ak dekonekte"],
     ["home.yourShift", "Your shift", "Votre service", "Sèvis ou"],
     ["home.clockKeys", "A break, or clock out", "Une pause, ou le départ", "Yon poz, oswa soti"],

@@ -370,7 +370,8 @@
   ui.signOut = function (andClock) {
     var me = B.user, p = andClock ? B.clockOut() : Promise.resolve(null);
     return p.then(function (sh) {
-      E.door.outNote = sh ? t("signout.clocked", { name: me.name, t: E.fmtTime(new Date(sh.out)), h: ui.dur(B.shiftMs(sh)) }) : t("signout.only", { name: me.name });
+      E.door.outNote = sh ? t("signout.clocked", { name: me.name, t: E.fmtTime(new Date(sh.out)), h: ui.dur(B.shiftMs(sh)) })
+        : B.openShift(me.id) ? t("signout.only", { name: me.name }) : t("signout.plain", { name: me.name });
       B.lock("signout");
     }, ui.failed);
   };

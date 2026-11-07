@@ -11,7 +11,7 @@ Read this first in a new session. It says where Lakay stands and what comes next
 - **Making a release:** see "Releasing a build" in `README.md`. In short: raise `build.json`, build, test, run `python3 release/device_repos.py windows`, commit and push Lakay-Windows; then `python3 release/device_repos.py mac <clone of Lakay-Mac>` and `... apps <clone of Lakay-Apps>`, commit and push each. Put `[skip ci]` in a commit message to save work without building.
 - **GitHub commits the apps into `builds/`** after each build (`release/publish.py`, as github-actions, with `[skip ci]`). So pull before pushing: `git pull --rebase origin claude/magical-darwin-ppq4pn`.
 - **Released:** Build 6 (7 November 2026): the owner as administrator, the staff with user IDs and access levels, signing in and out with the time clock, reports by person. Build 5 (the mark in true depth, the downloads set up as the other apps') was confirmed on all three repositories before it.
-- **Tests:** `node tests/t_build3.js` (48 checks) and `node tests/t_build6.js` (41 checks) drive the whole app in Chromium. Build with `python3 build.py`.
+- **Tests:** `node tests/t_build3.js` (48 checks) and `node tests/t_build6.js` (42 checks) drive the whole app in Chromium. Build with `python3 build.py`.
 
 ## How the app is made
 

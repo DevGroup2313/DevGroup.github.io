@@ -13,7 +13,7 @@ The newest build is first. The build number also shows in Lakay's About.
 - **What each person sees.** A person without costs and profit sees no cost, profit or value of the stock anywhere: not in Inventory, the item cards, Home, the reports or the CSV files. The rooms, keys and side-rail keys follow each person's access, and the books themselves refuse a change a person may not make.
 - **The practice store** has two sample people, Marie (a cashier) and Jean (a manager), with two weeks of shifts and sales. The status key there shows the store as each of them sees it.
 - Two new Guidebook chapters: Your team, and Signing in, the clock and breaks.
-- tests/t_build6.js: 41 checks, all passing, with the 48 of tests/t_build3.js.
+- tests/t_build6.js: 42 checks, all passing, with the 48 of tests/t_build3.js.
 
 ## Build 5 (7 November 2026): the mark in true depth, and the downloads set up as the other apps'
 
