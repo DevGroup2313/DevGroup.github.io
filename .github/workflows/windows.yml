@@ -156,14 +156,6 @@ jobs:
           if (-not $m.Success) { Write-Error "The page did not say it was ready within 120 seconds. The photograph under Artifacts shows the screen."; exit 1 }
           exit 0
 
-      - name: Keep the screenshot with this run
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-screenshot
-          path: ${{ runner.temp }}/shots
-          if-no-files-found: warn
-
       - name: Make the installer
         run: |
           $find = { Get-ChildItem -Path "${env:ProgramFiles(x86)}\Inno Setup*\ISCC.exe", "$env:ProgramFiles\Inno Setup*\ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 }
@@ -239,14 +231,6 @@ jobs:
           "DEFENDER_NOTE=$note" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Add-Content $env:GITHUB_STEP_SUMMARY "### $note"
           exit 0
-
-      - name: Keep the installer with this run
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: emporium-windows
-          path: ${{ runner.temp }}/out/*.exe
-          if-no-files-found: warn
 
       - name: Put the installer on the build's release page
         env:

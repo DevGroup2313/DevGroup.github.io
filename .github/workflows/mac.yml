@@ -77,7 +77,8 @@ jobs:
 
       - name: Open the app once
         # Starts the app and waits for its own line "start: page ready" (the
-        # door drawn), then photographs the screen and closes it.
+        # door drawn), then closes it. Nothing from this test is kept as a file:
+        # the only downloads are the apps on the release page.
         continue-on-error: true
         run: |
           LOG="$HOME/Library/Application Support/Emporium/emporium.log"
@@ -89,9 +90,7 @@ jobs:
             if grep -q "start: page \(NOT \)\?ready" "$LOG" 2>/dev/null; then break; fi
             kill -0 $PID 2>/dev/null || break
           done
-          sleep 3
-          mkdir -p "$RUNNER_TEMP/shots"
-          screencapture -x "$RUNNER_TEMP/shots/mac-${{ matrix.zip }}.png" || true
+          sleep 2
           kill $PID 2>/dev/null || true
           echo "--- what the app recorded ---"; cat "$LOG" 2>/dev/null || echo "(nothing)"
           if grep -q "start: page ready" "$LOG"; then
@@ -103,14 +102,6 @@ jobs:
             echo "::warning::The page did not say it was ready on GitHub's Mac (${{ matrix.chip }})."
             exit 1
           fi
-
-      - name: Keep the photograph with this run
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-screenshot-${{ matrix.zip }}
-          path: ${{ runner.temp }}/shots
-          if-no-files-found: warn
 
       - name: Zip the app
         run: |
