@@ -58,11 +58,20 @@ def main():
         sys.exit("GitHub did not accept %s after four tries. If an error above says 403, the cure is "
                  "Settings, Actions, General, Workflow permissions: Read and write." % name)
 
+    # The notes are written afresh from release/NOTES.md each time, so a later
+    # change to the instructions reaches the page; the fingerprint lines already
+    # there (one per package, under the last heading) are kept, this package's
+    # replaced.
+    with open(os.path.join(ROOT, "release", "NOTES.md"), encoding="utf-8") as fh:
+        template = fh.read().replace("@@BUILD@@", str(build)).replace("@@DATE@@", str(info.get("date", ""))).rstrip("\n")
     line = "- %s: `%s`, SHA-256 `%s`%s" % (label, name, digest, (". " + note) if note else "")
     for _ in range(4):
         r = gh("release", "view", tag, "--json", "body", "-q", ".body", capture=True)
         if r.returncode == 0:
-            body = [x for x in r.stdout.rstrip("\n").splitlines() if not x.startswith("- %s: " % label)]
+            old = r.stdout.rstrip("\n").splitlines()
+            mark = max((i for i, x in enumerate(old) if x.startswith("**Fingerprints**")), default=-1)
+            kept = [x for x in old[mark + 1:] if x.startswith("- ") and not x.startswith("- %s: " % label)] if mark >= 0 else []
+            body = template.splitlines() + kept
             body.append(line)
             bf = os.path.join(tmp, "body.md")
             with open(bf, "w", encoding="utf-8") as fh:

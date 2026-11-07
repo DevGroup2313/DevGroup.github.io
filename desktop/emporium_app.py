@@ -18,6 +18,7 @@ Left out: the Forge's second windows and its JavaScript bridge (see "saving
 files" below).
 """
 
+import json
 import os
 import re
 import sys
@@ -216,11 +217,12 @@ def _window_shown():
 # Asked of the page until it is ready: how far it has loaded, whether its door
 # or its rooms are drawn (a door with buttons, or the shell), its background
 # colour, and the build it says it is.
+# The answer comes back as JSON text, which every web view returns the same
+# way (WebKit on the Mac turns a bare array into an object of its own).
 _READY_JS = (
-    "(function(){var d=document,a=d.getElementById('app'),bg='',b='';"
+    "(function(){var d=document,a=d.getElementById('app'),bg='';"
     "try{bg=getComputedStyle(d.body).backgroundColor;}catch(e){}"
-    "try{var m=d.querySelector('meta[name=\"emporium-build\"]');b=m?m.getAttribute('content'):'';}catch(e){}"
-    "return [d.readyState,a?a.childElementCount:0,!!d.querySelector('.door button, .shell'),bg,b];})()"
+    "return JSON.stringify([d.readyState,a?a.childElementCount:0,!!d.querySelector('.door button, .shell'),bg,d.title]);})()"
 )
 
 _RGB_RE = re.compile(r"rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)")
@@ -279,6 +281,8 @@ def _watch_start(window):
                     # run_js, not evaluate_js: evaluate_js wraps the script in
                     # eval, which the page's security policy refuses.
                     state = window.run_js(_READY_JS)
+                    if isinstance(state, str):
+                        state = json.loads(state)
             except Exception:
                 state = None
             if isinstance(state, (list, tuple)) and len(state) >= 5:

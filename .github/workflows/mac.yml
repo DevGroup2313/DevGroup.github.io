@@ -1,0 +1,124 @@
+name: Emporium for Mac
+
+# Builds Emporium for the Mac on GitHub's own Macs, one app for Apple silicon
+# (M1 and later) and one for Intel, opens each once, and puts each zip on the
+# build's release page. Made after Ingenium's Mac build (build-mac.yml).
+
+on:
+  push:
+    paths:
+      - 'app/**'
+      - 'build.json'
+      - 'desktop/**'
+      - 'release/**'
+      - '.github/workflows/mac.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mac-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mac:
+    name: mac (${{ matrix.chip }})
+    strategy:
+      fail-fast: false
+      # one at a time: both go on the same release page
+      max-parallel: 1
+      matrix:
+        include:
+          - chip: Apple silicon
+            runner: macos-15
+            zip: Mac-Apple-Silicon
+          - chip: Intel
+            runner: macos-15-intel
+            zip: Mac-Intel
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - name: Get the project
+        uses: actions/checkout@v4
+
+      - name: Read the build number
+        run: |
+          BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
+          echo "BUILD=$BUILD" >> "$GITHUB_ENV"
+          echo "ZIP=Emporium-Build-$BUILD-${{ matrix.zip }}.zip" >> "$GITHUB_ENV"
+          uname -m; sw_vers
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install the build tools
+        # the versions Ingenium's and the Forge's builds use
+        run: python3 -m pip install --disable-pip-version-check "pyinstaller==6.22.3" "pywebview==6.2.1"
+
+      - name: Build Emporium.app
+        run: |
+          python3 -m PyInstaller --noconfirm --clean desktop/mac/emporium-mac.spec 2>&1 | tail -n 8
+          test -d dist/Emporium.app
+          PAGE=$(find dist/Emporium.app -name Emporium.html -type f | head -n 1)
+          echo "Page inside: $PAGE"
+          A=$(shasum -a 256 "$PAGE" | cut -d' ' -f1); B=$(cut -d' ' -f1 app/Emporium.html.sha256)
+          echo "inside $A, recorded $B"
+          test "$A" = "$B"
+          file dist/Emporium.app/Contents/MacOS/Emporium
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" dist/Emporium.app/Contents/Info.plist
+
+      - name: Seal the app (ad hoc, no Apple ID)
+        run: |
+          codesign --force --deep --sign - --timestamp=none dist/Emporium.app
+          codesign --verify --deep --strict --verbose=2 dist/Emporium.app
+
+      - name: Open the app once
+        # Starts the app and waits for its own line "start: page ready" (the
+        # door drawn), then photographs the screen and closes it.
+        continue-on-error: true
+        run: |
+          LOG="$HOME/Library/Application Support/Emporium/emporium.log"
+          rm -f "$LOG"
+          dist/Emporium.app/Contents/MacOS/Emporium &
+          PID=$!
+          for i in $(seq 1 240); do
+            sleep 0.5
+            if grep -q "start: page \(NOT \)\?ready" "$LOG" 2>/dev/null; then break; fi
+            kill -0 $PID 2>/dev/null || break
+          done
+          sleep 3
+          mkdir -p "$RUNNER_TEMP/shots"
+          screencapture -x "$RUNNER_TEMP/shots/mac-${{ matrix.zip }}.png" || true
+          kill $PID 2>/dev/null || true
+          echo "--- what the app recorded ---"; cat "$LOG" 2>/dev/null || echo "(nothing)"
+          if grep -q "start: page ready" "$LOG"; then
+            NOTE=$(grep -o "page ready in [0-9.]* s" "$LOG" | head -n 1)
+            echo "START_NOTE=opened on GitHub's Mac: $NOTE" >> "$GITHUB_ENV"
+            echo "### ${{ matrix.chip }}: $NOTE" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "START_NOTE=not opened on GitHub's Mac" >> "$GITHUB_ENV"
+            echo "::warning::The page did not say it was ready on GitHub's Mac (${{ matrix.chip }})."
+            exit 1
+          fi
+
+      - name: Keep the photograph with this run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-screenshot-${{ matrix.zip }}
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: warn
+
+      - name: Zip the app
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent dist/Emporium.app "$RUNNER_TEMP/$ZIP"
+          ls -la "$RUNNER_TEMP/$ZIP"
+
+      - name: Put it on the build's release page
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 release/publish.py "$RUNNER_TEMP/$ZIP" "Mac (${{ matrix.chip }})" "${START_NOTE:-not opened}"
