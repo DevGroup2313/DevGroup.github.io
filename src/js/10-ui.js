@@ -38,6 +38,7 @@
     root.setAttribute("data-theme", dark ? "night" : "day");
     root.setAttribute("data-size", U.prefGet("size", "m"));
     root.setAttribute("data-calm", U.prefGet("calm", "0"));
+    root.setAttribute("data-fold", U.prefGet("fold", "0"));
     var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#0A1A20" : "#F6F1E7");
   };
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ui.applyLook); } catch (e) { }
@@ -180,13 +181,18 @@
     var app = document.getElementById("app"); U.clear(app);
     var st = B.state();
     var nav = h("nav.rail", { "aria-label": t("menu") }, [
-      h("div.rail-brand", null, [ui.sealWrap(46), h("div", null, [h("div.brand-name", null, "Emporium"), h("div.brand-store", null, st.settings.storeName)])]),
-      h("div.rail-keys", null, ROOMS.map(function (r) {
-        return h("button.nav-key", { type: "button", "data-room": r, "aria-label": t("room." + r), onclick: function () { ui.go(r); } },
-          [h("span.nav-tile", { "aria-hidden": "true" }, ui.emo(ui.ROOM_EMO[r])), h("span.long", null, t("room." + r)), h("span.short", { "aria-hidden": "true" }, t("short." + r))]);
+      h("div.rail-brand", null, [ui.sealWrap(42), h("div", null, [h("div.brand-name", null, "Emporium"), h("div.brand-store", null, st.settings.storeName)]),
+        h("button.icon-key.rail-fold", { type: "button", "aria-label": t("menu.fold"), title: t("menu.fold"), onclick: function () {
+          U.prefSet("fold", U.prefGet("fold", "0") === "1" ? "0" : "1"); ui.applyLook();
+          this.textContent = U.prefGet("fold", "0") === "1" ? "›" : "‹";
+        } }, U.prefGet("fold", "0") === "1" ? "›" : "‹")]),
+      h("div.rail-keys", null, ROOMS.map(function (r, i) {
+        var key = h("button.nav-key", { type: "button", "data-room": r, "aria-label": t("room." + r), title: t("room." + r), onclick: function () { ui.go(r); } },
+          [ui.emo(ui.ROOM_EMO[r], "nav-emo"), h("span.long", null, t("room." + r)), h("span.short", { "aria-hidden": "true" }, t("short." + r))]);
+        return i === 2 || i === 4 ? [h("span.rail-rule", { "aria-hidden": "true" }), key] : key;
       })),
       h("div.rail-foot", null, [
-        h("button.nav-key.lock-key", { type: "button", "aria-label": t("lockNow"), onclick: function () { B.lock("hand"); } }, [h("span.nav-tile", { "aria-hidden": "true" }, ui.emo("🔒")), h("span.long", null, t("lockNow"))]),
+        h("button.nav-key.lock-key", { type: "button", "aria-label": t("lockNow"), title: t("lockNow"), onclick: function () { B.lock("hand"); } }, [ui.emo("🔒", "nav-emo"), h("span.long", null, t("lockNow"))]),
         h("p.build-line", null, t("build") + " " + E.BUILD.number)])
     ]);
     var main = h("main#room", { tabindex: "-1" });

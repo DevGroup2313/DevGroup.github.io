@@ -13,7 +13,7 @@
     ["build", "Build", "Build", "Build"], ["cancel", "Cancel", "Annuler", "Anile"], ["close", "Close", "Fermer", "Fèmen"],
     ["edit", "Edit", "Modifier", "Modifye"], ["gotIt", "Got it", "Compris", "Mwen konprann"], ["language", "Language", "Langue", "Lang"],
     ["loading", "Loading…", "Chargement…", "N ap chaje…"], ["lockNow", "Lock now", "Verrouiller", "Fèmen kounye a"],
-    ["menu", "Menu", "Menu", "Meni"], ["next", "Next", "Suivant", "Kontinye"], ["off", "Off", "Non", "Non"], ["on", "On", "Oui", "Wi"],
+    ["menu", "Menu", "Menu", "Meni"], ["menu.fold", "Fold or unfold the menu", "Replier ou déplier le menu", "Pliye oswa depliye meni an"], ["next", "Next", "Suivant", "Kontinye"], ["off", "Off", "Non", "Non"], ["on", "On", "Oui", "Wi"],
     ["readAloud", "Read aloud", "Lire à voix haute", "Li l fò"], ["remove", "Remove", "Retirer", "Retire"], ["save", "Save", "Enregistrer", "Anrejistre"],
     ["tip", "Tip", "Conseil", "Konsèy"], ["theme", "Light", "Lumière", "Limyè"], ["theme.day", "Day", "Jour", "Jou"],
     ["theme.night", "Night", "Nuit", "Lannwit"], ["theme.auto", "Auto", "Auto", "Otomatik"],

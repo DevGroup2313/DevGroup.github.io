@@ -223,6 +223,16 @@ const PW = 'Patties are hot at noon!', PW2 = 'Kafe lakay se kafe lakay 2026';
   }
   await p.setViewportSize({ width: 1366, height: 768 });
 
+  /* ---------- the side menu folds to its emojis and unfolds again ---------- */
+  await p.evaluate(() => Emporium.ui.go('home'));
+  const wide = await p.$eval('.rail', n => n.getBoundingClientRect().width);
+  await p.click('.rail-fold'); await p.waitForTimeout(200);
+  const narrow = await p.$eval('.rail', n => n.getBoundingClientRect().width);
+  const labelsHidden = await p.$$eval('.rail .nav-key .long', ns => ns.every(n => getComputedStyle(n).display === 'none'));
+  await shot('13-rail-folded');
+  await p.click('.rail-fold'); await p.waitForTimeout(200);
+  ok(wide > 200 && narrow < 90 && labelsHidden && (await p.$eval('.rail', n => n.getBoundingClientRect().width)) > 200, 'the side menu folds to its emojis and unfolds again', [wide, narrow, labelsHidden]);
+
   /* ---------- the phone menu: every short word fits, in every language ---------- */
   await p.setViewportSize({ width: 360, height: 780 });
   const cut = [];
