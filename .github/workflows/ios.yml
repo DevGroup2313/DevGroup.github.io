@@ -36,7 +36,7 @@ jobs:
         run: |
           BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
-          echo "IPA=Emporium-Build-$BUILD-iPhone-iPad.ipa" >> "$GITHUB_ENV"
+          echo "IPA=Emporium-iPhone-iPad-unsigned.ipa" >> "$GITHUB_ENV"
           xcodebuild -version
 
       - name: Put the page and the build number in the shell

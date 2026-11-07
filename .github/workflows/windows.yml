@@ -45,7 +45,7 @@ jobs:
             "BUILD=$build"
             "APP_LABEL=Build $build"
             "APP_NUMERIC=1.0.$build.0"
-            "SETUP_BASE=Emporium-Build-$build-Windows-Setup"
+            "SETUP_BASE=Emporium-Windows-Setup"
             "OUT=$env:RUNNER_TEMP\out"
           ) | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\out" | Out-Null

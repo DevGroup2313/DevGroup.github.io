@@ -44,12 +44,12 @@ jobs:
           cp app/Emporium.html app/Emporium.html.sha256 LICENCE.txt "out/$D/"
           cp docs/*.md "out/$D/docs/"
           sed -e "s/@@BUILD@@/$BUILD/g" -e "s/@@DATE@@/$DATE/g" "release/READ ME FIRST.txt" > "out/$D/READ ME FIRST.txt"
-          (cd out && zip -X -q -r "../Emporium-Build-$BUILD-Standalone-Page.zip" "$D")
-          unzip -l "Emporium-Build-$BUILD-Standalone-Page.zip"
+          (cd out && zip -X -q -r "../Emporium-Standalone-Page.zip" "$D")
+          unzip -l "Emporium-Standalone-Page.zip"
 
       - name: Put it on the build's release page
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          python3 release/publish.py "Emporium-Build-$BUILD-Standalone-Page.zip" "Standalone page" "Emporium.html inside: SHA-256 $(cut -d' ' -f1 app/Emporium.html.sha256)"
+          python3 release/publish.py "Emporium-Standalone-Page.zip" "Standalone page" "Emporium.html inside: SHA-256 $(cut -d' ' -f1 app/Emporium.html.sha256)"

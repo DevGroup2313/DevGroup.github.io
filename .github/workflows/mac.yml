@@ -46,7 +46,7 @@ jobs:
         run: |
           BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
-          echo "ZIP=Emporium-Build-$BUILD-${{ matrix.zip }}.zip" >> "$GITHUB_ENV"
+          echo "ZIP=Emporium-${{ matrix.zip }}.zip" >> "$GITHUB_ENV"
           uname -m; sw_vers
 
       - name: Set up Python 3.12

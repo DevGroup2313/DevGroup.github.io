@@ -33,9 +33,10 @@ and Ingenium.
 - Sealed backups and restore; English, French and Kreyòl; Day, Night and Auto; larger text; Calm mode; tips beside the
   controls; the Guidebook.
 
-**To install it:** the repository's Releases page holds each build's packages, made by GitHub from this repository:
-the Windows installer (`Emporium-Build-2-Windows-Setup.exe`) and the standalone page
-(`Emporium-Build-2-Standalone-Page.zip`). The Mac, iPhone and iPad, and Fire tablet packages follow.
+**To install it:** open the latest release (Releases, "Emporium (latest build)") and download the file for the
+device: `Emporium-Windows-Setup.exe`, `Emporium-Mac-Apple-Silicon.zip`, `Emporium-Mac-Intel.zip`,
+`Emporium-Android-Fire.apk`, `Emporium-iPhone-iPad-unsigned.ipa`, or `Emporium-Standalone-Page.zip`. The release
+page says how to install each. GitHub builds them all from this repository and replaces them with each new build.
 
 **To try it without installing:** open `app/Emporium.html` in Microsoft Edge, Chrome or Safari. Nothing leaves the
 device.

@@ -32,7 +32,10 @@ def main():
     with open(os.path.join(ROOT, "build.json"), encoding="utf-8") as fh:
         info = json.load(fh)
     build = int(info["build"])
-    tag, title = "build-%d" % build, "Emporium build %d" % build
+    # One release, "latest", updated in place with fixed file names, as the
+    # owner's other apps publish theirs (Ingenium-Mac-Mini, Ingenium-Android-fire).
+    tag, title = "latest", "Emporium (latest build)"
+    commit = (os.environ.get("GITHUB_SHA") or "")[:7]
     name = os.path.basename(path)
     with open(path, "rb") as fh:
         digest = hashlib.sha256(fh.read()).hexdigest()
@@ -40,7 +43,7 @@ def main():
 
     if gh("release", "view", tag, capture=True).returncode != 0:
         with open(os.path.join(ROOT, "release", "NOTES.md"), encoding="utf-8") as fh:
-            notes = fh.read().replace("@@BUILD@@", str(build)).replace("@@DATE@@", str(info.get("date", "")))
+            notes = fh.read().replace("@@BUILD@@", str(build)).replace("@@DATE@@", str(info.get("date", ""))).replace("@@COMMIT@@", commit)
         nf = os.path.join(tmp, "notes.md")
         with open(nf, "w", encoding="utf-8") as fh:
             fh.write(notes)
@@ -63,14 +66,14 @@ def main():
     # there (one per package, under the last heading) are kept, this package's
     # replaced.
     with open(os.path.join(ROOT, "release", "NOTES.md"), encoding="utf-8") as fh:
-        template = fh.read().replace("@@BUILD@@", str(build)).replace("@@DATE@@", str(info.get("date", ""))).rstrip("\n")
-    line = "- %s: `%s`, SHA-256 `%s`%s" % (label, name, digest, (". " + note) if note else "")
+        template = fh.read().replace("@@BUILD@@", str(build)).replace("@@DATE@@", str(info.get("date", ""))).replace("@@COMMIT@@", commit).rstrip("\n")
+    line = "- %s: `%s`" % (name, digest)
     for _ in range(4):
         r = gh("release", "view", tag, "--json", "body", "-q", ".body", capture=True)
         if r.returncode == 0:
             old = r.stdout.rstrip("\n").splitlines()
             mark = max((i for i, x in enumerate(old) if x.startswith("**Fingerprints**")), default=-1)
-            kept = [x for x in old[mark + 1:] if x.startswith("- ") and not x.startswith("- %s: " % label)] if mark >= 0 else []
+            kept = [x for x in old[mark + 1:] if x.startswith("- ") and not x.startswith("- %s: " % name)] if mark >= 0 else []
             body = template.splitlines() + kept
             body.append(line)
             bf = os.path.join(tmp, "body.md")
@@ -79,6 +82,13 @@ def main():
             if gh("release", "edit", tag, "--notes-file", bf).returncode == 0:
                 break
         time.sleep(5)
+    r = gh("release", "list", "--limit", "50", "--json", "tagName", "-q", ".[].tagName", capture=True)
+    for old_tag in (r.stdout.split() if r.returncode == 0 else []):
+        if old_tag.startswith("build-"):
+            gh("release", "delete", old_tag, "--cleanup-tag", "-y")
+            print("Removed the older page %s: everything is on %s now." % (old_tag, tag))
+    if note:
+        print(note)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as fh:

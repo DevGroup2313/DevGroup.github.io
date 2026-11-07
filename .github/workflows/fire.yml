@@ -43,11 +43,11 @@ jobs:
         run: |
           BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
-          PLAT=$(ls -d "$ANDROID_HOME"/platforms/android-* | sort -V | tail -n 1)
+          PLAT=$(ls -d "$ANDROID_HOME"/platforms/android-* | grep -v -i -E "beta|preview|ext" | sort -V | tail -n 1)
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
           echo "BT=$BT" >> "$GITHUB_ENV"
           echo "PLAT=$PLAT" >> "$GITHUB_ENV"
-          echo "APK=Emporium-Build-$BUILD-Fire-Tablet.apk" >> "$GITHUB_ENV"
+          echo "APK=Emporium-Android-Fire.apk" >> "$GITHUB_ENV"
           echo "Build $BUILD; build tools $BT; platform $PLAT"; java -version
 
       - name: Compile the shell
