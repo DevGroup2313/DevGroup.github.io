@@ -1,8 +1,8 @@
 name: Lakay for the Fire tablet
 
 # Builds Lakay's APK for the Fire tablet (and any Android tablet) on GitHub's
-# Linux computer with Android's own tools, and puts it on the build's release
-# page. The app is Ingenium 6.0's Android shell (packages/fire) holding
+# Linux computer with Android's own tools, and puts it on the Releases page
+# and in builds/. The app is Ingenium 6.0's Android shell (packages/fire) holding
 # Lakay's page in assets/.
 #
 # SIGNING. Android installs a new version over an old one only when both carry
@@ -20,7 +20,7 @@ on:
       - 'app/**'
       - 'build.json'
       - 'packages/fire/**'
-      - 'release/**'
+      - 'release/publish.py'
       - '.github/workflows/fire.yml'
   workflow_dispatch:
 
@@ -99,7 +99,7 @@ jobs:
           echo "page inside $(cat "$RUNNER_TEMP/inside.txt"), recorded $(cut -d' ' -f1 app/Lakay.html.sha256)"
           test "$(cat "$RUNNER_TEMP/inside.txt")" = "$(cut -d' ' -f1 app/Lakay.html.sha256)"
 
-      - name: Put it on the build's release page
+      - name: Put it on the Releases page and in builds/
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

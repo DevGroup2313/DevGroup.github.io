@@ -2,7 +2,8 @@ name: Lakay for Windows
 
 # Builds the Windows program from app/Lakay.html, tests it on GitHub's
 # Windows computer, makes the installer, installs and uninstalls it, scans it
-# with Microsoft Defender, and puts it on the build's release page.
+# with Microsoft Defender, and puts it on the Releases page ("Lakay for Windows (latest build)")
+# and in this repository's builds/ folder, as the owner's other apps are delivered.
 # Made after the Forge's Windows build (FFF, 9s80).
 
 on:
@@ -11,7 +12,7 @@ on:
       - 'app/**'
       - 'build.json'
       - 'desktop/**'
-      - 'release/**'
+      - 'release/publish.py'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
 
@@ -234,7 +235,7 @@ jobs:
           Add-Content $env:GITHUB_STEP_SUMMARY "### $note"
           exit 0
 
-      - name: Put the installer on the build's release page
+      - name: Put the installer on the Releases page and in builds/
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

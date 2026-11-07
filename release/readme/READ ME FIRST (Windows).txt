@@ -1,0 +1,54 @@
+LAKAY FOR WINDOWS
+=================
+Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
+
+
+WHICH FILE
+----------
+Lakay-Windows-Setup.exe, for Windows 10 and 11. It is in the builds folder of
+this repository, and on its Releases page ("Lakay for Windows (latest build)",
+under Assets). The PC needs nothing else: no Python, no administrator password.
+
+
+INSTALL (OR UPDATE)
+-------------------
+1. Download Lakay-Windows-Setup.exe. In the builds folder, click the file's
+   name, then the download button on the right.
+2. If Microsoft Edge says the file is not commonly downloaded, do not choose
+   Delete: point at the download, click the three dots, then Keep, Show more
+   and Keep anyway.
+3. Double-click the file. If Windows shows "Windows protected your PC", click
+   More info, then Run anyway. Both warnings come from this file being new and
+   not signed with a paid certificate.
+4. Tick "Put Lakay on the Desktop" if you want it there, then Install. Lakay is
+   installed for you only, in your own folder, and it is in the Start menu.
+5. To update, download the newer Lakay-Windows-Setup.exe and run it. The
+   store's books stay: they are not kept inside the program.
+
+Lakay opens on its door. Enter opens the practice store at once. The little
+lock in the card's corner sets up the real store, or signs in to it.
+
+To remove Lakay: Settings, Apps, Installed apps, Lakay, Uninstall. The books
+stay on the PC.
+
+
+THE STORE'S BOOKS
+-----------------
+- They are sealed on this PC, in your own folder:
+    %LOCALAPPDATA%\Emporium
+  (Lakay's former name stays on the folder, so nothing is lost.)
+- Save a backup in Lakay at closing time: Settings, Save a backup now. The
+  file is sealed and opens only with your password or the Master Key. Keep a
+  copy on a USB key and another outside the store.
+- Each device keeps its own books. To move a store to another computer, save
+  a backup here and restore it there.
+
+
+IF IT DOES NOT OPEN
+-------------------
+- If Windows Security removed the file or named a threat, open Windows
+  Security, Virus and threat protection, Protection history, and note the
+  name it gives. Each build is scanned with Microsoft Defender on GitHub's
+  Windows computer before it is published; the Releases page says the result.
+- What Lakay noted when it started is in
+    %LOCALAPPDATA%\Emporium\emporium.log

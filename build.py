@@ -36,12 +36,13 @@ def main():
         sys.exit("build stopped: a script that does not belong")
 
     js = js.replace('"/*@@BUILD@@*/"', json.dumps(build)).replace('"/*@@DATE@@*/"', json.dumps(date))
-    # the mark: the Spiral, seven layers at depth, by day and by night (drawn once, kept in src/brand/lakay-mark)
+    # the mark: the Spiral, its layers at depth (a coin with an edge, shadows on the plate, a shell with sides), by day and by night (drawn once, kept in src/brand/lakay-mark)
     MARK = os.path.join(SRC, "brand", "lakay-mark")
     def b64png(name):
         with open(os.path.join(MARK, name), "rb") as f:
             return "data:image/png;base64," + base64.b64encode(f.read()).decode("ascii")
-    mark = {th: [b64png("spiral-%s-%d.png" % (th, i)) for i in range(7)] for th in ("day", "night")}
+    ROLES = ["edge", "plate", "engr", "hshadow", "sshadow", "halo", "sside", "shell", "lattice", "pearl", "sparks"]
+    mark = {th: {r: b64png("spiral-%s-%s.png" % (th, r)) for r in ROLES} for th in ("day", "night")}
     js = js.replace('"/*@@MARK@@*/"', json.dumps(mark))
     if "@@" in js:
         sys.exit("build stopped: a placeholder was left in the code")

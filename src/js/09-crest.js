@@ -1,57 +1,66 @@
 /* LAKAY | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
-   The mark: the Spiral, a shell cut in facets like a jewel and set in gold, a nod to the lambi that calls people
-   together and to a business that grows turn by turn. Chosen by the owner on 7 November 2026.
-   As the marks of the Offline Project are made, it is layers at different depths, and it lives as Ingenium's seal does:
-   seven layers (the plate, the engraved guilloche, the gold halo with its beads, the faceted shell, its gold lattice,
-   the pearl, three sparkles), each moving on its own. The whole mark sways and leans toward the pointer; the layers
-   breathe in and out of depth out of step with one another; the engraving and the shell turn one way, the halo and
-   the sparkles the other; a gleam of light crosses the shell; the pearl breathes. A press winds it all up like a
-   flywheel (the rings and the shell whirl in counter motion and slow back down), or turns the mark over, or brings
-   the pearl forward. Each layer is a picture drawn once
-   (src/brand/lakay-mark), by day and by night, put in the page by the build. Calm, and the system's "reduce motion",
-   keep it still. */
+   The mark: the Spiral, a nautilus cut in facets like a jewel, on an enamel plate with a fine champagne rim, a pearl at its
+   heart: a nod to the lambi that calls people together, and to a business that grows turn by turn. Chosen and approved by
+   the owner on 7 November 2026; the drawing stays as approved.
+   It is made as a real object is, in depth, and lives as Ingenium's seal does. The coin has an edge (four planes behind
+   the face, so its thickness shows as it turns). The halo and the shell cast their shadows on the plate, and float above
+   them. The shell has sides (three planes under its faceted top). The engraving, the halo, the lattice, the pearl and the
+   sparkles each stand at their own depth. The whole mark sways and leans toward the pointer; the halo, the shell and the
+   pearl breathe in and out of depth out of step; the engraving and the shell turn one way, the halo and the sparkles the
+   other; a gleam crosses the shell. A press winds it up like a flywheel, or turns it over, or brings the pearl forward.
+   Each plane is a picture drawn once (src/brand/lakay-mark), by day and by night, put in the page by the build. Calm, and
+   the system's "reduce motion", keep it still. */
 "use strict";
 (function () {
   var h = E.util.h;
   var K = E.crest = {};
   var MARK = "/*@@MARK@@*/";
-  var Z = [0, 0.012, 0.05, 0.14, 0.2, 0.27, 0.32];
-  var SHELL = 3;
+  /* the planes, back to front: [picture, depth (a share of the width), group] */
+  var PLANES = [
+    ["edge", -0.07], ["edge", -0.0525], ["edge", -0.035], ["edge", -0.0175],
+    ["plate", 0], ["engr", 0.012], ["hshadow", 0.018], ["sshadow", 0.022], ["halo", 0.10],
+    ["sside", 0.17], ["sside", 0.185], ["sside", 0.20], ["shell", 0.215], ["lattice", 0.245],
+    ["pearl", 0.33], ["sparks", 0.42]];
+  var SMALL = { edge: 1, plate: 1, sside: 1, shell: 1, lattice: 1, pearl: 1 };
+  var SHELL_Z = 0.215;
   function night() { try { return document.documentElement.getAttribute("data-theme") === "night"; } catch (e) { return false; } }
-  function layers() { return (MARK && MARK[night() ? "night" : "day"]) || []; }
+  function pics() { return (MARK && MARK[night() ? "night" : "day"]) || {}; }
   function still() {
     try { if (document.documentElement.getAttribute("data-calm") === "1") return true; } catch (e) { }
     try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; }
   }
   K.still = still;
-  function picture(i, src) {
-    var im = h("img.lk-l.lk-l" + i, { alt: "", draggable: "false", decoding: "async", "data-i": String(i) });
+  function picture(role, src) {
+    var im = h("img.lk-l.lk-" + role, { alt: "", draggable: "false", decoding: "async", "data-role": role });
     im.src = src;
     return im;
   }
 
-  /* The still mark: the same layers, flat (for printing, and wherever a still emblem is wanted). */
+  /* The still mark: the same planes laid flat (for printing, and wherever a still emblem is wanted). */
   K.flat = function (size, label) {
-    var s = layers(), box = h("span.lk-flat", label ? { role: "img", "aria-label": label } : { "aria-hidden": "true" });
+    var p = pics(), box = h("span.lk-flat", label ? { role: "img", "aria-label": label } : { "aria-hidden": "true" });
     box.style.width = size + "px"; box.style.height = size + "px";
-    s.forEach(function (src, i) { box.appendChild(picture(i, src)); });
+    ["plate", "engr", "hshadow", "sshadow", "halo", "sside", "shell", "lattice", "pearl", "sparks"].forEach(function (r) { if (p[r]) box.appendChild(picture(r, p[r])); });
     return box;
   };
 
-  /* The live mark. o.label names it for screen readers; o.rise lets its layers gather when it first appears. */
+  /* The live mark. o.label names it for screen readers; o.rise lets its planes gather when it first appears. */
   var SWAY = 0;
   K.make = function (size, o) {
     o = o || {};
-    var W = Math.round(size);
-    var root = h("span.lk-crest" + (W < 30 ? ".lk-small" : ""), o.label ? { role: "img", "aria-label": o.label } : { "aria-hidden": "true" });
+    var W = Math.round(size), small = W < 30, p = pics();
+    var root = h("span.lk-crest" + (small ? ".lk-small" : ""), o.label ? { role: "img", "aria-label": o.label } : { "aria-hidden": "true" });
     root.style.setProperty("--W", W + "px");
     var tilt = h("span.lk-tilt"), idle = h("span.lk-idle");
-    idle.style.animationDelay = (-((SWAY++) * 1.7) % 7).toFixed(1) + "s";
+    idle.style.animationDelay = (-((SWAY++) * 1.7) % 8).toFixed(1) + "s";
     idle.appendChild(h("i.lk-cast"));
-    var s = layers();
-    s.forEach(function (src, i) {
-      var im = picture(i, src); im.style.setProperty("--z", String(Z[i])); idle.appendChild(im);
-      if (i === SHELL) { var g = h("i.lk-gleam"); g.style.setProperty("--z", String(Z[SHELL] + .004)); idle.appendChild(g); }
+    var seenEdge = 0;
+    PLANES.forEach(function (pl) {
+      var role = pl[0];
+      if (small && (!SMALL[role] || (role === "edge" && seenEdge++) || (role === "sside" && pl[1] !== 0.20))) return;
+      if (!p[role]) return;
+      var im = picture(role, p[role]); im.style.setProperty("--z", String(pl[1])); idle.appendChild(im);
+      if (role === "shell" && !small) { var g = h("i.lk-gleam"); g.style.setProperty("--z", String(SHELL_Z + 0.004)); idle.appendChild(g); }
     });
     tilt.appendChild(idle); root.appendChild(tilt);
     wire(root);
@@ -63,9 +72,9 @@
   /* by night the mark wears its night dress */
   try {
     new MutationObserver(function () {
-      var s = layers();
+      var p = pics();
       Array.prototype.forEach.call(document.querySelectorAll("img.lk-l"), function (im) {
-        var i = +im.getAttribute("data-i"); if (s[i] && im.getAttribute("src") !== s[i]) im.src = s[i];
+        var r = im.getAttribute("data-role"); if (p[r] && im.getAttribute("src") !== p[r]) im.src = p[r];
       });
     }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   } catch (e) { }
@@ -75,7 +84,7 @@
     root.addEventListener("pointermove", function (e) {
       if (e.pointerType === "touch" || still()) return; var r = root.getBoundingClientRect(); if (!r.width) return;
       var px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5; root.classList.add("hov");
-      root.style.setProperty("--ry", (clamp(px, -.7, .7) * 26).toFixed(1) + "deg"); root.style.setProperty("--rx", (-clamp(py, -.7, .7) * 18).toFixed(1) + "deg");
+      root.style.setProperty("--ry", (clamp(px, -.7, .7) * 30).toFixed(1) + "deg"); root.style.setProperty("--rx", (-clamp(py, -.7, .7) * 22).toFixed(1) + "deg");
     }, { passive: true });
     root.addEventListener("pointerleave", function () { root.classList.remove("hov", "down"); root.style.removeProperty("--rx"); root.style.removeProperty("--ry"); }, { passive: true });
     root.addEventListener("pointerdown", function () { root.classList.add("down"); }, { passive: true });
@@ -84,12 +93,14 @@
 
   /* ---------- the flourishes ---------- */
   function anim(el, frames, opts) { if (!el || !el.animate) return null; try { opts.composite = "add"; return el.animate(frames, opts); } catch (e) { try { delete opts.composite; return el.animate(frames, opts); } catch (x) { return null; } } }
-  function layer(root, i) { return root.querySelector("img.lk-l" + i); }
+  function all(root, roles) { return Array.prototype.filter.call(root.querySelectorAll("img.lk-l"), function (im) { return roles.indexOf(im.getAttribute("data-role")) >= 0; }); }
   var SPRING = "cubic-bezier(.2,.8,.25,1)";
-  /* the flywheel: the rings' own turning, wound up and let go */
+  /* the flywheel: the planes' own turning, wound up and let go */
   function wind(root, peak, ms) {
     var list = [];
-    [1, 2, 3, 4, 6].forEach(function (i) { var el = layer(root, i); if (el && el.getAnimations) el.getAnimations().forEach(function (a) { if (/lkCW|lkCCW/.test(a.animationName || "")) list.push(a); }); });
+    all(root, ["engr", "hshadow", "halo", "sshadow", "sside", "shell", "lattice", "sparks"]).forEach(function (el) {
+      if (el.getAnimations) el.getAnimations().forEach(function (a) { if (/lkCW|lkCCW/.test(a.animationName || "")) list.push(a); });
+    });
     if (!list.length) return;
     var t0 = performance.now();
     function step(now) {
@@ -100,26 +111,28 @@
     requestAnimationFrame(step);
   }
   var FL = {
-    /* the layers gather from the plate into their places */
+    /* the planes gather from the plate into their places */
     rise: function (r) {
       var W = r.__W || 88;
-      for (var i = 1; i < Z.length; i++) {
-        anim(layer(r, i), [{ translate: "0 0 " + (-W * Z[i]).toFixed(1) + "px", opacity: 0 }, { translate: "0 0 0", opacity: 1 }], { duration: 900 + i * 110, easing: SPRING });
-      }
+      Array.prototype.forEach.call(r.querySelectorAll("img.lk-l"), function (im, i) {
+        var z = parseFloat(im.style.getPropertyValue("--z")) || 0; if (z <= 0) return;
+        anim(im, [{ translate: "0 0 " + (-W * z).toFixed(1) + "px", opacity: 0 }, { translate: "0 0 0", opacity: 1 }], { duration: 900 + z * 1800, easing: SPRING });
+      });
       wind(r, 22, 1800);
     },
     /* the rings and the shell whirl in counter motion, then slow back down like a flywheel */
     spin: function (r) { wind(r, 60, 2400); },
-    /* the whole mark turns over */
+    /* the whole mark turns over, and its edge shows */
     turn: function (r) {
       wind(r, 18, 1600);
-      anim(r.querySelector(".lk-idle"), [{ transform: "rotateY(0deg)" }, { transform: "rotateY(360deg)" }], { duration: 1250, easing: "cubic-bezier(.45,.05,.25,1)" });
+      anim(r.querySelector(".lk-idle"), [{ transform: "rotateY(0deg)" }, { transform: "rotateY(360deg)" }], { duration: 1400, easing: "cubic-bezier(.45,.05,.25,1)" });
     },
-    /* the pearl comes forward, the halo lifts after it */
+    /* the pearl comes forward, the shell and the halo lift after it */
     pulse: function (r) {
       var W = r.__W || 88;
-      anim(layer(r, 5), [{ translate: "0 0 0" }, { translate: "0 0 " + (W * .14).toFixed(1) + "px", offset: .35 }, { translate: "0 0 0" }], { duration: 950, easing: "ease-out" });
-      anim(layer(r, 2), [{ translate: "0 0 0" }, { translate: "0 0 " + (W * .07).toFixed(1) + "px", offset: .45 }, { translate: "0 0 0" }], { duration: 1100, easing: "ease-out" });
+      all(r, ["pearl"]).forEach(function (el) { anim(el, [{ translate: "0 0 0" }, { translate: "0 0 " + (W * .16).toFixed(1) + "px", offset: .35 }, { translate: "0 0 0" }], { duration: 950, easing: "ease-out" }); });
+      all(r, ["sside", "shell", "lattice"]).forEach(function (el) { anim(el, [{ translate: "0 0 0" }, { translate: "0 0 " + (W * .08).toFixed(1) + "px", offset: .4 }, { translate: "0 0 0" }], { duration: 1050, easing: "ease-out" }); });
+      all(r, ["halo"]).forEach(function (el) { anim(el, [{ translate: "0 0 0" }, { translate: "0 0 " + (W * .07).toFixed(1) + "px", offset: .45 }, { translate: "0 0 0" }], { duration: 1150, easing: "ease-out" }); });
       wind(r, 12, 1400);
     }
   };

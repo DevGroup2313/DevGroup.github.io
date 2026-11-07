@@ -22,7 +22,7 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   console.log("The door");
   await page.goto(URL);
   await page.waitForSelector("#introDoor .intro-card", { timeout: 20000 });
-  ok(await page.locator("#introSeal .lk-crest img.lk-l").count() === 7, "the door's mark has its seven layers");
+  ok(await page.locator("#introSeal .lk-crest img.lk-l").count() === 16, "the door's mark stands in its sixteen planes");
   ok(/^data:image\/png;base64,/.test(await page.getAttribute('link[rel="icon"]', "href")), "the page's icon is the mark");
   ok((await page.title()) === "Lakay", "the window is called Lakay");
 
@@ -30,7 +30,7 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   await page.click("#introEnter");
   await page.waitForSelector(".shell", { timeout: 30000 });
   ok(await page.locator("#brandSeal .lk-crest").count() === 1, "the side menu carries the living mark");
-  ok(await page.locator("#heroCrest .lk-crest img.lk-l").count() === 7, "home carries the living mark");
+  ok(await page.locator("#heroCrest .lk-crest img.lk-l").count() === 16, "home carries the living mark in its sixteen planes");
   const status = await page.textContent("#statusPill");
   ok(/practice/i.test(status), "the status key says practice store (" + status.trim() + ")");
   ok(await page.locator(".cl-cluster button.cl-key.lang").count() === 1, "one language key, not three");
@@ -90,9 +90,9 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   console.log("The mark answers a press, and dresses for the night");
   await page.click('.nav-btn[data-room="home"]'); await page.waitForTimeout(300);
   await page.click("#heroCrest"); await page.waitForTimeout(300); await page.click("#heroCrest"); await page.waitForTimeout(300);
-  const daySrc = await page.getAttribute("#heroCrest img.lk-l0", "src");
+  const daySrc = await page.getAttribute("#heroCrest img.lk-plate", "src");
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "night")); await page.waitForTimeout(200);
-  const nightSrc = await page.getAttribute("#heroCrest img.lk-l0", "src");
+  const nightSrc = await page.getAttribute("#heroCrest img.lk-plate", "src");
   ok(daySrc !== nightSrc, "the mark changes to its night dress");
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "day"));
 

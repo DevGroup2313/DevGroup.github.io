@@ -1,0 +1,50 @@
+LAKAY FOR THE FIRE TABLET
+=========================
+Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
+
+
+WHICH FILE
+----------
+Lakay-Android-Fire.apk, for the Fire tablet and other Android tablets. It is in
+the builds folder of this repository, and on its Releases page ("Lakay for
+iPhone, iPad and Fire (latest build)", under Assets).
+
+
+INSTALL (OR UPDATE)
+-------------------
+By cable, from a computer:
+1. Download Lakay-Android-Fire.apk on the computer. In the builds folder, click
+   the file's name, then the download button on the right.
+2. Connect the tablet with its cable and copy the file into the tablet's
+   Download folder.
+3. On the tablet, open the Files app, tap the file, then Install.
+
+Or on the tablet itself: open this repository in Silk, download the file, then
+tap it in Files.
+
+The first time, the tablet asks to allow apps from unknown sources for Files
+(or Silk). Allow it, go back, and tap Install again.
+
+
+UPDATES AND THE SIGNING KEY
+---------------------------
+Android installs a new Lakay over the old one only when both carry the same
+signing key. That key is kept as two secrets of this repository (Settings,
+Secrets and variables, Actions): EMPORIUM_ANDROID_KEY and
+EMPORIUM_ANDROID_KEY_PASSWORD. It never goes into the repository itself.
+
+Until those secrets exist, each build is signed with a key made for that build
+alone. Its Releases page says so beside the file. Such a build installs on a
+tablet with no Lakay; on a tablet that has one, the old Lakay must be removed
+first, and removing it removes that tablet's books. So, before that:
+Settings, Save a backup now, and keep the file off the tablet. After the
+install, restore it at the door.
+
+
+THE STORE'S BOOKS
+-----------------
+- They are sealed on the tablet, inside Lakay's own space.
+- Save a backup in Lakay at closing time: Settings, Save a backup now. The
+  file is sealed and opens only with your password or the Master Key.
+- Each device keeps its own books. To move a store, save a backup on one
+  device and restore it on the other.

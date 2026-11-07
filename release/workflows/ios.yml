@@ -1,7 +1,7 @@
 name: Lakay for iPhone and iPad
 
 # Builds Lakay for iPhone and iPad on GitHub's own Macs (they have Xcode) and
-# puts Lakay-Build-N-iPhone-iPad.ipa on the build's release page. One file
+# puts Lakay-iPhone-iPad.ipa on the Releases page and in builds/. One file
 # works on both. The IPA is NOT signed: Sideloadly signs it with your Apple ID
 # while it installs it over the cable, as Ingenium and Inkwell are installed.
 # The app is Ingenium 6.0's iPhone and iPad shell (packages/ios) holding
@@ -13,7 +13,7 @@ on:
       - 'app/**'
       - 'build.json'
       - 'packages/ios/**'
-      - 'release/**'
+      - 'release/publish.py'
       - '.github/workflows/ios.yml'
   workflow_dispatch:
 
@@ -38,7 +38,7 @@ jobs:
         run: |
           BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
-          echo "IPA=Lakay-iPhone-iPad-unsigned.ipa" >> "$GITHUB_ENV"
+          echo "IPA=Lakay-iPhone-iPad.ipa" >> "$GITHUB_ENV"
           xcodebuild -version
 
       - name: Put the page and the build number in the shell
@@ -83,9 +83,9 @@ jobs:
           (cd "$RUNNER_TEMP/ipa" && zip -qry "$RUNNER_TEMP/$IPA" Payload)
           ls -la "$RUNNER_TEMP/$IPA"
 
-      - name: Put it on the build's release page
+      - name: Put it on the Releases page and in builds/
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          python3 release/publish.py "$RUNNER_TEMP/$IPA" "iPhone and iPad" "unsigned: install it with Sideloadly"
+          python3 release/publish.py "$RUNNER_TEMP/$IPA" "iPhone and iPad" "install it with Sideloadly, which signs it with your Apple ID"

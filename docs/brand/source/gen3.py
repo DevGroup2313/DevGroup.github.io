@@ -369,3 +369,36 @@ def spiral8(th):
             ("gold", .2, "".join(gold)), ("pearl", .27, pearl_l), ("sparkles", .32, sparkles)]
 
 MARKS["spiral"] = spiral8
+
+# ---------------- the Spiral in true depth (8 November 2026): a coin with an edge, cast shadows, a shell with sides ----------------
+import re as _re
+def _strip(svg):
+    return svg.replace(' filter="url(#sh)"', '').replace(' filter="url(#shs)"', '')
+def _silhouette(svg, color):
+    s = _re.sub(r'fill="url\(#[^)]*\)"', 'fill="%s"' % color, svg)
+    s = _re.sub(r'(<(?:path|circle|rect|ellipse)[^>]*?)fill="#[0-9a-fA-F]{3,6}"', r'\1fill="%s"' % color, s)
+    s = _re.sub(r'stroke="url\(#[^)]*\)"', 'stroke="%s"' % color, s)
+    s = _re.sub(r'(<(?:path|circle|rect|ellipse)[^>]*?)stroke="#[0-9a-fA-F]{3,6}"', r'\1stroke="%s"' % color, s)
+    s = _re.sub(r'(stroke|fill)-opacity="[0-9.]+"', '', s)
+    s = s.replace(' opacity=".9"', '').replace(' opacity=".85"', '')
+    return s
+
+def spiral9(th):
+    night = th == "night"
+    L = dict((k, s) for k, z, s in spiral8(th))
+    shell, lattice, halo = _strip(L["shell"]), _strip(L["gold"]), _strip(L["halo"])
+    dark = "#120c38" if not night else "#000000"
+    def shadow(svg, dx, dy, blur, op, fid):
+        return ('<defs><filter id="%s" x="-30%%" y="-30%%" width="160%%" height="160%%"><feGaussianBlur stdDeviation="%s"/></filter></defs>' % (fid, blur) +
+                '<g filter="url(#%s)" opacity="%s" transform="translate(%s %s)">%s</g>' % (fid, op, dx, dy, _silhouette(svg, dark)))
+    a, b, c, d = CHAMP[th]
+    edge = ('<defs>' + lg("eg", [(0, "#c9a86c", None), (.5, "#9a7a44", None), (1, "#6a4f24", None)], x1=0, y1=0, x2=1, y2=1) + '</defs>'
+            '<circle cx="200" cy="200" r="184" fill="url(#eg)"/><circle cx="200" cy="200" r="183.4" fill="none" stroke="#5a4320" stroke-opacity=".6" stroke-width="1.2"/>')
+    side = _silhouette(shell, "#3a409a" if not night else "#1d2166")
+    return [("edge", -0.07, edge), ("plate", 0, L["plate"]), ("engr", .012, L["engraving"]),
+            ("hshadow", .018, shadow(halo, 3, 6, 2.6, ".34" if not night else ".5", "bh")),
+            ("sshadow", .022, shadow(shell, 7, 12, 7, ".42" if not night else ".6", "bs")),
+            ("halo", .10, halo), ("sside", .17, side), ("shell", .215, shell), ("lattice", .245, lattice),
+            ("pearl", .33, L["pearl"]), ("sparks", .42, L["sparkles"])]
+
+MARKS["spiral"] = spiral9

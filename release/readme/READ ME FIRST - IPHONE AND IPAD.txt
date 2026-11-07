@@ -1,0 +1,41 @@
+LAKAY FOR IPHONE AND IPAD
+=========================
+Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
+
+
+WHICH FILE
+----------
+Lakay-iPhone-iPad.ipa: one file for both. It is in the builds folder of this
+repository, and on its Releases page ("Lakay for iPhone, iPad and Fire (latest
+build)", under Assets).
+
+
+INSTALL (OR UPDATE)
+-------------------
+Apple lets an app that is not from the App Store onto an iPhone or iPad only
+through a computer. Tapping the file on the iPhone or iPad installs nothing.
+
+1. On a computer (Mac or Windows), download Lakay-iPhone-iPad.ipa. In the
+   builds folder, click the file's name, then the download button on the right.
+2. Open Sideloadly (sideloadly.io). On Windows, Sideloadly also needs iTunes
+   and iCloud from Apple's own website.
+3. Connect the iPhone or iPad with its cable, and unlock it.
+4. Drag Lakay-iPhone-iPad.ipa into Sideloadly, type your Apple ID, and press
+   Start. Sideloadly signs the app with your Apple ID as it installs it.
+5. The first time, on the iPhone or iPad: Settings, General, VPN and Device
+   Management, your Apple ID, Trust. On iOS 16 or newer, Developer Mode may
+   also be asked for: Settings, Privacy and Security, Developer Mode.
+
+With a free Apple ID, the app must be installed again this way every 7 days.
+The store's books stay. A paid Apple Developer account makes each install last
+a year. To update, install the newer file the same way, over the old one.
+
+
+THE STORE'S BOOKS
+-----------------
+- They are sealed on the iPhone or iPad, inside Lakay's own space. Removing
+  Lakay from the device removes them, so save a backup first.
+- Save a backup in Lakay at closing time: Settings, Save a backup now. The
+  file is sealed and opens only with your password or the Master Key.
+- Each device keeps its own books. To move a store, save a backup on one
+  device and restore it on the other.
