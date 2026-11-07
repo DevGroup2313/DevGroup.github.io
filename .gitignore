@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .DS_Store
 app/svg_seal.svg
+/dist/
+/build/

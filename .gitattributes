@@ -1,0 +1,5 @@
+app/Emporium.html -text
+app/Emporium.html.sha256 -text
+*.ico binary
+*.png binary
+*.jpg binary

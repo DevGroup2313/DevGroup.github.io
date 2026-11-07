@@ -33,8 +33,12 @@ and Ingenium.
 - Sealed backups and restore; English, French and Kreyòl; Day, Night and Auto; larger text; Calm mode; tips beside the
   controls; the Guidebook.
 
-**To try it:** open `app/Emporium.html` in Microsoft Edge, Chrome or Safari. Nothing is installed and nothing leaves the
-device. The programs for Windows, Mac, iPhone and iPad, and the Fire tablet follow, built by GitHub from this repository.
+**To install it:** the repository's Releases page holds each build's packages, made by GitHub from this repository:
+the Windows installer (`Emporium-Build-2-Windows-Setup.exe`) and the standalone page
+(`Emporium-Build-2-Standalone-Page.zip`). The Mac, iPhone and iPad, and Fire tablet packages follow.
+
+**To try it without installing:** open `app/Emporium.html` in Microsoft Edge, Chrome or Safari. Nothing leaves the
+device.
 
 `app/Emporium.html.sha256` holds the fingerprint of the page, to check a download.
 
@@ -44,6 +48,14 @@ device. The programs for Windows, Mac, iPhone and iPad, and the Fire tablet foll
 - `docs/02-DESIGN-AND-SECURITY.md`: how the books are kept and protected, in plain words, with the methods for an auditor.
 - `docs/03-STAGES.md`: the stages, and what to check at each.
 - `docs/04-QUESTIONS.md`: the questions still open.
+
+## The packages
+
+- `desktop/emporium_app.py`: the window around the page for Windows (and later Mac), after the Forge's Windows program.
+- `desktop/windows/`: the PyInstaller recipe and the Inno Setup installer script.
+- `.github/workflows/windows.yml`: builds the program, opens it once, installs and uninstalls it, scans it with Microsoft
+  Defender, and puts the installer on the build's release page. `.github/workflows/page.yml` does the same for the
+  standalone page. `release/publish.py` names each release after the build number in `build.json`.
 
 ## Building and testing
 
