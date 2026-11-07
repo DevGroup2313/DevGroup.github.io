@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YRTbjMiNJAEmuBKzeKdyzNRUM6EhB1zestAlE1oILII='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-G2ZrclbgaXMWpe5Fmpfcy/gwRP9tJTMx0Cl60tdahjA='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f6f4fa">
@@ -868,6 +868,16 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
   @page { margin: 12mm; }
 }
 
+/* see the password: a key inside every password field (18-peek.js) */
+.pw-wrap { position: relative; display: block; width: 100%; }
+.pw-wrap > input { width: 100%; box-sizing: border-box; padding-right: 48px !important; }
+.pw-peek { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 38px; height: 32px; padding: 0; border: 0; border-radius: 9px;
+  background: transparent; color: inherit; cursor: pointer; font-size: 18px; line-height: 1; display: grid; place-items: center; transition: background .15s ease, transform .12s ease; }
+.pw-peek:hover { background: rgba(var(--pri-rgb), .12); }
+.pw-peek:active { transform: translateY(-50%) scale(.92); }
+.pw-peek:focus-visible { outline: 2.5px solid var(--pri-ring); outline-offset: 1px; }
+.pw-peek[aria-pressed="true"] { background: rgba(var(--pri-rgb), .14); }
+
 /* EMPORIUM | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
    The door and the sign-in, after Ingenium 6.50's own (its .intro-door and its sign-in, r197): the same card, the
    same corner switches, the same emblem disc, the same raised key, the same dialogs and their numbered grid. Ingenium's
@@ -1346,6 +1356,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
     ["master.card.made", "Made on {d}", "Créée le {d}", "Fèt {d}"],
 
     /* passwords */
+    ["pw.show", "Show the password", "Afficher le mot de passe", "Montre modpas la"], ["pw.hide", "Hide the password", "Masquer le mot de passe", "Kache modpas la"],
     ["pw.tooShort", "At least 10 characters, please.", "Au moins 10 caractères, s'il vous plaît.", "Omwen 10 karaktè, tanpri."],
     ["pw.tooSimple", "Too easy to guess. Try a short sentence.", "Trop facile à deviner. Essayez une courte phrase.", "Li twò fasil pou devine. Eseye yon ti fraz."],
     ["pw.fair", "Good enough. Longer is stronger.", "Correct. Plus long, c'est plus sûr.", "Li bon. Pi long, pi solid."],
@@ -5042,6 +5053,41 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   ["touchend", "touchcancel"].forEach(function (ev) { document.addEventListener(ev, function () { clearTimeout(lp); lp = null; }, { passive: true, capture: true }); });
   document.addEventListener("touchmove", function (e) { var tt = e.touches[0]; if (tt && Math.abs(tt.clientX - lx) + Math.abs(tt.clientY - ly) > 12) { clearTimeout(lp); lp = null; } }, { passive: true, capture: true });
   window.addEventListener("scroll", close, true);
+})();
+
+/* LAKAY | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
+   See the password: every password field in Lakay, wherever it appears (the sign-in, the set-up, a new password,
+   a backup, Settings), always carries a key that shows what is typed and hides it again. It helps anyone who loses
+   track of what they typed, and is part of the app's AuDHD support. The field keeps the focus while the key is used. */
+"use strict";
+(function () {
+  var h = E.util.h, t = E.t;
+  function paint(inp, key) {
+    var shown = inp.type !== "password", l = t(shown ? "pw.hide" : "pw.show");
+    key.textContent = shown ? "🙈" : "👁️"; key.title = l; key.setAttribute("aria-label", l); key.setAttribute("aria-pressed", String(shown));
+  }
+  function deco(inp) {
+    if (inp.getAttribute("data-peek")) return;
+    inp.setAttribute("data-peek", "1");
+    var wrap = h("span.pw-wrap");
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    var key = h("button.pw-peek", { type: "button" });
+    key.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    key.addEventListener("click", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      inp.type = inp.type === "password" ? "text" : "password"; paint(inp, key);
+      try { var n = inp.value.length; inp.focus(); inp.setSelectionRange(n, n); } catch (x) { }
+    });
+    paint(inp, key);
+    wrap.appendChild(key);
+  }
+  function scan() { Array.prototype.forEach.call(document.querySelectorAll('input[type="password"]:not([data-peek])'), deco); }
+  try { new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) { }
+  /* a field that another key turns to plain text (the Master Key box) keeps its key in step */
+  document.addEventListener("change", function () {
+    Array.prototype.forEach.call(document.querySelectorAll(".pw-wrap > input"), function (inp) { var k = inp.parentNode.querySelector(".pw-peek"); if (k) paint(inp, k); });
+  }, true);
+  E.peek = { scan: scan };
 })();
 
 /* EMPORIUM | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.

@@ -99,6 +99,7 @@
     ["master.card.made", "Made on {d}", "Créée le {d}", "Fèt {d}"],
 
     /* passwords */
+    ["pw.show", "Show the password", "Afficher le mot de passe", "Montre modpas la"], ["pw.hide", "Hide the password", "Masquer le mot de passe", "Kache modpas la"],
     ["pw.tooShort", "At least 10 characters, please.", "Au moins 10 caractères, s'il vous plaît.", "Omwen 10 karaktè, tanpri."],
     ["pw.tooSimple", "Too easy to guess. Try a short sentence.", "Trop facile à deviner. Essayez une courte phrase.", "Li twò fasil pou devine. Eseye yon ti fraz."],
     ["pw.fair", "Good enough. Longer is stronger.", "Correct. Plus long, c'est plus sûr.", "Li bon. Pi long, pi solid."],

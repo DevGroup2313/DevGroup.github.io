@@ -11,6 +11,8 @@ The build number the app shows in About: **Build @@BUILD@@** (@@DATE@@).
 | **Lakay-iPhone-iPad-unsigned.ipa** | iPhone and iPad | Install from a computer with Sideloadly, signing in with your Apple ID. |
 | Lakay-Standalone-Page.zip | Any computer's browser | Unzip it and double-click Lakay.html. Nothing is installed. |
 
+Each device has its own repository, and each repository's latest release holds its own files: Lakay-Windows (Windows and the standalone page), Lakay-Mac (both Macs), Lakay-Apps (iPhone, iPad and Fire).
+
 Each app works with no connection, and keeps its own sealed books on its own device.
 
 **Fingerprints** (SHA-256):

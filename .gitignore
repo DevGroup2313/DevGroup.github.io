@@ -5,3 +5,4 @@ __pycache__/
 app/svg_seal.svg
 /dist/
 /build/
+tests/*.png

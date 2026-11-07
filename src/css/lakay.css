@@ -794,3 +794,13 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
   * { animation: none !important; }
   @page { margin: 12mm; }
 }
+
+/* see the password: a key inside every password field (18-peek.js) */
+.pw-wrap { position: relative; display: block; width: 100%; }
+.pw-wrap > input { width: 100%; box-sizing: border-box; padding-right: 48px !important; }
+.pw-peek { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 38px; height: 32px; padding: 0; border: 0; border-radius: 9px;
+  background: transparent; color: inherit; cursor: pointer; font-size: 18px; line-height: 1; display: grid; place-items: center; transition: background .15s ease, transform .12s ease; }
+.pw-peek:hover { background: rgba(var(--pri-rgb), .12); }
+.pw-peek:active { transform: translateY(-50%) scale(.92); }
+.pw-peek:focus-visible { outline: 2.5px solid var(--pri-ring); outline-offset: 1px; }
+.pw-peek[aria-pressed="true"] { background: rgba(var(--pri-rgb), .14); }
