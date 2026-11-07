@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-KxH4uBSrhBxRsD997rJyPlUNWfo/XZjl2EzREL2cMvQ='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Ijb+SaB6/wBMlQx6N4P4sIV/HY5TdZlJf91eLzQNqGI='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F6F1E7">
@@ -3224,6 +3224,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   B.on("lock", function (why) {
     Array.prototype.forEach.call(document.querySelectorAll(".layer"), function (n) { n.remove(); });
     U.clear(document.getElementById("print"));
+    U.clear(document.getElementById("toasts"));                 // nothing said while open stays on the screen once locked
     if (why === "restore") return;
     E.door.show(why);
   });

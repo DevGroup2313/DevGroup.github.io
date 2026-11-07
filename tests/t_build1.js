@@ -141,7 +141,9 @@ const PW = 'Patties are hot at noon!', PW2 = 'Kafe lakay se kafe lakay 2026';
   /* ---------- verify, lock, sign in ---------- */
   await p.evaluate(() => Emporium.ui.go('settings')); await click('#verifyKey'); await p.waitForSelector('#verifyResult');
   ok(await p.$eval('#verifyResult', n => n.dataset.ok) === '1', 'Verify the books: every line and every stock figure agree', await text('#verifyResult'));
+  await p.evaluate(() => Emporium.ui.toast('Kompa Gold CD: a message from before the lock', 'good'));
   await p.evaluate(() => Emporium.books.lock('hand')); await p.waitForSelector('#doorPassword');
+  ok(await p.$$eval('#toasts > *', n => n.length) === 0, 'locking clears every message that was on the screen');
   await shot('09-door-locked');
   await fill('#doorPassword', 'not the password'); await click('#doorOpen'); await p.waitForTimeout(2500);
   ok(await text('#doorPassword-e') !== '' && !(await p.$('.shell')), 'a wrong password does not open the store');

@@ -14,6 +14,7 @@
   B.on("lock", function (why) {
     Array.prototype.forEach.call(document.querySelectorAll(".layer"), function (n) { n.remove(); });
     U.clear(document.getElementById("print"));
+    U.clear(document.getElementById("toasts"));                 // nothing said while open stays on the screen once locked
     if (why === "restore") return;
     E.door.show(why);
   });
