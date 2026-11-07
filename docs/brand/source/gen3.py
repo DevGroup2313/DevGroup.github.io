@@ -288,13 +288,13 @@ def cdefs(th):
 
 def spiral8(th):
     night = th == "night"
-    face0, face1, face2 = ("#fbfaff", "#e6e5fa", "#c9cdf3") if not night else ("#2c2f6a", "#1b1c48", "#101130")
+    face0, face1, face2 = ("#a3acf3", "#727bdc", "#4a51b6") if not night else ("#5a62c8", "#363b98", "#1f2266")
     c3 = CHAMP[th][3]
     # 0. the plate: a fine champagne rim and an enamel face, lit from the upper left
     d0 = ("<defs>" + champ("gd", th) + SHADOW +
           rg("pf", [(0, face0, None), (.6, face1, None), (1, face2, None)], cx=.38, cy=.32, r=.8) +
-          lg("spec", [(0, "#ffffff", ".9" if not night else ".22"), (.42, "#ffffff", "0")], x1=0, y1=0, x2=1, y2=1) +
-          rg("inner", [(0, "#000000", "0"), (.9, "#000000", "0"), (1, "#1a1640", ".16" if not night else ".4")], r=.5) + "</defs>")
+          lg("spec", [(0, "#ffffff", ".55" if not night else ".2"), (.42, "#ffffff", "0")], x1=0, y1=0, x2=1, y2=1) +
+          rg("inner", [(0, "#000000", "0"), (.86, "#000000", "0"), (1, "#141238", ".28" if not night else ".45")], r=.5) + "</defs>")
     plate0 = (d0 + '<g filter="url(#sh)"><circle cx="200" cy="200" r="184" fill="url(#gd)"/></g>' +
               '<circle cx="200" cy="200" r="178.5" fill="url(#pf)"/><circle cx="200" cy="200" r="178.5" fill="url(#inner)"/>' +
               '<circle cx="200" cy="200" r="178.5" fill="none" stroke="%s" stroke-opacity=".55" stroke-width=".8"/>' % c3 +
@@ -302,12 +302,12 @@ def spiral8(th):
               '<circle cx="200" cy="200" r="173.5" fill="none" stroke="url(#gd)" stroke-width=".9" stroke-opacity=".9"/>' +
               '<circle cx="200" cy="200" r="178.5" fill="url(#spec)" opacity=".55"/>')
     # 1. the engraving: fine guilloche waves and a ring of ticks (turns anticlockwise)
-    col = "#8f96e6" if not night else "#b8bdff"
+    col = "#ffffff" if not night else "#d6d9ff"
     eng = []
     for r, lobes, amp, op in ((150, 20, 1.8, .34), (156, 26, 1.5, .3), (162, 32, 1.3, .27), (168, 38, 1.1, .24)):
         pts = [(200 + (r + amp * math.sin(math.radians(i) * lobes)) * math.cos(math.radians(i)),
                 200 + (r + amp * math.sin(math.radians(i) * lobes)) * math.sin(math.radians(i))) for i in range(361)]
-        eng.append('<path d="%s" fill="none" stroke="%s" stroke-opacity="%.2f" stroke-width=".7"/>' % (poly(pts), col, op if not night else op * .6))
+        eng.append('<path d="%s" fill="none" stroke="%s" stroke-opacity="%.2f" stroke-width=".7"/>' % (poly(pts), col, op * .75 if not night else op * .5))
     eng.append('<path d="%s" stroke="%s" stroke-opacity=".75" stroke-width=".8" stroke-linecap="round"/>' % ("".join(
         "M%.1f %.1fL%.1f %.1f" % (200 + 140 * math.cos(a), 200 + 140 * math.sin(a), 200 + (143 if i % 5 else 146) * math.cos(a), 200 + (143 if i % 5 else 146) * math.sin(a))
         for i, a in enumerate([k * math.pi / 30 for k in range(60)])), CHAMP[th][2]))
@@ -331,7 +331,7 @@ def spiral8(th):
         r_ = rr(t) if r is None else r
         a_ = t + math.radians(-35)
         return (200 + r_ * math.cos(a_), 200 + r_ * math.sin(a_))
-    lo, hi = ("#525ab8", "#f3f3ff") if not night else ("#454cb0", "#eceeff")
+    lo, hi = ("#8790e6", "#ffffff") if not night else ("#7780dc", "#f2f3ff")
     per_turn = 24
     turns = 3.1
     n = int(per_turn * turns)

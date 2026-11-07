@@ -84,59 +84,95 @@
   door.show = function (why) {
     if (B.mode === "practice") B.useBooks(false);
     return B.boot().then(function (r) {
-      info = r;
-      if (!r.hasStore) return intro();
-      return signIn(why);
+      info = r; E.doorInfo = r.door || null;
+      return intro({ store: !!r.hasStore, open: why === "idle", why: why });
     });
   };
 
   /* ---------- the introduction (no store of its own yet) ---------- */
-  var intro = screen(function () {
-    var app = clearApp();
+  var intro = screen(function (o) {
+    o = o || {};
+    var app = clearApp(), stored = !!o.store, d = (info && info.door) || {};
     var ghost = h("div.intro-ghost", { "aria-hidden": "true" }, [
       h("div.g-rail", null, [h("i"), h("i"), h("i"), h("i"), h("i"), h("i"), h("i")]),
       h("div.g-main", null, [h("i"), h("i"), h("div.g-row", null, [h("i"), h("i"), h("i")])])]);
     var enter = h("button.i-primary#introEnter", { type: "button" }, t("intro.enter"));
     var msg = h("p.intro-tourline.intro-msg", { role: "status" });
+    var card;
     function go() {
       enter.disabled = true; enter.textContent = t("intro.opening");
       B.openPractice(function (f) { msg.textContent = t("intro.preparing", { n: Math.round(f * 100) }); }).then(function () {
         E.app.opened(true);
       }, function (e) { enter.disabled = false; enter.textContent = t("intro.enter"); msg.textContent = t("door.problem"); console.error(e); });
     }
-    enter.addEventListener("click", go);
-    var seal = ui.crestKey(112, { cls: "intro-seal", id: "introSeal", rise: true, flourish: "burst", title: t("intro.knock"), onPress: function () { setTimeout(go, E.crest.still() ? 60 : 520); } });
-    var card = h("div.intro-card", { role: "dialog", "aria-label": t("intro.aria", { app: E.appName() }) }, [
-      h("div.intro-corner.intro-corner-l", null, langSeg()),
+    /* the little lock on the door, as Ingenium has it: a pill in the card's top-left corner, beside nothing but the
+       theme pill across the card. With a store of its own it opens the sign-in in the card's place; on a new device it
+       sets up the real store with a sign-in. */
+    var lockPill = h("div.i-seg.intro-lockpill", { role: "group", "aria-label": t(stored ? "intro.lockOpen" : "intro.protect") },
+      h("button.seg-btn#" + (stored ? "introLock" : "introProtect"), { type: "button", title: t(stored ? "intro.lockOpen" : "intro.protect"), "aria-label": t(stored ? "intro.lockOpen" : "intro.protectAria"),
+        onclick: function () { if (stored) openSignIn(); else door.startReal("intro"); } }, lockIcon()));
+    var seal = ui.crestKey(112, { cls: "intro-seal", id: "introSeal", rise: true, flourish: "burst", title: t(stored ? "intro.lockOpen" : "intro.knock"), onPress: function () {
+      if (stored) setTimeout(openSignIn, E.crest.still() ? 0 : 420); else setTimeout(go, E.crest.still() ? 60 : 520);
+    } });
+    var kids;
+    if (!stored) {
+      enter.addEventListener("click", go);
+      kids = [h("p.intro-lede", null, t("intro.lede")),
+        h("p.intro-tourline", null, [h("span", null, t("intro.moving") + " "), h("button.intro-tour#introRestore", { type: "button", onclick: function () { restore("intro"); } }, t("intro.restore"))]),
+        enter, msg];
+    } else {
+      enter.addEventListener("click", openSignIn);
+      kids = [d.storeName ? h("p.intro-store", null, d.storeName) : null,
+        h("p.intro-lede", null, d.user ? t("ld.welcomeName", { name: d.user }) : t("ld.welcome")),
+        o.why === "idle" ? h("p.intro-tourline", null, t("door.lockedIdle")) : null,
+        enter, msg];
+    }
+    card = h("div.intro-card", { role: "dialog", "aria-label": t("intro.aria", { app: E.appName() }) }, [
+      h("div.intro-corner.intro-corner-l", null, lockPill),
       h("div.intro-corner", null, themeSeg()),
       seal,
       h("div.intro-word", null, E.appName()),
-      h("div.intro-subword", null, E.tagline()),
-      h("p.intro-lede", null, t("intro.lede")),
-      h("p.intro-tourline", null, [h("span", null, t("intro.moving") + " "), h("button.intro-tour#introRestore", { type: "button", onclick: function () { restore("intro"); } }, t("intro.restore"))]),
-      enter, msg,
-      h("p.intro-tourline.intro-protect", null, [h("button.intro-tour#introProtect", { type: "button", onclick: function () { door.startReal("intro"); } }, t("intro.protect")),
-        h("br"), h("span", null, t("intro.protectP"))]),
-      h("p.intro-credit", null, t("intro.credit"))]);
+      h("div.intro-subword", null, E.tagline())].concat(kids).concat([h("p.intro-credit", null, t("intro.credit"))]));
     app.appendChild(h("div#introDoor.intro-door", null, [ghost, h("div.intro-frost"), card]));
-    setTimeout(function () { try { enter.focus(); } catch (e) { } }, 60);
+    app.appendChild(ui.doorBar(function () { door.view(); }));
+    if (stored && o.open) setTimeout(openSignIn, 0);
+    setTimeout(function () { try { if (!o.open) enter.focus(); } catch (e) { } }, 60);
+  });
+  function lockIcon() {
+    var NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16"); svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+    [["rect", { x: "3", y: "7", width: "10", height: "7.5", rx: "1.8", fill: "none", stroke: "currentColor", "stroke-width": "1.5" }],
+     ["path", { d: "M5.3 7V5.1a2.7 2.7 0 0 1 5.4 0V7", fill: "none", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" }],
+     ["circle", { cx: "8", cy: "10.6", r: "1.05", fill: "currentColor" }]].forEach(function (x) {
+      var e = document.createElementNS(NS, x[0]); Object.keys(x[1]).forEach(function (k) { e.setAttribute(k, x[1][k]); }); svg.appendChild(e);
+    });
+    return svg;
+  }
+  /* the sign-in, in the introduction card's place */
+  var openSignIn = screen(function () {
+    var card = lockDoor(document.getElementById("introDoor") ? "intro" : "door");
+    var known = (info && info.door && info.door.user) || "";
+    fill(card, [h("h1", null, E.appName()),
+      (info && info.door && info.door.storeName) ? h("p.ild-store", null, info.door.storeName) : null,
+      h("p.ild-sub", null, known ? t("ld.welcomeName", { name: known }) : t("ld.welcome")),
+      signInForm(card, true),
+      h("p.ild-note", null, [t("ld.note") + " ", h("button.ild-link#ldPractice", { type: "button", onclick: openPracticeFromDoor }, t("ld.practice"))])]);
   });
 
   /* ---------- the sign-in of the store's own books ---------- */
   function waitLeft() { var until = +U.prefGet("waitUntil", "0"); return Math.max(0, until - Date.now()); }
-  var signIn = screen(function (why) {
-    clearApp();
-    var card = lockDoor("door");
+  function signInForm(card, indoor) {
     var known = (info && info.door && info.door.user) || "";
     var nm = field("ldName", "text", "username", known), pw = field("ldPw", "password", "current-password");
     var go = h("button.ild-key#ldGo", { type: "submit" }, t("ld.signIn"));
     function wrong() {
       var n = (+U.prefGet("fails", "0")) + 1; U.prefSet("fails", n);
-      if (n >= 5) { var s = Math.min(900, 30 * Math.pow(2, n - 5)); U.prefSet("waitUntil", Date.now() + s * 1000); err(card, t("door.tooMany", { s: s })); }
+      if (n >= 5) { var s2 = Math.min(900, 30 * Math.pow(2, n - 5)); U.prefSet("waitUntil", Date.now() + s2 * 1000); err(card, t("door.tooMany", { s: s2 })); }
       else err(card, t("ld.wrongPair"));
+      if (E.sound) E.sound.play("nope");
       busy(card, false); try { pw.select(); } catch (e) { }
     }
-    var form = h("form#ldSign", { autocomplete: "on", onsubmit: function (e) {
+    return h("form#ldSign", { autocomplete: "on", onsubmit: function (e) {
       e.preventDefault();
       var left = waitLeft();
       if (left > 0) return err(card, t("door.wait", { s: Math.ceil(left / 1000) }));
@@ -152,14 +188,11 @@
         busy(card, false); err(card, t("door.problem")); console.error(x);
       });
     } }, [label(t("ld.yourName"), nm), label(t("ld.yourPw"), pw),
-      h("div.ild-keys", null, [h("button.ild-link#ldForgot", { type: "button", onclick: ways }, t("ld.cant")), go])]);
-    fill(card, [corner(), h("h1", null, E.appName()),
-      (info && info.door && info.door.storeName) ? h("p.ild-store", null, info.door.storeName) : null,
-      h("p.ild-sub", null, known ? t("ld.welcomeName", { name: known }) : t("ld.welcome")),
-      why === "idle" ? h("p.ild-hint", null, t("door.lockedIdle")) : null,
-      form,
-      h("p.ild-note", null, [t("ld.note") + " ", h("button.ild-link#ldPractice", { type: "button", onclick: openPracticeFromDoor }, t("ld.practice"))])]);
-  });
+      h("div.ild-keys", null, [h("button.ild-link#ldForgot", { type: "button", onclick: ways }, t("ld.cant")),
+        indoor && document.getElementById("introDoor") ? h("button.ild-key.ild-ghost#ldBack", { type: "button", onclick: function () { hideLock(); door.view = intro; } }, t("back")) : null, go])]);
+  }
+  /* the sign-in, wherever the door is asked for it: the introduction, with the fold open */
+  var signIn = function (why) { return intro({ store: true, open: true, why: why }); };
   function openPracticeFromDoor() {
     var d = document.getElementById("lockDoor"), card = d && d.firstChild;
     if (card) busy(card, true);

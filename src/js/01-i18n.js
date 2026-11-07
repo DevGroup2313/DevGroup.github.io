@@ -10,7 +10,7 @@
   add(
     /* common words */
     ["add", "Add", "Ajouter", "Ajoute"], ["all", "All", "Tout", "Tout"], ["back", "Back", "Retour", "Retounen"],
-    ["build", "Build", "Build", "Build"], ["cancel", "Cancel", "Annuler", "Anile"], ["close", "Close", "Fermer", "Fèmen"],
+    ["build", "Build", "Build", "Build"], ["cancel", "Cancel", "Annuler", "Anile"], ["close", "Close", "Fermer", "Fèmen"], ["delete", "Delete", "Supprimer", "Efase"],
     ["edit", "Edit", "Modifier", "Modifye"], ["gotIt", "Got it", "Compris", "Mwen konprann"], ["language", "Language", "Langue", "Lang"],
     ["loading", "Loading…", "Chargement…", "N ap chaje…"], ["lockNow", "Lock now", "Verrouiller", "Fèmen kounye a"],
     ["menu", "Menu", "Menu", "Meni"], ["menu.more", "More", "Plus", "Plis"], ["short.more", "More", "Plus", "Plis"],
@@ -101,6 +101,27 @@
     /* passwords */
     ["disp.sound", "Sounds", "Sons", "Son"], ["disp.vol", "Volume", "Volume", "Volim"],
     ["disp.vol.soft", "Soft", "Doux", "Dous"], ["disp.vol.mid", "Medium", "Moyen", "Mwayen"], ["disp.vol.full", "Full", "Plein", "Plen"],
+    ["rail.label", "Side keys", "Touches de côté", "Bouton sou kote"], ["rail.bell", "Reminders", "Rappels", "Rapèl"], 
+    
+    ["rail.calc", "Calculator", "Calculatrice", "Kalkilatris"], ["rail.down", "Lay down the side keys", "Ranger les touches de côté", "Ranje bouton sou kote yo"], ["rail.up", "Bring back the side keys", "Ramener les touches de côté", "Remete bouton sou kote yo"],
+    ["rail.sale", "New sale", "Nouvelle vente", "Nouvo vant"], ["rail.find", "Price check", "Vérifier un prix", "Tcheke yon pri"], ["rail.low", "Low stock", "Stock bas", "Stòk ki ba"],
+    ["find.what", "Name, code or barcode", "Nom, code ou code-barres", "Non, kòd oswa kòd-ba"], ["find.hint", "Type or scan to find any of the {n} items.", "Tapez ou scannez pour trouver l'un des {n} articles.", "Tape oswa eskane pou jwenn youn nan {n} atik yo."],
+    ["find.none", "Nothing by that name or code.", "Rien sous ce nom ou ce code.", "Anyen pa gen non oswa kòd sa a."], ["find.in", "{n} in stock", "{n} en stock", "{n} an stòk"],
+    ["find.low", "Low: {n} left", "Bas : il en reste {n}", "Ba : rete {n}"], ["find.out", "Out of stock", "Rupture de stock", "Pa gen nan stòk"],
+    ["find.sell", "Sell", "Vendre", "Vann"], ["find.sellTip", "Put it on a new sale", "Le mettre sur une vente", "Mete l sou yon vant"], ["find.open", "Open", "Ouvrir", "Louvri"], ["find.openTip", "Open it in Inventory", "L'ouvrir dans l'inventaire", "Louvri l nan envantè a"],
+    ["low.lede", "{n} items are low or out. Receive a delivery straight from here.", "{n} articles sont bas ou épuisés. Recevez une livraison d'ici même.", "{n} atik ba oswa fini. Resevwa yon livrezon dirèkteman isit la."],
+    ["low.ledeNone", "Every item is above its reorder level.", "Chaque article est au-dessus de son seuil de commande.", "Chak atik pi wo pase nivo pou rekòmande a."],
+    ["low.none", "Nothing is low. Well stocked.", "Rien n'est bas. Bien approvisionné.", "Anyen pa ba. Stòk la bon."], ["low.receive", "Receive", "Recevoir", "Resevwa"],
+    ["low.receiveTip", "Receive a delivery of this item", "Recevoir une livraison de cet article", "Resevwa yon livrezon atik sa a"], ["low.all", "All of Inventory", "Tout l'inventaire", "Tout envantè a"],
+    ["rem.what", "What to remember", "Ce qu'il faut retenir", "Sa pou sonje"], ["rem.add", "Add", "Ajouter", "Ajoute"], ["rem.none", "No reminders yet.", "Aucun rappel pour l'instant.", "Poko gen rapèl."], ["rem.done", "Done", "Fait", "Fini"],
+    
+    
+    
+    
+    
+    
+    ["calc.move", "Hold here to move it", "Tenez ici pour la déplacer", "Kenbe la a pou deplase l"], ["calc.copy", "Copy", "Copier", "Kopye"], ["calc.copied", "The result is copied.", "Le résultat est copié.", "Rezilta a kopye."],
+    ["calc.reuse", "Use this result", "Reprendre ce résultat", "Itilize rezilta sa a"], ["calc.err", "Not a number", "Pas un nombre", "Se pa yon chif"],
     ["pw.show", "Show the password", "Afficher le mot de passe", "Montre modpas la"], ["pw.hide", "Hide the password", "Masquer le mot de passe", "Kache modpas la"],
     ["pw.tooShort", "At least 10 characters, please.", "Au moins 10 caractères, s'il vous plaît.", "Omwen 10 karaktè, tanpri."],
     ["pw.tooSimple", "Too easy to guess. Try a short sentence.", "Trop facile à deviner. Essayez une courte phrase.", "Li twò fasil pou devine. Eseye yon ti fraz."],
@@ -465,6 +486,9 @@
     ["intro.enter", "Enter", "Entrer", "Antre"], ["intro.opening", "Opening…", "Ouverture…", "N ap louvri…"],
     ["intro.preparing", "Setting out the practice store… {n}%", "Mise en place du magasin d'essai… {n} %", "N ap ranje magazen pou pratike a… {n}%"],
     ["crest.press", "The sun rises. Press it.", "Le soleil se lève. Appuyez dessus.", "Solèy la ap leve. Peze l."],
+    ["intro.signInKey", "Sign in", "Se connecter", "Konekte"], ["intro.lockOpen", "Sign in", "Se connecter", "Konekte"],
+    ["intro.protectAria", "Set up the real store with a sign-in: a name and a password at the door, and the store's books sealed with them", "Créer le vrai magasin avec une connexion : un nom et un mot de passe à la porte, et les livres du magasin scellés avec eux", "Kreye vrè magazen an ak yon koneksyon : yon non ak yon modpas nan pòt la, epi liv magazen an sele avèk yo"],
+    
     ["intro.knock", "Knock to enter", "Frappez pour entrer", "Frape pou antre"], ["intro.aria", "Welcome to {app}", "Bienvenue dans {app}", "Byenveni nan {app}"],
     ["intro.lede", "The store's own books, on this device: stock, sales, cash and reports, in English, French and Kreyòl. Everything is sealed here and works with no connection.", "Les livres du magasin, sur cet appareil : stock, ventes, caisse et rapports, en anglais, en français et en kreyòl. Tout est scellé ici et fonctionne sans connexion.", "Liv kont magazen an, sou aparèy sa a: stòk, vant, kès ak rapò, an angle, an franse ak an kreyòl. Tout bagay sele isit la, e li mache san entènèt."],
     ["intro.moving", "Moving from another device?", "Vous venez d'un autre appareil ?", "W ap soti sou yon lòt aparèy?"],

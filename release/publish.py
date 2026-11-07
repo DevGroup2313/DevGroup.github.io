@@ -73,7 +73,7 @@ def main():
         if r.returncode == 0:
             old = r.stdout.rstrip("\n").splitlines()
             mark = max((i for i, x in enumerate(old) if x.startswith("**Fingerprints**")), default=-1)
-            kept = [x for x in old[mark + 1:] if x.startswith("- ") and not x.startswith("- %s: " % name)] if mark >= 0 else []
+            kept = [x for x in old[mark + 1:] if x.startswith("- ") and not x.startswith("- %s: " % name) and not x.startswith("- Emporium-")] if mark >= 0 else []
             body = template.splitlines() + kept
             body.append(line)
             bf = os.path.join(tmp, "body.md")
@@ -82,6 +82,13 @@ def main():
             if gh("release", "edit", tag, "--notes-file", bf).returncode == 0:
                 break
         time.sleep(5)
+    # The files of the app's former name (Emporium, up to Build 2) leave the page, and its title follows the name.
+    gh("release", "edit", tag, "--title", title)
+    r = gh("release", "view", tag, "--json", "assets", "-q", ".assets[].name", capture=True)
+    for asset in (r.stdout.split() if r.returncode == 0 else []):
+        if asset.startswith("Emporium-"):
+            gh("release", "delete-asset", tag, asset, "-y")
+            print("Removed %s, a file of the app's former name." % asset)
     r = gh("release", "list", "--limit", "50", "--json", "tagName", "-q", ".[].tagName", capture=True)
     for old_tag in (r.stdout.split() if r.returncode == 0 else []):
         if old_tag.startswith("build-"):

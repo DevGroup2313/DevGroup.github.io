@@ -6,6 +6,7 @@
 "use strict";
 const { chromium } = require("playwright");
 const path = require("path");
+const BUILD = require(path.join(__dirname, "..", "build.json")).build;
 const URL = process.argv[2] || "file://" + path.resolve(__dirname, "..", "app", "Lakay.html");
 let failed = 0, passed = 0;
 function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); } else { failed++; console.log("  FAIL " + what); } }
@@ -56,10 +57,10 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
 
   console.log("The build number in About and the Guidebook");
   await page.click('.cl-key:has-text("About")'); await page.waitForTimeout(400);
-  ok(/Build 3/.test(await page.textContent(".about-foot")), "About's foot names Build 3");
+  ok(new RegExp("Build " + BUILD).test(await page.textContent(".about-foot")), "About's foot names Build " + BUILD);
   await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   await page.click('.nav-btn[data-room="guide"]'); await page.waitForTimeout(300);
-  ok(/Build 3/.test(await page.textContent(".guide-foot")), "the Guidebook's foot names Build 3");
+  ok(new RegExp("Build " + BUILD).test(await page.textContent(".guide-foot")), "the Guidebook's foot names Build " + BUILD);
 
   console.log("Languages");
   const navHome = () => page.textContent('.nav-btn[data-room="home"] .long');
@@ -116,7 +117,15 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   await p2.waitForSelector(".shell", { timeout: 60000 });
   ok(/Mizik Depot Test/.test(await p2.textContent(".brand .storename")), "the real store opens with its name");
   await p2.evaluate(() => E.books.lock("test"));
-  await p2.waitForSelector("#ldPw", { timeout: 20000 });
+  await p2.waitForSelector("#introDoor #introLock", { timeout: 20000 });
+  ok(!(await p2.isVisible("#ldPw")), "the door opens on the introduction, not on the sign-in");
+  ok(await p2.locator("#doorBar #doorDisplay").count() === 1 && await p2.locator("#doorBar #doorAbout").count() === 1 && await p2.locator("#doorBar #doorLang").count() === 1,
+    "the door carries the top bar: Display, About and one language key");
+  ok(await p2.locator(".intro-corner-l .intro-lockpill #introLock svg").count() === 1, "the little lock sits in the card's top-left corner, as in Ingenium");
+  await p2.click("#introLock");
+  await p2.waitForSelector("#lockDoor.ild-indoor #ldPw", { state: "visible", timeout: 5000 });
+  ok(true, "the lock opens the sign-in in the card's place");
+  await p2.screenshot({ path: path.join(__dirname, "door-unfolded.png") });
   ok(await p2.locator(".pw-wrap #ldPw + .pw-peek").count() === 1, "the sign-in's password field has its show-password key");
   await p2.fill("#ldPw", "not the password at all");
   await p2.click(".pw-wrap #ldPw + .pw-peek");
@@ -127,6 +136,7 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   await p2.click("#ldGo");
   await p2.waitForTimeout(2500);
   ok(await p2.locator(".shell").count() === 0, "a wrong password is refused");
+  ok(/match|wrong|not/i.test(await p2.textContent("#lockDoor .ild-err")), "and the door says so");
   await p2.fill("#ldPw", "kreyol and coffee 2026"); await p2.click("#ldGo");
   await p2.waitForSelector(".shell", { timeout: 60000 });
   ok(true, "the right password opens the store again");

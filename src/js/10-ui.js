@@ -289,6 +289,13 @@
   };
 
   /* ---------- the top keys: Carpe Diem's floating capsule ---------- */
+  ui.doorBar = function (onLang) {
+    var NEXT = { en: "fr", fr: "ht", ht: "en" }, next = NEXT[E.lang] || "fr";
+    return h("div#doorBar.cl-cluster.door-bar", { role: "toolbar", "aria-label": t("top.tools") }, [
+      h("button.cl-key#doorDisplay", { type: "button", title: t("top.display"), onclick: ui.displayPanel }, t("top.display")),
+      h("button.cl-key#doorAbout", { type: "button", title: t("top.about"), onclick: ui.about }, t("top.about")),
+      h("button.cl-key.lang#doorLang", { type: "button", title: "Langue · Language · Lang: " + t("lang." + next), "aria-label": t("lang." + next), onclick: function () { E.setLang(next); if (onLang) onLang(); } }, ui.flag(next))]);
+  };
   ui.cluster = function () {
     var practice = B.mode === "practice", folded = U.prefGet("barFold", "0") === "1";
     var c = h("div#topCluster.cl-cluster" + (folded ? ".folded" : ""), { role: "toolbar", "aria-label": t("top.tools") });
@@ -308,7 +315,7 @@
     c.appendChild(h("button.cl-key.lang#langBtn", { type: "button", title: "Langue · Language · Lang: " + t("lang." + next), "aria-label": t("lang." + next), onclick: function () { E.setLang(next); ui.shell(); } }, ui.flag(next)));
     return c;
   };
-  ui.refreshTop = function () { var old = document.getElementById("topCluster"); if (old) old.replaceWith(ui.cluster()); var f = document.getElementById("fabs"); if (f) f.replaceWith(ui.fabs()); };
+  ui.refreshTop = function () { var old = document.getElementById("topCluster"); if (old) old.replaceWith(ui.cluster()); var f = document.getElementById("rail"); if (f) f.replaceWith(ui.fabs()); };
   /* the round keys on the right, as in Ingenium and Carpe Diem: day or night, and the lock */
   ui.fabs = function () {
     var night = document.documentElement.getAttribute("data-theme") === "night";
@@ -357,7 +364,7 @@
       h("p.hint", null, t("set.calmHint"))]), actions: [{ label: t("close"), kind: "primary" }] });
   };
   ui.about = function () {
-    var st = B.state();
+    var st = B.state() || { settings: { storeName: (E.doorInfo && E.doorInfo.storeName) || "" }, head: null };
     ui.dialog({ title: t("top.about"), body: h("div.about-card", null, [ui.crestKey(84, { rise: true, title: t("crest.press") }), h("h3", null, E.appName()), h("span.eyebrow", null, E.tagline()),
       h("dl.about-facts", null, [h("dt", null, t("about.store")), h("dd", null, st.settings.storeName), h("dt", null, t("about.books")), h("dd", null, String(st.head ? st.head.seq : 0)),
         h("dt", null, t("about.lang")), h("dd", null, "English · Français · Kreyòl")]),

@@ -142,7 +142,7 @@
   function load(vault, key) {
     ID = vault.storeId;
     return D.entries("rec").then(function (entries) {
-      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], counters: {}, head: null, unreadable: [] };
+      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], counters: {}, pad: {}, head: null, unreadable: [] };
       return Promise.all(entries.map(function (e) {
         return C.open(key, e[1], aadRec(ID, e[0])).then(function (val) { return [e[0], val]; }, function () { st.unreadable.push(e[0]); return null; });
       })).then(function (rows) {
@@ -175,6 +175,7 @@
     else if (kind === "sale") { var j = st.sales.findIndex(function (s) { return s.id === v.id; }); if (j >= 0) st.sales[j] = v; else st.sales.push(v); }
     else if (kind === "move") st.moves.push(v);
     else if (kind === "counter") st.counters[id] = v;
+    else if (kind === "pad") st.pad[id] = v;
   }
 
   B.lock = function (why) {
@@ -314,6 +315,16 @@
     });
     return chain.then(function () { B._at = null; return state; }, function (e) { B._at = null; throw e; });
   }
+
+  /* ---------- the side rail's own notes: each person's reminders and caught thoughts, sealed like the rest ---------- */
+  B.pad = function () {
+    var u = (B.user && B.user.id) || "owner", p = state && state.pad && state.pad[u];
+    p = clone(p) || {}; p.thoughts = p.thoughts || []; p.reminders = p.reminders || []; return p;
+  };
+  B.savePad = function (pad, what) {
+    var u = (B.user && B.user.id) || "owner";
+    return B.change(function () { return { type: "pad.updated", data: { what: what || "pad", thoughts: pad.thoughts.length, reminders: pad.reminders.length }, recs: [{ kind: "pad", id: u, value: pad }] }; });
+  };
 
   /* ---------- writing: one change at a time, each worked out from the books as they stand at that moment ---------- */
   var queue = Promise.resolve();

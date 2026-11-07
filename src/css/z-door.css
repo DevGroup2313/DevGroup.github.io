@@ -208,3 +208,12 @@
 .intro-protect .intro-tour { font-size: 13px; }
 .intro-card .i-primary[disabled] { opacity: .7; cursor: progress; transform: none; }
 :root[data-theme="night"] .seal3d .s4-brass { stroke: #d8b46a; }
+
+/* the door of a store of its own (Build 4): the introduction, with the sign-in folded inside the little lock key */
+.door-bar { position: fixed; top: calc(4px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); z-index: 420; }
+.intro-store { margin: 4px 0 0; font: 600 12px/1.3 var(--i-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--pri-text); }
+.intro-lockpill .seg-btn { color: var(--i-ink-2); cursor: pointer; display: grid; place-items: center; transition: color .15s ease, background .15s ease; }
+.intro-lockpill .seg-btn svg { width: 1.05em; height: 1.05em; display: block; }
+.intro-lockpill .seg-btn:hover { color: var(--pri-text); background: rgba(var(--pri-rgb), .10); }
+.intro-lockpill .seg-btn:focus-visible { outline: 2px solid var(--i-accent); outline-offset: 2px; }
+
