@@ -34,6 +34,10 @@ every package and on the GitHub release.
 **You check:** set up a practice store, add ten items, receive stock, sell, read the day's report, lock, unlock with the
 password, unlock with the Master Key, save a backup and restore it on another device.
 
+**Build 2** (the same stage): the cohesive redesign, the store's name at the top of every page, and the Author Studio
+(names, words, look, receipt, safekeeping). **You check:** rename the app and the store, rewrite a phrase, choose a set
+of colours, word the receipt; lock and see the door wear the new names; export the choices, reset, and import them back.
+
 ## Stage 2: people and accountability (Build 2 and after)
 
 - Staff profiles: manager and employees, with PINs; switching the person at the register; permissions you set.
@@ -82,4 +86,6 @@ password, unlock with the Master Key, save a backup and restore it on another de
 ## Stage 9: ready for audit
 
 - Builds signed with your key; key rotation; a demonstration edition with invented data.
+- A new store kit: Emporium set up for another store from a template (the Author Studio's choices, categories, tax
+  rates, staff roles), with that store's own books, password and Master Key.
 - Documentation for auditors; an independent security review; code signing for Mac, Windows and iPhone if you choose it.

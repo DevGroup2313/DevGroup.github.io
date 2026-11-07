@@ -13,7 +13,8 @@
     ["build", "Build", "Build", "Build"], ["cancel", "Cancel", "Annuler", "Anile"], ["close", "Close", "Fermer", "Fèmen"],
     ["edit", "Edit", "Modifier", "Modifye"], ["gotIt", "Got it", "Compris", "Mwen konprann"], ["language", "Language", "Langue", "Lang"],
     ["loading", "Loading…", "Chargement…", "N ap chaje…"], ["lockNow", "Lock now", "Verrouiller", "Fèmen kounye a"],
-    ["menu", "Menu", "Menu", "Meni"], ["menu.fold", "Fold or unfold the menu", "Replier ou déplier le menu", "Pliye oswa depliye meni an"], ["next", "Next", "Suivant", "Kontinye"], ["off", "Off", "Non", "Non"], ["on", "On", "Oui", "Wi"],
+    ["menu", "Menu", "Menu", "Meni"], ["menu.more", "More", "Plus", "Plis"], ["short.more", "More", "Plus", "Plis"],
+    ["top.system", "The store's system · {app}", "Le système du magasin · {app}", "Sistèm magazen an · {app}"], ["menu.fold", "Fold or unfold the menu", "Replier ou déplier le menu", "Pliye oswa depliye meni an"], ["next", "Next", "Suivant", "Kontinye"], ["off", "Off", "Non", "Non"], ["on", "On", "Oui", "Wi"],
     ["readAloud", "Read aloud", "Lire à voix haute", "Li l fò"], ["remove", "Remove", "Retirer", "Retire"], ["save", "Save", "Enregistrer", "Anrejistre"],
     ["tip", "Tip", "Conseil", "Konsèy"], ["theme", "Light", "Lumière", "Limyè"], ["theme.day", "Day", "Jour", "Jou"],
     ["theme.night", "Night", "Nuit", "Lannwit"], ["theme.auto", "Auto", "Auto", "Otomatik"],
@@ -128,6 +129,7 @@
     ["home.profitToday", "Profit today", "Bénéfice du jour", "Benefis jodi a"], ["home.lowStock", "Low on stock", "Stock bas", "Stòk ki ba"],
     ["home.newSale", "New sale", "Nouvelle vente", "Nouvo vant"], ["home.receive", "Receive stock", "Recevoir du stock", "Resevwa machandiz"],
     ["home.addItem", "Add an item", "Ajouter un article", "Ajoute yon atik"], ["home.report", "Today's report", "Rapport du jour", "Rapò jodi a"],
+    ["home.today", "Today at the counter", "Aujourd'hui au comptoir", "Jodi a nan kontwa a"],
     ["home.lowTitle", "Low on stock", "Stock bas", "Stòk ki ba"], ["home.lowNone", "Nothing is low.", "Rien n'est bas.", "Anyen pa ba."],
     ["home.recentTitle", "Latest sales", "Dernières ventes", "Dènye vant yo"], ["home.recentNone", "No sales yet.", "Pas encore de ventes.", "Poko gen vant."],
     ["first.title", "First steps: {n} of {of} done", "Premiers pas : {n} sur {of}", "Premye pa: {n} sou {of} fèt"], ["first.hide", "Hide", "Masquer", "Kache"],
@@ -251,7 +253,7 @@
     ["rep.csvLines", "Sales lines (CSV)", "Lignes de vente (CSV)", "Liy vant (CSV)"], ["rep.csvReceipts", "Receipts (CSV)", "Reçus (CSV)", "Resi (CSV)"],
     ["rep.csvStock", "Stock list (CSV)", "Liste du stock (CSV)", "Lis stòk (CSV)"], ["rep.print", "Print", "Imprimer", "Enprime"],
     ["rep.saved", "The file is saved.", "Le fichier est enregistré.", "Fichye a anrejistre."],
-    ["rep.stamp", "Emporium build {b} · made {d} · ledger line {n} · fingerprint {f}", "Emporium build {b} · fait le {d} · ligne {n} du registre · empreinte {f}", "Emporium build {b} · fèt {d} · liy {n} nan rejis la · anprent {f}"],
+    ["rep.stamp", "made {d} · ledger line {n} · fingerprint {f}", "fait le {d} · ligne {n} du registre · empreinte {f}", "fèt {d} · liy {n} nan rejis la · anprent {f}"],
 
     /* settings */
     ["set.sections", "Sections", "Sections", "Seksyon"], ["set.store", "The store", "Le magasin", "Magazen an"], ["set.tax", "Sales tax", "Taxe de vente", "Taks sou vant"],
@@ -371,6 +373,69 @@
     ["prov.kreyol", "Kreyòl pale, kreyòl konprann.", "Kreyòl pale, kreyòl konprann.", "Kreyòl pale, kreyòl konprann."],
     ["prov.kreyol.m", "Spoken plainly, understood plainly.", "Parlé franchement, compris franchement.", "Kreyòl pale, kreyòl konprann."],
 
+    /* the Author Studio */
+    ["room.studio", "Author Studio", "Studio d'auteur", "Estidyo otè"], ["short.studio", "Studio", "Studio", "Estidyo"],
+    ["type.author.changed", "The Author Studio was used", "Le Studio d'auteur a été utilisé", "Yo sèvi ak Estidyo otè a"],
+    ["about.software", "Emporium software", "Logiciel Emporium", "Lojisyèl Emporium"],
+    ["studio.status", "All changes kept", "Tous les changements sont gardés", "Tout chanjman yo kenbe"],
+    ["studio.export", "Export all", "Tout exporter", "Ekspòte tout"], ["studio.import", "Import all", "Tout importer", "Enpòte tout"],
+    ["studio.reset", "Reset all", "Tout rétablir", "Remete tout"],
+    ["studio.r.start", "The Editor", "L'Éditeur", "Editè a"], ["studio.r.names", "Names", "Noms", "Non yo"], ["studio.r.words", "Words", "Mots", "Mo yo"],
+    ["studio.r.look", "Look", "Apparence", "Aparans"], ["studio.r.receipt", "Receipt", "Reçu", "Resi"], ["studio.r.safe", "Safekeeping", "Mise à l'abri", "Sekirite chwa yo"],
+    ["studio.start.intro", "Where to begin: choose what you are changing, and this opens the room that changes it.", "Par où commencer : choisissez ce que vous changez, et la salle qui le change s'ouvre.", "Kote pou kòmanse: chwazi sa w ap chanje, epi sal ki chanje l la ap louvri."],
+    ["studio.start.names.t", "The names it carries", "Les noms qu'il porte", "Non li pote yo"],
+    ["studio.start.names.b", "The app's name, the store's name, and the line under the title.", "Le nom de l'application, celui du magasin et la ligne sous le titre.", "Non aplikasyon an, non magazen an, ak liy anba tit la."],
+    ["studio.start.words.t", "The words it says", "Les mots qu'il dit", "Mo li di yo"],
+    ["studio.start.words.b", "Any phrase on any page, in English, French or Kreyòl.", "N'importe quelle phrase, sur n'importe quelle page, en anglais, en français ou en kreyòl.", "Nenpòt fraz sou nenpòt paj, an angle, an franse oswa an kreyòl."],
+    ["studio.start.look.t", "The way it looks", "Son apparence", "Jan li parèt"],
+    ["studio.start.look.b", "A set of colours, by day and by night, and the size of the keys.", "Un jeu de couleurs, de jour comme de nuit, et la taille des touches.", "Yon seri koulè, lajounen kou lannwit, ak gwosè bouton yo."],
+    ["studio.start.receipt.t", "The receipt", "Le reçu", "Resi a"],
+    ["studio.start.receipt.b", "The lines under the store's name, the thank you, and the note at the foot.", "Les lignes sous le nom du magasin, le remerciement et la note du bas.", "Liy anba non magazen an, mèsi a, ak nòt anba a."],
+    ["studio.choose", "Choose", "Choisir", "Chwazi"],
+    ["studio.foot", "Everything here is yours to change. Each change is kept on this device, written in the ledger, and carried in backups and in Export all. The originals can always be put back.", "Tout ici peut être changé. Chaque changement est gardé sur cet appareil, inscrit au registre, et suit les sauvegardes et Tout exporter. Les originaux peuvent toujours être rétablis.", "Tout bagay isit la, ou ka chanje l. Chak chanjman kenbe sou aparèy sa a, ekri nan rejis la, epi li ale nan kopi sekirite yo ak nan Ekspòte tout. Ou ka toujou remete sa ki te la anvan."],
+    ["studio.names.intro", "The app's name shows at the door, in the menu, in the window's title and on receipts. The software's own name and build stay in small print, for audits.", "Le nom de l'application paraît à la porte, dans le menu, dans le titre de la fenêtre et sur les reçus. Le nom du logiciel et son build restent en petit, pour les audits.", "Non aplikasyon an parèt sou pòt la, nan meni an, nan tit fenèt la ak sou resi yo. Non lojisyèl la ak build li rete an ti lèt, pou odit yo."],
+    ["studio.appName", "Name of the app", "Nom de l'application", "Non aplikasyon an"], ["studio.appNameHint", "Leave empty to keep Emporium.", "Laissez vide pour garder Emporium.", "Kite l vid pou kenbe Emporium."],
+    ["studio.tagline", "The line under the title", "La ligne sous le titre", "Liy anba tit la"], ["studio.preview", "Preview", "Aperçu", "Apèsi"],
+    ["studio.original", "Put back the originals", "Rétablir les originaux", "Remete sa ki te la yo"],
+    ["studio.lang.en", "English", "Anglais", "Angle"], ["studio.lang.fr", "French", "Français", "Franse"], ["studio.lang.ht", "Kreyòl", "Kreyòl", "Kreyòl"],
+    ["studio.words.intro", "Find a phrase and write it your way. An empty box keeps the original. Long passages, such as the Guidebook, can be rewritten too.", "Trouvez une phrase et écrivez-la à votre façon. Une case vide garde l'original. Les longs passages, comme le Guide, peuvent aussi être réécrits.", "Jwenn yon fraz epi ekri l jan w vle. Yon bwat vid kenbe sa ki te la. Ou ka reekri pasaj ki long yo tou, tankou Gid la."],
+    ["studio.words.lang", "Language to edit", "Langue à modifier", "Lang pou modifye"], ["studio.words.search", "Search the phrases", "Chercher dans les phrases", "Chèche nan fraz yo"],
+    ["studio.words.yours", "Your wording", "Votre formulation", "Jan ou ekri l"], ["studio.words.reset", "Put back the original", "Rétablir l'original", "Remete sa ki te la"],
+    ["studio.words.changed", "{n} changed", "{n} modifiées", "{n} chanje"], ["studio.words.more", "{n} more. Search to narrow the list.", "{n} de plus. Cherchez pour réduire la liste.", "{n} ankò. Chèche pou redwi lis la."],
+    ["studio.words.none", "No phrase matches.", "Aucune phrase ne correspond.", "Pa gen fraz ki koresponn."], ["studio.words.saveAll", "Save the words", "Enregistrer les mots", "Anrejistre mo yo"],
+    ["studio.area.all", "All", "Tout", "Tout"], ["studio.area.door", "Door", "Porte", "Pòt"], ["studio.area.menu", "Menu", "Menu", "Meni"], ["studio.area.home", "Home", "Accueil", "Akèy"],
+    ["studio.area.register", "Register", "Caisse", "Kès"], ["studio.area.inventory", "Inventory", "Inventaire", "Envantè"], ["studio.area.reports", "Reports", "Rapports", "Rapò"],
+    ["studio.area.settings", "Settings", "Réglages", "Reglaj"], ["studio.area.guide", "Guidebook", "Guide", "Gid"], ["studio.area.tips", "Tips", "Conseils", "Konsèy"], ["studio.area.studio", "Studio", "Studio", "Estidyo"],
+    ["studio.look.intro", "Each set of colours is matched by day and by night, so every page stays in harmony.", "Chaque jeu de couleurs est accordé de jour comme de nuit, pour que chaque page reste harmonieuse.", "Chak seri koulè fèt pou mache ansanm lajounen kou lannwit, pou chak paj rete an amoni."],
+    ["studio.look.hint", "Day, Night and Auto, text size and Calm mode are in the top bar and in Settings.", "Jour, Nuit et Auto, la taille du texte et le mode calme sont dans la barre du haut et dans les Réglages.", "Jou, Lannwit ak Otomatik, gwosè tèks la ak mòd kalm lan nan ba anwo a ak nan Reglaj."],
+    ["studio.pal.indigo", "Indigo and brass", "Indigo et laiton", "Endigo ak kwiv"], ["studio.pal.indigo.d", "The house colours, between Carpe Diem's blue and Ingenium's purple.", "Les couleurs de la maison, entre le bleu de Carpe Diem et le violet d'Ingenium.", "Koulè lakay la, ant ble Carpe Diem ak vyolèt Ingenium."],
+    ["studio.pal.royal", "Royal blue and brass", "Bleu roi et laiton", "Ble wa ak kwiv"], ["studio.pal.royal.d", "Close to Carpe Diem and The Forge.", "Proche de Carpe Diem et de The Forge.", "Toupre Carpe Diem ak The Forge."],
+    ["studio.pal.amethyst", "Amethyst and brass", "Améthyste et laiton", "Ametis ak kwiv"], ["studio.pal.amethyst.d", "Close to Ingenium.", "Proche d'Ingenium.", "Toupre Ingenium."],
+    ["studio.pal.burgundy", "Burgundy and brass", "Bordeaux et laiton", "Bòdo ak kwiv"], ["studio.pal.burgundy.d", "An old library: deep red, parchment and brass.", "Une vieille bibliothèque : rouge profond, parchemin et laiton.", "Yon vye bibliyotèk: wouj fon, pachemen ak kwiv."],
+    ["studio.pal.graphite", "Graphite and brass", "Graphite et laiton", "Grafit ak kwiv"], ["studio.pal.graphite.d", "Quiet greys, for a sober counter.", "Des gris discrets, pour un comptoir sobre.", "Gri ki kalm, pou yon kontwa ki sòb."],
+    ["studio.density", "Keys", "Touches", "Bouton yo"], ["studio.density.compact", "Compact", "Compactes", "Konpak"], ["studio.density.comfortable", "Comfortable", "Confortables", "Pi gwo"],
+    ["studio.receipt.intro", "The receipt shows the store's name, then your lines, the sale, and your thank you.", "Le reçu montre le nom du magasin, puis vos lignes, la vente et votre remerciement.", "Resi a montre non magazen an, apre sa liy ou yo, vant lan ak mèsi ou."],
+    ["studio.receipt.lines", "Lines under the store's name", "Lignes sous le nom du magasin", "Liy anba non magazen an"],
+    ["studio.receipt.linesHint", "Address, telephone, website: one per line.", "Adresse, téléphone, site : une par ligne.", "Adrès, telefòn, sit: youn pa liy."],
+    ["studio.receipt.thanks", "The thank you", "Le remerciement", "Mèsi a"], ["studio.sampleItem", "Pâté (sample)", "Pâté (exemple)", "Pate (egzanp)"],
+    ["studio.safe.intro", "Keep a copy of your choices, bring them to another device, or put back every original.", "Gardez une copie de vos choix, emportez-les sur un autre appareil, ou rétablissez tous les originaux.", "Kenbe yon kopi chwa ou yo, pote yo sou yon lòt aparèy, oswa remete tout sa ki te la."],
+    ["studio.safe.export", "One file with the names, words, look and receipt. It holds none of the store's books.", "Un fichier avec les noms, les mots, l'apparence et le reçu. Il ne contient aucun des livres du magasin.", "Yon fichye ak non yo, mo yo, aparans lan ak resi a. Pa gen anyen nan liv magazen an ladan."],
+    ["studio.safe.import", "Use the choices saved in such a file. Everything in it is checked first.", "Utiliser les choix gardés dans un tel fichier. Tout y est vérifié d'abord.", "Sèvi ak chwa ki nan yon fichye konsa. Tout sa ki ladan verifye anvan."],
+    ["studio.importFile", "File", "Fichier", "Fichye"], ["studio.importBad", "This file is not an export of the Author Studio.", "Ce fichier n'est pas un export du Studio d'auteur.", "Fichye sa a pa yon ekspòtasyon Estidyo otè a."],
+    ["studio.importConfirmT", "Use the choices in this file?", "Utiliser les choix de ce fichier ?", "Sèvi ak chwa ki nan fichye sa a?"],
+    ["studio.importConfirmP", "They replace the names, words, look and receipt chosen now. The store's books are not touched.", "Ils remplacent les noms, les mots, l'apparence et le reçu choisis maintenant. Les livres du magasin ne sont pas touchés.", "Yo ranplase non, mo, aparans ak resi ou chwazi kounye a. Liv magazen an pa chanje."],
+    ["studio.importYes", "Use them", "Les utiliser", "Sèvi ak yo"], ["studio.imported", "The choices from the file are in place.", "Les choix du fichier sont en place.", "Chwa ki nan fichye a anplas."],
+    ["studio.exported", "The choices are saved in a file.", "Les choix sont enregistrés dans un fichier.", "Chwa yo anrejistre nan yon fichye."],
+    ["studio.resetT", "Put back every original?", "Rétablir tous les originaux ?", "Remete tout sa ki te la?"],
+    ["studio.resetP", "The app's name, the line under the title, every changed phrase, the look and the receipt lines go back to the originals. The store's name and the books are not touched.", "Le nom de l'application, la ligne sous le titre, chaque phrase modifiée, l'apparence et les lignes du reçu reviennent aux originaux. Le nom du magasin et les livres ne sont pas touchés.", "Non aplikasyon an, liy anba tit la, chak fraz ki chanje, aparans lan ak liy resi yo retounen jan yo te ye. Non magazen an ak liv yo pa chanje."],
+    ["studio.resetYes", "Put back the originals", "Rétablir les originaux", "Remete sa ki te la yo"], ["studio.resetDone", "Every original is back.", "Tous les originaux sont rétablis.", "Tout sa ki te la retounen."],
+    ["studio.saved", "Saved, and written in the ledger.", "Enregistré, et inscrit au registre.", "Anrejistre, epi ekri nan rejis la."], ["studio.nothing", "Nothing has changed.", "Rien n'a changé.", "Anyen pa chanje."],
+    ["tip.studio.t", "The Author Studio", "Le Studio d'auteur", "Estidyo otè a"],
+    ["tip.studio.b", "Here Emporium becomes yours: its name, the store's name, every phrase, its colours and the receipt. Changes are data, not code, so the tested build stays the same and every change is in the ledger.", "Ici, Emporium devient le vôtre : son nom, celui du magasin, chaque phrase, ses couleurs et le reçu. Les changements sont des données, pas du code : le build testé reste le même et chaque changement est inscrit au registre.", "Isit la Emporium vin pou ou: non li, non magazen an, chak fraz, koulè li ak resi a. Chanjman yo se done, pa kòd, kidonk build ki teste a rete menm jan an, e chak chanjman ekri nan rejis la."],
+    ["guide.studio.t", "The Author Studio", "Le Studio d'auteur", "Estidyo otè a"],
+    ["guide.studio.b", "The Author Studio is where Emporium becomes yours. Open it from the menu: Author Studio.\nNames changes the app's name, the store's name and the line under the title, in each language. Words rewrites any phrase on any page. Look chooses a matched set of colours and the size of the keys. Receipt words the top and the foot of the receipt.\nEvery change is kept on this device, written in the ledger, and carried in backups. Safekeeping exports your choices to a file, brings them back, or puts back every original.", "Le Studio d'auteur est l'endroit où Emporium devient le vôtre. Ouvrez-le depuis le menu : Studio d'auteur.\nNoms change le nom de l'application, celui du magasin et la ligne sous le titre, dans chaque langue. Mots réécrit n'importe quelle phrase. Apparence choisit un jeu de couleurs accordé et la taille des touches. Reçu formule le haut et le bas du reçu.\nChaque changement est gardé sur cet appareil, inscrit au registre et suit les sauvegardes. Mise à l'abri exporte vos choix dans un fichier, les reprend, ou rétablit tous les originaux.", "Estidyo otè a se kote Emporium vin pou ou. Louvri l nan meni an: Estidyo otè.\nNon yo chanje non aplikasyon an, non magazen an ak liy anba tit la, nan chak lang. Mo yo reekri nenpòt fraz. Aparans chwazi yon seri koulè ki mache ansanm ak gwosè bouton yo. Resi ekri tèt ak pye resi a.\nChak chanjman kenbe sou aparèy sa a, ekri nan rejis la, epi li ale nan kopi sekirite yo. Sekirite chwa yo ekspòte chwa ou yo nan yon fichye, remete yo, oswa remete tout sa ki te la."],
+    ["guide.studio.tip", "Export your choices after a big change, and keep the file with your backups.", "Exportez vos choix après un grand changement, et gardez le fichier avec vos sauvegardes.", "Ekspòte chwa ou yo apre yon gwo chanjman, epi kenbe fichye a ak kopi sekirite ou yo."],
+
     /* tips */
     ["tip.home.t", "Home", "Accueil", "Akèy"], ["tip.home.b", "The day at a glance: today's sales, the money taken, the profit, and what is running low. The large keys start the most common tasks.", "La journée en un coup d'œil : ventes, encaissements, bénéfice et stock bas. Les grandes touches lancent les tâches courantes.", "Jounen an an yon kout je: vant jodi a, lajan ki antre, benefis la, ak sa k ap fini. Gwo bouton yo kòmanse travay ki pi souvan yo."],
     ["tip.register.t", "The Register", "La Caisse", "Kès la"], ["tip.register.b", "Scan or type to find an item; each press adds one. Check the ticket, then press Take cash. Nothing is recorded until the sale is completed.", "Scannez ou tapez pour trouver un article ; chaque appui en ajoute un. Vérifiez le ticket, puis Encaisser. Rien n'est enregistré avant la fin de la vente.", "Eskane oswa tape pou jwenn yon atik; chak fwa w peze, li ajoute youn. Tcheke tikè a, epi peze Pran lajan kach. Anyen pa anrejistre anvan vant lan fini."],
@@ -397,13 +462,14 @@
   E.lang = (function () { var l = U.prefGet("lang", ""); if (DICT[l]) return l; var n = (navigator.language || "en").slice(0, 2); return n === "fr" ? "fr" : n === "ht" ? "ht" : "en"; })();
   E.missing = {};
   E.t = function (key, vars) {
-    var s = DICT[E.lang][key];
+    var c = E.custom && E.custom.words && E.custom.words[E.lang], s = c && typeof c[key] === "string" && c[key] ? c[key] : DICT[E.lang][key];
     if (s === undefined) s = DICT.en[key];
     if (s === undefined) { E.missing[key] = 1; return key; }
     if (vars) s = s.replace(/\{(\w+)\}/g, function (m, k) { return vars[k] !== undefined ? String(vars[k]) : m; });
     return s;
   };
   E.has = function (key) { return DICT.en[key] !== undefined; };
+  E.original = function (key, lang) { var d = DICT[lang || E.lang]; return d && d[key] !== undefined ? d[key] : DICT.en[key]; };
   E.setLang = function (l) { E.lang = DICT[l] ? l : "en"; U.prefSet("lang", E.lang); document.documentElement.lang = E.lang; };
   E.dict = DICT;
 

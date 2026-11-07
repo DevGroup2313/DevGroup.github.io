@@ -11,7 +11,7 @@
     var catSel = ui.select([["all", t("all")]].concat(ui.cats().map(function (c) { return [c.id, ui.catName(c)]; })), I.cat, { id: "invCat", "aria-label": t("inv.category") });
     var filt = ui.seg([["active", t("inv.f.active")], ["low", t("inv.f.low")], ["archived", t("inv.f.archived")]], I.filter, function (v) { I.filter = v; draw(); }, t("inv.show"));
     var body = h("tbody", { id: "invRows" }), foot = h("p.inv-foot.muted", { id: "invFoot" });
-    main.appendChild(ui.roomHead("room.inventory", "tip.inventory", [h("button.key.hero", { type: "button", id: "addItem", onclick: function () { I.add(); } }, [ui.emo("🏷️"), t("inv.add")])]));
+    main.appendChild(ui.roomHead("room.inventory", "tip.inventory", [h("button.key.primary", { type: "button", id: "addItem", onclick: function () { I.add(); } }, [ui.emo("🏷️"), t("inv.add")])]));
     if (mode === "receive") main.appendChild(h("p.banner", { role: "status" }, [ui.emo("🚚"), t("inv.chooseReceive")]));
     main.appendChild(h("div.toolbar", null, [h("div.search-row", null, [U.icon("search"), search]), catSel, filt]));
     main.appendChild(h("div.table-wrap.card", null, h("table.grid", null, [

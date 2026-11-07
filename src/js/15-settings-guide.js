@@ -87,7 +87,7 @@
     /* backups */
     var lastB = U.prefGet("lastBackup", "");
     main.appendChild(sec("set-backup", "set.backup", "tip.backup", [h("p", { id: "lastBackup" }, lastB ? t("set.lastBackup", { d: E.fmtDate(new Date(lastB), "long") + " " + E.fmtTime(new Date(lastB)) }) : t("set.noBackup")),
-      h("div.row-keys", null, [h("button.key.hero", { type: "button", id: "saveBackup", onclick: saveBackup }, [ui.emo("💾"), t("set.saveBackup")]),
+      h("div.row-keys", null, [h("button.key.primary", { type: "button", id: "saveBackup", onclick: saveBackup }, [ui.emo("💾"), t("set.saveBackup")]),
         h("button.key", { type: "button", id: "restoreBackup", onclick: function () { E.door.restore(false); } }, [ui.emo("📂"), t("set.restore")])]),
       h("p.hint", null, t("set.backupHint"))]));
 
@@ -116,7 +116,7 @@
 
     /* about */
     main.appendChild(sec("set-about", "set.about", null, [h("div.about", null, [ui.sealWrap(84, "Emporium"), h("div", null, [
-      h("p", null, [h("strong", null, "Emporium"), " · " + t("build") + " " + E.BUILD.number + " · " + E.BUILD.date]),
+      h("p", null, [h("strong", null, E.appName()), " · " + E.made() + " · " + E.BUILD.date]),
       h("p", null, t("about.p1")), h("p", null, "Copyright © 2026 Yannie D. Forest. " + t("about.rights")), h("p.hint", null, t("about.p2"))])])]));
 
     /* erase */
@@ -187,8 +187,8 @@
   }
 
   /* ---------- the Guidebook ---------- */
-  var ARTICLES = ["start", "door", "master", "sale", "items", "receive", "correct", "reports", "backup", "sealed", "verify", "display", "build", "limits"];
-  var ART_EMO = { start: "🌟", door: "🚪", master: "🗝️", sale: "🛒", items: "🏷️", receive: "🚚", correct: "✏️", reports: "📊", backup: "💾", sealed: "🔐", verify: "🛡️", display: "🎨", build: "🔢", limits: "🧭" };
+  var ARTICLES = ["start", "door", "master", "sale", "items", "receive", "correct", "reports", "backup", "sealed", "verify", "display", "studio", "build", "limits"];
+  var ART_EMO = { start: "🌟", door: "🚪", master: "🗝️", sale: "🛒", items: "🏷️", receive: "🚚", correct: "✏️", reports: "📊", backup: "💾", sealed: "🔐", verify: "🛡️", display: "🎨", studio: "⚒️", build: "🔢", limits: "🧭" };
   ui.rooms.guide = function (main) {
     var q = ui.input({ id: "guideSearch", type: "search", placeholder: t("guide.searchPh"), "aria-label": t("guide.search") });
     var list = h("ul.guide-list", { id: "guideList" }), art = h("article.guide-article.card", { id: "guideArticle", tabindex: "-1" });

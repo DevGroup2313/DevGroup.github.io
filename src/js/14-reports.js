@@ -56,12 +56,12 @@
     var margin = r.net - r.noCost > 0 ? Math.round(r.profit * 1000 / (r.net - r.noCost)) / 10 : null;
     var node = h("div.report" + (forPrint ? ".for-print" : ""), null, [
       forPrint ? h("div.print-head", null, [ui.seal(56), h("div", null, [h("h1", null, st.settings.storeName), h("p", null, t("room.reports") + " · " + label)])]) : h("h2.rep-range", { id: "repRange" }, [ui.emo("📅"), label]),
-      h("div.stats", null, [
+      h("section.card", null, h("div.ledger.eight", null, [
         ui.stat(t("rep.sales"), String(r.count), null, "rSales", "🧾"), ui.stat(t("rep.items"), String(r.items), null, "rItems", "🛍️"),
         ui.stat(t("rep.net"), money(r.net), null, "rNet", "💵"), ui.stat(t("rep.tax"), money(r.tax), null, "rTax", "🏛️"),
         ui.stat(t("rep.gross"), money(r.gross), null, "rGross", "💰"), ui.stat(t("rep.cogs"), money(r.cogs), null, "rCogs", "🏷️"),
         ui.stat(t("rep.profit") + (margin !== null ? " (" + margin + "%)" : ""), money(r.profit), r.profit < 0 ? "bad" : "good", "rProfit", "📈"),
-        ui.stat(t("rep.avg"), r.count ? money(U.divRound(r.gross, r.count)) : "—", null, "rAvg", "⚖️")]),
+        ui.stat(t("rep.avg"), r.count ? money(U.divRound(r.gross, r.count)) : "—", null, "rAvg", "⚖️")])),
       r.noCost ? h("p.note", null, [ui.emo("ℹ️"), t("rep.noCostNote", { m: money(r.noCost) })]) : null,
       r.count ? null : h("p.muted", null, [ui.emo("🌙"), " ", t("rep.none")])]);
     if (r.count) {
@@ -96,15 +96,15 @@
     node.appendChild(section("💔 " + t("rep.losses"), reasons.length ? table([t("ad.reason"), t("rep.items"), t("inv.value")], reasons.map(function (k) {
       var x = r.losses.byReason[k]; return [t("reason." + k), x.qty, money(x.value)];
     }).concat([[t("rep.total"), r.losses.qty, money(r.losses.value)]]), [1, 2]) : h("p.muted", null, t("rep.noLosses")), t("rep.lossesHint")));
-    node.appendChild(section("📦 " + t("rep.stockNow"), h("div.stats.small", null, [
+    node.appendChild(section("📦 " + t("rep.stockNow"), h("div.stats-sm", null, [
       ui.stat(t("rep.atCost"), money(stock.atCost)), ui.stat(t("rep.atPrice"), money(stock.atPrice)), ui.stat(t("rep.units"), String(stock.units)),
       ui.stat(t("rep.received"), t("rep.receivedVal", { n: r.received.qty, m: money(r.received.value) })),
       ui.stat(t("home.lowStock"), String(stock.low.length), stock.low.length ? "warn" : null), ui.stat(t("rep.negative"), String(stock.negative.length), stock.negative.length ? "bad" : null)])));
-    node.appendChild(h("p.stamp", { id: "repStamp" }, t("rep.stamp", { b: E.BUILD.number, d: E.fmtDate(new Date(), "short") + " " + E.fmtTime(new Date()), n: st.head.seq, f: st.head.hash.slice(0, 16) })));
+    node.appendChild(h("p.stamp", { id: "repStamp" }, E.made() + " · " + t("rep.stamp", { b: E.BUILD.number, d: E.fmtDate(new Date(), "short") + " " + E.fmtTime(new Date()), n: st.head.seq, f: st.head.hash.slice(0, 16) })));
     return node;
   }
   function bar(f) { var fill = h("span.bar-fill"); fill.style.width = Math.max(2, Math.round(f * 100)) + "%"; return h("span.bar", { "aria-hidden": "true" }, fill); }
-  function section(title, content, hint) { return h("section.card.rep-sec", null, [h("h3", null, title), hint ? h("p.hint", null, hint) : null, content]); }
+  function section(title, content, hint) { return h("section.card.rep-sec", null, [h("p.label-caps", null, title), hint ? h("p.hint", null, hint) : null, content]); }
   function table(head, rows, numCols) {
     numCols = numCols || [];
     return h("div.table-wrap", null, h("table.grid.compact", null, [h("thead", null, h("tr", null, head.map(function (x, i) { return h("th" + (numCols.indexOf(i) >= 0 ? ".num" : ""), null, x); }))),

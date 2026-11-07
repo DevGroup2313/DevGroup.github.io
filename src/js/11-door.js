@@ -16,15 +16,15 @@
   function frame(children, wide) {
     var app = document.getElementById("app"); U.clear(app);
     var card = h("div.door-card" + (wide ? ".wide" : ""), null, children);
-    app.appendChild(h("div.door", null, [h("main.door-main", { "aria-label": "Emporium" }, card),
+    app.appendChild(h("div.door", null, [h("main.door-main", { "aria-label": E.appName() }, card),
       h("footer.door-foot", null, [h("div.door-choices", null, [langRow(), themeRow()]),
         h("p", null, t("build") + " " + E.BUILD.number + " · © 2026 Yannie D. Forest · " + t("door.offline"))])]));
     var f = card.querySelector("input,button.primary"); if (f) setTimeout(function () { f.focus(); }, 40);
     return card;
   }
   function crest(sub) {
-    return h("div.crest", null, [h("span.seal-ring", null, ui.sealWrap(108, "Emporium")), h("h1.brand", null, "Emporium"),
-      h("div.door-rule", null, [h("span"), h("em", null, sub || t("door.tag")), h("span")])]);
+    return h("div.crest", null, [h("span.seal-ring", null, ui.sealWrap(108, E.appName())), h("h1.brand", null, E.appName()),
+      h("div.door-rule", null, [h("span"), h("em", null, sub || E.tagline()), h("span")])]);
   }
 
   /* each screen is remembered, so that changing the language draws the same screen again */
@@ -44,7 +44,7 @@
   var signIn = screen(function (why) {
     var pw = ui.input({ type: "password", autocomplete: "current-password", id: "doorPassword" });
     var msg = h("p.door-msg", { role: "status" }, why === "idle" ? t("door.lockedIdle") : why === "hand" ? t("door.lockedHand") : "");
-    var go = h("button.key.primary.big", { type: "submit", id: "doorOpen" }, [ui.emo("🔓"), t("door.open")]);
+    var go = h("button.key.primary.lg", { type: "submit", id: "doorOpen" }, [ui.emo("🔓"), t("door.open")]);
     var form = h("form.door-form", { onsubmit: function (e) {
       e.preventDefault();
       var left = waitLeft();
@@ -72,7 +72,7 @@
   /* ---------- a new store ---------- */
   var welcome = screen(function () {
     frame([crest(), h("p.door-lead", null, t("setup.lead")),
-      h("button.key.hero.big", { type: "button", id: "setupBegin", onclick: function () { setup.step1(); } }, [ui.emo("✨"), t("setup.begin")]),
+      h("button.key.primary.lg", { type: "button", id: "setupBegin", onclick: function () { setup.step1(); } }, [ui.emo("✨"), t("setup.begin")]),
       h("div.door-links", null, [h("button.link", { type: "button", onclick: function () { restore(false); } }, [ui.emo("💾"), t("door.restoreHere")])])]);
   });
   var draft = {};
@@ -146,7 +146,7 @@
       door.view = function () { setup.step5(prep); };
       var groups = C.groups(prep.code), a = 1 + Math.floor(Math.random() * 6), b = 7 + Math.floor(Math.random() * 6);
       var ga = ui.input({ id: "confirmA", maxlength: "4", autocapitalize: "characters", class: "mono" }), gb = ui.input({ id: "confirmB", maxlength: "4", autocapitalize: "characters", class: "mono" });
-      var go = h("button.key.hero", { type: "submit", id: "s5Finish" }, [ui.emo("🎉"), t("setup.finish")]);
+      var go = h("button.key.primary", { type: "submit", id: "s5Finish" }, [ui.emo("🎉"), t("setup.finish")]);
       var wait = h("p.door-msg", { role: "status" });
       frame([steps(5), h("h2.door-h", null, [ui.emo("✅"), t("setup.s5.h")]), h("p", null, t("setup.s5.p1")),
         h("form", { onsubmit: function (e) {

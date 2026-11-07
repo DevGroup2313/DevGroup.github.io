@@ -67,6 +67,20 @@ A short PIN cannot protect data on its own, because a stolen copy could be tried
 to say **who** is at the register on a store device that the owner or manager has already opened. The data stays sealed
 by the Store Key. Repeated wrong PINs lock that employee out until a manager unlocks them.
 
+## 3b. The Author Studio's choices
+
+The owner can rename the app and the store, rewrite any phrase, choose the colours and word the receipt. These choices
+are data, never code: the tested build stays exactly the same.
+
+- They are kept beside the envelopes, not sealed, so that the door can wear them before the store is opened. They hold
+  no figure of the business.
+- Each change is also a ledger line ("The Author Studio was used", with the parts that changed), written in the same
+  transaction, so the books show who changed what and when.
+- A file brought in is checked field by field: only the fields the Studio knows, only text, within set lengths, and
+  only phrases that exist. Everything is shown as text and never run.
+- Whatever the app is called, receipts, reports and About keep the software's own name and build, which an auditor checks
+  against the release.
+
 ## 4. The ledger and its seal
 
 Each line of the ledger carries a fingerprint (SHA-256) of the line before it, so the lines form a chain. Changing,

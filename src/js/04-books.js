@@ -27,8 +27,8 @@
       return D.write([{ store: "meta", key: "device", value: dev }]).then(function () { return dev; });
     }).then(function (dev) {
       B.device = dev;
-      return Promise.all([D.get("meta", "vault"), D.get("meta", "door")]);
-    }).then(function (r) { return { hasStore: !!r[0], door: r[1] || null, vault: r[0] || null }; });
+      return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.get("meta", "custom")]);
+    }).then(function (r) { E.custom = E.cleanCustom ? E.cleanCustom(r[2]) : (r[2] || null); return { hasStore: !!r[0], door: r[1] || null, vault: r[0] || null }; });
   };
 
   /* ---------- the default shelves of the store ---------- */
@@ -224,6 +224,13 @@
       var c = { id: id, name: name, order: order };
       return { type: "category.created", data: { cat: c }, recs: [{ kind: "cat", id: id, value: c }], result: c };
     });
+  };
+
+  /* The Author Studio's choices (names, words, look, receipt) are kept beside the envelopes, so the door can wear them
+     before the store is opened; each change is also a ledger line, written in the same transaction. */
+  B.saveCustom = function (custom, changed) {
+    return B.change(function () { return { type: "author.changed", data: { changed: changed }, meta: [{ key: "custom", value: custom }] }; })
+      .then(function (r) { E.custom = custom; return r; });
   };
 
   /* ---------- items ---------- */
@@ -502,8 +509,8 @@
 
   /* ---------- backups: the sealed books as they are, in one file ---------- */
   B.makeBackup = function () {
-    return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.entries("rec"), D.entries("journal")]).then(function (r) {
-      var body = { format: "emporium-backup", v: 1, build: E.BUILD.number, at: new Date().toISOString(), door: r[1], vault: r[0],
+    return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.entries("rec"), D.entries("journal"), D.get("meta", "custom")]).then(function (r) {
+      var body = { format: "emporium-backup", v: 1, build: E.BUILD.number, at: new Date().toISOString(), door: r[1], vault: r[0], custom: r[4] || null,
         rec: r[2].map(function (e) { return [e[0], U.b64e(e[1].iv), U.b64e(e[1].ct)]; }),
         journal: r[3].map(function (e) { return [e[0], U.b64e(e[1].iv), U.b64e(e[1].ct)]; }) };
       return U.sha256hex(U.canon(body)).then(function (sum) { body.sum = sum; return JSON.stringify(body); });
@@ -540,8 +547,10 @@
       }
       return next().then(function () {
         B.lock("restore");
-        return D.replaceAll([["vault", v], ["door", body.door], ["device", B.device]], rec, journal);
-      }).then(function () { return load(v, key); });
+        var meta = [["vault", v], ["door", body.door], ["device", B.device]];
+        if (body.custom) meta.push(["custom", E.cleanCustom ? E.cleanCustom(body.custom) : body.custom]);
+        return D.replaceAll(meta, rec, journal);
+      }).then(function () { E.custom = body.custom && E.cleanCustom ? E.cleanCustom(body.custom) : null; if (E.ui && E.ui.applyLook) E.ui.applyLook(); return load(v, key); });
     });
   };
 

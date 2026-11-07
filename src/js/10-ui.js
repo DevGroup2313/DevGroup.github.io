@@ -16,7 +16,7 @@
     '<circle cx="120" cy="120" r="70" fill="#353F86" stroke="url(#emg2)" stroke-width="3.5"/>' +
     '<text font-family="Palatino Linotype,Palatino,Book Antiqua,Georgia,serif" font-size="21" font-weight="700" letter-spacing="7" fill="#F4DC97"><textPath href="#emt" startOffset="50%" text-anchor="middle">EMPORIUM</textPath></text>' +
     '<text font-family="Palatino Linotype,Palatino,Book Antiqua,Georgia,serif" font-size="13" font-weight="700" letter-spacing="5" fill="#E5C77F"><textPath href="#emb" startOffset="50%" text-anchor="middle">· MMXXVI ·</textPath></text>' +
-    '<path d="M120 52.5l3.1 6.8 7.4.8-5.5 5 1.6 7.3-6.6-3.8-6.6 3.8 1.6-7.3-5.5-5 7.4-.8z" fill="#F6B8A8" stroke="#F4DC97" stroke-width="1.2"/>' +
+    '<path d="M120 52.5l3.1 6.8 7.4.8-5.5 5 1.6 7.3-6.6-3.8-6.6 3.8 1.6-7.3-5.5-5 7.4-.8z" fill="#F4DC97"/>' +
     '<g fill="none" stroke="url(#emg2)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M120 80V158M100 160h40M82 92h76M82 92l-12 30M82 92l12 30M158 92l-12 30M158 92l12 30"/></g>' +
     '<circle cx="120" cy="84" r="5.5" fill="#F4DC97"/>' +
@@ -39,13 +39,17 @@
     root.setAttribute("data-size", U.prefGet("size", "m"));
     root.setAttribute("data-calm", U.prefGet("calm", "0"));
     root.setAttribute("data-fold", U.prefGet("fold", "0"));
+    var look = E.custom && E.custom.look;
+    root.setAttribute("data-palette", look && look.palette ? look.palette : "indigo");
+    root.setAttribute("data-density", look && look.density === "comfortable" ? "comfortable" : "compact");
+    try { document.title = E.appName ? E.appName() : "Emporium"; } catch (e) { }
     var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#0A1A20" : "#F6F1E7");
   };
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ui.applyLook); } catch (e) { }
 
   /* ---------- emojis (drawn by the device's own emoji font; hidden from screen readers, the words carry the meaning) ---------- */
   ui.emo = function (ch, cls) { return h("span.emo" + (cls ? "." + cls : ""), { "aria-hidden": "true" }, ch); };
-  ui.ROOM_EMO = { home: "🏠", register: "🛒", inventory: "📦", reports: "📊", guide: "📖", settings: "⚙️" };
+  ui.ROOM_EMO = { home: "🏠", register: "🛒", inventory: "📦", reports: "📊", guide: "📖", settings: "⚙️", studio: "⚒️" };
   ui.CAT_EMO = { music: "🎵", movies: "🎬", perfume: "🌸", grocery: "🥥", drinks: "🥤", food: "🥟", services: "💸", other: "🛍️" };
   ui.catEmo = function (c) { return ui.CAT_EMO[c] || "🏷️"; };
 
@@ -174,14 +178,14 @@
   };
 
   /* ---------- the shell and its rooms ---------- */
-  var ROOMS = ["home", "register", "inventory", "reports", "guide", "settings"];
+  var ROOMS = ["home", "register", "inventory", "reports", "guide", "settings", "studio"];
   ui.rooms = {};
   ui.current = null;
   ui.shell = function () {
     var app = document.getElementById("app"); U.clear(app);
     var st = B.state();
     var nav = h("nav.rail", { "aria-label": t("menu") }, [
-      h("div.rail-brand", null, [ui.sealWrap(42), h("div", null, [h("div.brand-name", null, "Emporium"), h("div.brand-store", null, st.settings.storeName)]),
+      h("div.rail-brand", null, [ui.sealWrap(42), h("div", null, [h("div.brand-name", null, E.appName()), h("div.brand-store", null, st.settings.storeName)]),
         h("button.icon-key.rail-fold", { type: "button", "aria-label": t("menu.fold"), title: t("menu.fold"), onclick: function () {
           U.prefSet("fold", U.prefGet("fold", "0") === "1" ? "0" : "1"); ui.applyLook();
           this.textContent = U.prefGet("fold", "0") === "1" ? "›" : "‹";
@@ -193,10 +197,24 @@
       })),
       h("div.rail-foot", null, [
         h("button.nav-key.lock-key", { type: "button", "aria-label": t("lockNow"), title: t("lockNow"), onclick: function () { B.lock("hand"); } }, [ui.emo("🔒", "nav-emo"), h("span.long", null, t("lockNow"))]),
+        h("button.nav-key.more-key", { type: "button", "aria-label": t("menu.more"), onclick: function () {
+          var d = ui.dialog({ title: t("menu.more"), emoji: "☰", body: h("div.more-list", null, [["guide", "📖"], ["studio", "⚒️"]].map(function (r) {
+            return h("button.key", { type: "button", onclick: function () { d.close(); ui.go(r[0]); } }, [ui.emo(r[1]), t("room." + r[0])]);
+          }).concat([h("button.key", { type: "button", onclick: function () { d.close(); B.lock("hand"); } }, [ui.emo("🔒"), t("lockNow")])])) });
+        } }, [ui.emo("☰", "nav-emo"), h("span.short", { "aria-hidden": "true" }, t("short.more"))]),
         h("p.build-line", null, t("build") + " " + E.BUILD.number)])
     ]);
     var main = h("main#room", { tabindex: "-1" });
-    app.appendChild(h("div.shell", null, [nav, main]));
+    /* the slim top bar, as in the Forge and Carpe Diem: the day, the language and the light, always one press away */
+    var when = h("span.when", { id: "topWhen" });
+    function tick() { when.textContent = E.fmtDate(new Date(), "long") + " · " + E.fmtTime(new Date()); }
+    tick(); clearInterval(ui._tick); ui._tick = setInterval(tick, 30000);
+    var mark = h("div.store-mark", null, [ui.seal(30), h("div", null, [h("div.store-name", { id: "topStore" }, st.settings.storeName), h("div.store-sub", null, t("top.system", { app: E.appName() }))])]);
+    var top = h("header.topbar", null, [mark, h("div.top-tools", null, [when,
+      ui.seg([["en", "EN"], ["fr", "FR"], ["ht", "KR"]], E.lang, function (l) { E.setLang(l); ui.shell(); }, t("language")),
+      ui.seg([["day", "", "sun"], ["auto", "", "auto"], ["night", "", "moon"]], U.prefGet("theme", "auto"), function (v) { U.prefSet("theme", v); ui.applyLook(); }, t("theme"))])]);
+    Array.prototype.forEach.call(top.querySelectorAll(".seg")[1].children, function (b) { b.setAttribute("aria-label", t("theme." + b.getAttribute("data-v"))); b.title = t("theme." + b.getAttribute("data-v")); });
+    app.appendChild(h("div.shell", null, [nav, h("div.page", null, [top, main])]));
     ui.go(location.hash.replace("#", "") || "home", true);
   };
   ui.go = function (room, quiet) {

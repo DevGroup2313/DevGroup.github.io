@@ -8,6 +8,17 @@ transfer logs, travel bookings and every device in step. It works with no connec
 on each device with the owner's password and the Master Key. It belongs to the family of Carpe Diem, The Forge, Inkwell
 and Ingenium.
 
+## Build 2 (7 November 2026): the foundation, redesigned, with the Author Studio
+
+- One family of colours: lavender mist, white and indigo by day; a midnight library (ink, parchment, brass) by night.
+  Compact raised keys at the Forge's scale, figures set like a ledger, the ticket as a slip of receipt paper, and the
+  side menu after the Forge's own.
+- The store's name at the top of every page, so the screen always says whose system it is.
+- The Author Studio (after Carpe Diem's): rename the app and the store, rewrite any phrase in English, French or Kreyòl,
+  choose a matched set of colours, word the receipt, and export, import or reset those choices. Every change is written
+  in the ledger, and the software's own name and build stay on receipts and reports for audits.
+- 65 checks in Chromium, served and opened from a file.
+
 ## Build 1 (7 November 2026): the foundation
 
 - The door: setting up the store in five steps, the owner's password, the Master Key (shown once, confirmed, printable),
@@ -37,7 +48,7 @@ device. The programs for Windows, Mac, iPhone and iPad, and the Fire tablet foll
 ## Building and testing
 
     python3 build.py                                   # writes app/Emporium.html from src/
-    node tests/t_build1.js <address of Emporium.html> <folder for pictures>   # 52 checks in Chromium (Playwright)
+    node tests/t_build1.js <address of Emporium.html> <folder for pictures>   # 65 checks in Chromium (Playwright)
 
 The build stops if the code uses `eval`, `innerHTML`, `document.write` or an address outside the page. The page's
 Content Security Policy allows only its own script, named by its SHA-256.

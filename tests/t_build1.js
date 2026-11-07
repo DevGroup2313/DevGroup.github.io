@@ -20,7 +20,8 @@ const PW = 'Patties are hot at noon!', PW2 = 'Kafe lakay se kafe lakay 2026';
   const text = s => p.$eval(s, n => n.textContent.trim());
 
   await p.goto(URL); await p.waitForSelector('#setupBegin', { timeout: 15000 });
-  ok(await p.evaluate(() => Emporium.BUILD.number) === '1', 'the page says Build 1');
+  const BUILD = String(JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'build.json'), 'utf8')).build);
+  ok(await p.evaluate(() => Emporium.BUILD.number) === BUILD, 'the page says Build ' + BUILD);
   await shot('01-door-new');
 
   /* ---------- setup ---------- */
@@ -202,18 +203,68 @@ const PW = 'Patties are hot at noon!', PW2 = 'Kafe lakay se kafe lakay 2026';
   /* ---------- three languages, every room, no missing words ---------- */
   for (const l of ['fr', 'ht', 'en']) {
     await p.evaluate(l => { Emporium.setLang(l); Emporium.ui.shell(); }, l);
-    for (const r of ['home', 'register', 'inventory', 'reports', 'guide', 'settings']) { await p.evaluate(r => Emporium.ui.go(r), r); await p.waitForTimeout(150); if (l !== 'en') await shot('10-' + l + '-' + r); }
+    for (const r of ['home', 'register', 'inventory', 'reports', 'guide', 'settings', 'studio']) { await p.evaluate(r => Emporium.ui.go(r), r); await p.waitForTimeout(150); if (l !== 'en') await shot('10-' + l + '-' + r); }
   }
   const missing = await p.evaluate(() => Object.keys(Emporium.missing));
   ok(missing.length === 0, 'no word is missing in English, French or Kreyòl', missing);
   const dict = await p.evaluate(() => { const d = Emporium.dict, out = []; Object.keys(d.en).forEach(k => { ['fr', 'ht'].forEach(l => { if (!d[l][k]) out.push(l + ':' + k); }); }); return out; });
   ok(dict.length === 0, 'every English phrase has its French and Kreyòl', dict.slice(0, 20));
 
+  /* ---------- the Author Studio ---------- */
+  await p.evaluate(() => { Emporium.setLang('en'); Emporium.ui.shell(); Emporium.studio.room = 'names'; Emporium.ui.go('studio'); });
+  await p.waitForSelector('#stApp');
+  await shot('14-studio-names');
+  await fill('#stApp', 'Lakay Books'); await fill('#stTag-en', 'The shop of the neighbourhood'); await fill('#stStore', 'Kafe Lakay Market');
+  await click('#stNamesSave'); await p.waitForTimeout(900);
+  ok(await text('.rail .brand-name') === 'Lakay Books' && await p.title() === 'Lakay Books' && await text('.rail .brand-store') === 'Kafe Lakay Market', 'the Author Studio renames the app and the store (menu and window title)', [await text('.rail .brand-name'), await p.title()]);
+  await p.evaluate(() => Emporium.books.lock('hand')); await p.waitForSelector('#doorPassword');
+  await shot('15-door-renamed');
+  ok(await text('.brand') === 'Lakay Books' && await text('.door-rule em') === 'The shop of the neighbourhood' && await text('.door-store') === 'Kafe Lakay Market', 'the door wears the new names before the store is opened',
+    [await text('.brand'), await text('.door-rule em'), await text('.door-store')]);
+  await fill('#doorPassword', PW2); await click('#doorOpen'); await p.waitForSelector('.shell', { timeout: 20000 });
+  await p.evaluate(() => { Emporium.studio.room = 'words'; Emporium.ui.go('studio'); }); await p.waitForSelector('#wordSearch');
+  await fill('#wordSearch', 'take cash'); await p.waitForTimeout(400);
+  await fill('.word-row[data-k="reg.takeCash"] input', 'Pay in cash');
+  await fill('#wordSearch', 'clear'); await p.waitForTimeout(400);
+  await fill('.word-row[data-k="reg.clear"] input', '<img src=x onerror="window.__pwned=1">Clear it');
+  await shot('16-studio-words');
+  await click('#wordsSave'); await p.waitForTimeout(900);
+  await p.evaluate(() => Emporium.ui.go('register')); await p.waitForSelector('#takeCash');
+  ok((await text('#takeCash')).includes('Pay in cash'), 'a phrase rewritten in the Author Studio shows at the register');
+  ok(!(await p.$('#clearTicket img')) && await p.evaluate(() => !window.__pwned) && (await text('#clearTicket')).includes('<img'), 'markup typed in the Author Studio is shown as text and never run');
+  await p.evaluate(() => { Emporium.studio.room = 'look'; Emporium.ui.go('studio'); }); await p.waitForSelector('.palette-card');
+  await click('.palette-card[data-p="burgundy"]'); await p.waitForTimeout(900);
+  ok(await p.evaluate(() => document.documentElement.dataset.palette === 'burgundy' && getComputedStyle(document.documentElement).getPropertyValue('--pri').trim().toUpperCase() === '#7A2E3B'), 'the Look changes the colours as one matched set (burgundy)');
+  await shot('17-studio-look');
+  await p.evaluate(() => { Emporium.studio.room = 'receipt'; Emporium.ui.go('studio'); }); await p.waitForSelector('#stLines');
+  await fill('#stLines', 'Little Haiti, Miami\n(305) 555 0100'); await fill('#stThanks-en', 'Mesi anpil, come again!'); await click('#stReceiptSave'); await p.waitForTimeout(900);
+  await p.evaluate(() => { Emporium.studio.room = 'receipt'; Emporium.ui.go('studio'); }); await p.waitForSelector('#receiptPreview .receipt');
+  const rp = await text('#receiptPreview');
+  ok(rp.includes('Little Haiti, Miami') && rp.includes('come again') && rp.includes('Lakay Books · Emporium'), 'the receipt carries the new lines, the thank you, and the software\'s own build', rp.slice(0, 200));
+  await shot('18-studio-receipt');
+  const nAuthor = await p.evaluate(() => Emporium.books.lines(l => l.type === 'author.changed').then(x => x.length));
+  ok(nAuthor >= 4, 'every change made in the Author Studio is a line in the ledger', nAuthor);
+  const [ex] = await Promise.all([p.waitForEvent('download'), p.click('#studioExport')]);
+  const exPath = path.join(OUT, 'author.json'); await ex.saveAs(exPath);
+  ok(JSON.parse(fs.readFileSync(exPath, 'utf8')).custom.names.app === 'Lakay Books' && !/Kompa|Champagne/.test(fs.readFileSync(exPath, 'utf8')), 'Export all writes the choices, and none of the books');
+  await click('#studioReset'); await p.waitForSelector('.dialog-foot .key.danger'); await click('.dialog-foot .key.danger'); await p.waitForTimeout(900);
+  ok(await text('.rail .brand-name') === 'Emporium' && await p.evaluate(() => document.documentElement.dataset.palette) === 'indigo', 'Reset all puts back every original');
+  await p.evaluate(() => { Emporium.studio.room = 'safe'; Emporium.ui.go('studio'); }); await p.waitForSelector('#studioFile');
+  await p.setInputFiles('#studioFile', exPath); await p.waitForSelector('.dialog-foot .key.primary'); await click('.dialog-foot .key.primary'); await p.waitForTimeout(900);
+  ok(await text('.rail .brand-name') === 'Lakay Books' && await p.evaluate(() => document.documentElement.dataset.palette) === 'burgundy', 'Import all brings the choices back');
+  const hostile = path.join(OUT, 'hostile.json');
+  fs.writeFileSync(hostile, JSON.stringify({ format: 'emporium-author', v: 1, custom: { names: { app: 'X'.repeat(500), tagline: { en: 5 } }, look: { palette: '<script>' }, words: { en: { 'not.a.key': 'x', 'reg.total': 5 } }, extra: { a: 1 } } }));
+  await p.evaluate(() => { Emporium.studio.room = 'safe'; Emporium.ui.go('studio'); }); await p.waitForSelector('#studioFile');
+  await p.setInputFiles('#studioFile', hostile); await p.waitForSelector('.dialog-foot .key.primary'); await click('.dialog-foot .key.primary'); await p.waitForTimeout(900);
+  const hc = await p.evaluate(() => Emporium.custom);
+  ok(hc.names.app.length === 40 && hc.look.palette === 'indigo' && !Object.keys(hc.words.en).length && !hc.extra && hc.names.tagline.en === '', 'a hostile file is cut down to what the Studio knows, within its limits', hc.names.app.length);
+  await click('#studioReset'); await p.waitForSelector('.dialog-foot .key.danger'); await click('.dialog-foot .key.danger'); await p.waitForTimeout(700);
+
   /* ---------- layout: no sideways scroll at a counter, a laptop, a tablet and a phone ---------- */
   for (const [w, hgt] of [[1366, 768], [1920, 1080], [1180, 820], [820, 1180], [390, 844]]) {
     await p.setViewportSize({ width: w, height: hgt });
     const bad = [];
-    for (const r of ['home', 'register', 'inventory', 'reports', 'guide', 'settings']) {
+    for (const r of ['home', 'register', 'inventory', 'reports', 'guide', 'settings', 'studio']) {
       await p.evaluate(r => Emporium.ui.go(r), r); await p.waitForTimeout(120);
       const o = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (o > 1) bad.push(r + ':' + o);

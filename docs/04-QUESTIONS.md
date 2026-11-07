@@ -1,7 +1,14 @@
 # Emporium: open questions
 
 Answers already given (7 November 2026): the app is called **Emporium**; its repository is **public** under
-DevGroup2313; the counter runs on a **Windows computer**; payments are **cash only for now**.
+DevGroup2313; the counter runs on a **Windows computer**; payments are **cash only for now**; the store is in
+**Florida** (question 2); what employees may do is **not decided yet** (question 6: Stage 2 will propose defaults that
+you can change); the licence sentence will be read (question 19).
+
+**New:** which **county** is the store in? As far as I know, Florida's state sales tax is 6%, and most counties add a
+discretionary surtax (Miami-Dade, for example, 1%), so the total depends on the county. Groceries for home use are
+generally exempt, while prepared food (hot patties) and soft drinks are generally taxed. Please confirm the rates and
+which goods are taxed with your accountant or the Florida Department of Revenue before relying on them.
 
 The questions below can be answered at your own pace. Each says which stage needs the answer. Until then, Emporium uses
 the default given in brackets, which you can change later in Settings.
