@@ -75,11 +75,15 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   if (await field.count()) {
     await field.click(); await field.fill("Kremas");
     await field.click({ button: "right" }); await page.waitForTimeout(200);
-    ok(await page.locator(".ctx[role=menu]").count() === 1, "a right press on a field opens the panel");
-    const items = await page.locator(".ctx button").allTextContents();
+    ok(await page.locator("#cd-em-menu[role=menu]").count() === 1, "a right press on a field opens the family's edit menu");
+    await page.screenshot({ path: path.join(__dirname, "edit-menu.png") });
+    const items = await page.locator("#cd-em-menu .cd-em-row").allTextContents();
     ok(items.some(x => /Copy/.test(x)) && items.some(x => /Paste/.test(x)) && items.some(x => /Undo/.test(x)), "the panel has Undo, Copy and Paste");
     await page.keyboard.press("Escape"); await page.waitForTimeout(150);
-    ok(await page.locator(".ctx").count() === 0, "Escape closes the panel");
+    ok(await page.locator("#cd-em-menu").count() === 0, "Escape closes the menu");
+    await page.evaluate(() => { try { window.getSelection().removeAllRanges(); } catch (e) { } });
+    await page.mouse.click(700, 120, { button: "right" }); await page.waitForTimeout(200);
+    ok(await page.locator("#cd-em-menu").count() === 0, "a right press where there is nothing to edit opens nothing");
   } else ok(false, "a text field to right press in Inventory");
 
   console.log("The mark answers a press, and dresses for the night");

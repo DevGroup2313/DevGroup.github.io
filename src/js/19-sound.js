@@ -108,6 +108,6 @@
   document.addEventListener("pointerdown", function (e) {
     var k = e.target && e.target.closest && e.target.closest("button, [role=button], .sel-opt, a.key");
     if (!k || k.disabled || k.closest(".crest-key, #introEnter, #introSeal")) return;
-    S.play(k.matches(".cl-key, .pw-peek, .sel-opt, .ctx button") ? "soft" : "tap");
+    S.play(k.matches(".cl-key, .pw-peek, .sel-opt, .cd-em-row") ? "soft" : "tap");
   }, true);
 })();

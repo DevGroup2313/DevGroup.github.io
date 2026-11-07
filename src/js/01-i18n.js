@@ -599,6 +599,8 @@
     ["ctx.label", "Edit", "Édition", "Edisyon"], ["ctx.undo", "Undo", "Annuler", "Defèt"], ["ctx.redo", "Redo", "Rétablir", "Refè"],
     ["ctx.cut", "Cut", "Couper", "Koupe"], ["ctx.copy", "Copy", "Copier", "Kopye"], ["ctx.paste", "Paste", "Coller", "Kole"],
     ["ctx.pastePlain", "Paste as plain text", "Coller en texte simple", "Kole kòm tèks senp"], ["ctx.selectAll", "Select all", "Tout sélectionner", "Chwazi tout"],
+    ["ctx.copyField", "Copy the whole field", "Copier tout le champ", "Kopye tout jaden an"], ["ctx.clearField", "Clear the field", "Vider le champ", "Efase jaden an"],
+    ["ctx.empty", "The clipboard is empty.", "Le presse-papiers est vide.", "Pa gen anyen nan presse-papye a."],
     ["ctx.pasteKeys", "This device keeps its clipboard private here. Press {k} to paste.", "Cet appareil garde son presse-papiers privé ici. Appuyez sur {k} pour coller.", "Aparèy sa a kenbe klipbòd li prive isit la. Peze {k} pou kole."],
     ["foot.made", "Designed and built by Yannie D. Forest", "Conçu et réalisé par Yannie D. Forest", "Konsepsyon ak fabrikasyon: Yannie D. Forest"],
     ["foot.rights", "All rights reserved.", "Tous droits réservés.", "Tout dwa rezève."],
