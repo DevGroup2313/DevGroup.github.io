@@ -1,250 +1,323 @@
 /* EMPORIUM | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
-   The door: signing in, setting up a store (one question per page), the Master Key, recovery, restoring a backup. */
+   The door and the sign-in, after Ingenium 6.50's own: the introduction card (Enter opens the practice store at once,
+   with no set-up), the sign-in of the store's own books (user name and password), "Can't sign in?" (the Master Key,
+   or a backup), and the three dialogs that protect the real store with a sign-in (the details, the Master Key in a
+   numbered grid, two of its groups to be sure). Nothing here changes how the books are sealed: that is 04-books.js. */
 "use strict";
 (function () {
   var U = E.util, h = U.h, t = E.t, B = E.books, C = E.crypto, ui = E.ui;
   var door = E.door = {};
-  var info = null;
+  var info = null, draft = {};
 
-  function langRow() {
-    return ui.seg([["en", "English"], ["fr", "Français"], ["ht", "Kreyòl"]], E.lang, function (l) { E.setLang(l); (door.view || door.show)(); }, t("language"));
+  /* ---------- pieces ---------- */
+  function clearApp() { var app = document.getElementById("app"); U.clear(app); return app; }
+  /* Each screen is remembered, so that a change of language draws the same screen again. */
+  function screen(fn) { return function () { var a = arguments; door.view = function () { fn.apply(null, a); }; return fn.apply(null, a); }; }
+  function segOf(items, current, onPick, label, cls) {
+    var g = h("div.i-seg", { role: "group", "aria-label": label });
+    items.forEach(function (o) {
+      var b = h("button.seg-btn" + (cls ? "." + cls : "") + (o[0] === current ? ".active" : ""), { type: "button", title: o[2] || o[1], "aria-label": o[2] || o[1], "aria-pressed": String(o[0] === current) }, o[1]);
+      b.addEventListener("click", function () {
+        Array.prototype.forEach.call(g.children, function (x) { x.classList.toggle("active", x === b); x.setAttribute("aria-pressed", String(x === b)); });
+        onPick(o[0]);
+      });
+      g.appendChild(b);
+    });
+    return g;
   }
-  function themeRow() {
-    return ui.seg([["day", t("theme.day"), "sun"], ["night", t("theme.night"), "moon"], ["auto", t("theme.auto"), "auto"]], U.prefGet("theme", "auto"),
-      function (v) { U.prefSet("theme", v); ui.applyLook(); }, t("theme"));
+  function themeSeg() {
+    return segOf([["day", "☀", t("intro.light")], ["auto", "◐", t("intro.system")], ["night", "☾", t("intro.dark")]], U.prefGet("theme", "auto"),
+      function (m) { U.prefSet("theme", m); ui.applyLook(); }, t("intro.themeGroup"));
   }
-  function frame(children, wide) {
-    var app = document.getElementById("app"); U.clear(app);
-    var card = h("div.door-card" + (wide ? ".wide" : ""), null, children);
-    app.appendChild(h("div.door", null, [h("main.door-main", { "aria-label": E.appName() }, card),
-      h("footer.door-foot", null, [h("div.door-choices", null, [langRow(), themeRow()]),
-        h("p", null, t("build") + " " + E.BUILD.number + " · © 2026 Yannie D. Forest · " + t("door.offline"))])]));
-    var f = card.querySelector("input,button.primary"); if (f) setTimeout(function () { f.focus(); }, 40);
+  function langSeg() {
+    return segOf([["en", "EN", "English"], ["fr", "FR", "Français"], ["ht", "KR", "Kreyòl"]], E.lang,
+      function (l) { E.setLang(l); if (door.view) door.view(); }, t("language"), "lang");
+  }
+  function label(text, input) { return h("label", null, [h("span", null, text), input]); }
+  function field(id, type, auto, value) {
+    return h("input#" + id, { type: type || "text", autocomplete: auto || "off", autocapitalize: "off", spellcheck: "false", value: value || "" });
+  }
+
+  /* The sign-in card, over everything (or, for the set-up, over the introduction card, in its place). */
+  function lockDoor(mode) {
+    var app = document.getElementById("app");
+    var d = document.getElementById("lockDoor");
+    if (!d) { d = h("div#lockDoor", { role: "dialog", "aria-modal": "true", "aria-label": t("ld.aria", { app: E.appName() }) }, h("div.ild-card")); app.appendChild(d); }
+    d.hidden = false;
+    d.classList.toggle("ild-over", mode === "intro" || mode === "app");
+    d.classList.toggle("ild-indoor", mode === "intro");
+    var intro = document.getElementById("introDoor");
+    if (intro) intro.classList.toggle("ild-card-away", mode === "intro");
+    var card = d.firstChild; U.clear(card); card.scrollTop = 0;
     return card;
   }
-  function crest(sub) {
-    return h("div.crest", null, [h("span.seal-ring", null, ui.sealWrap(108, E.appName())), h("h1.brand", null, E.appName()),
-      h("div.door-rule", null, [h("span"), h("em", null, sub || E.tagline()), h("span")])]);
+  function hideLock() {
+    var d = document.getElementById("lockDoor"); if (d) d.remove();
+    var intro = document.getElementById("introDoor"); if (intro) intro.classList.remove("ild-card-away");
   }
+  door.hideLock = hideLock;
+  function fill(card, kids) {
+    kids.forEach(function (k) { if (k) card.appendChild(k); });
+    setTimeout(function () {
+      var ins = card.querySelectorAll("input:not([type=hidden]):not([type=file]),textarea"), f = null;
+      for (var i = 0; i < ins.length; i++) if (!ins[i].value) { f = ins[i]; break; }
+      f = f || ins[0] || card.querySelector("button.ild-key:not(.ild-ghost)");
+      if (f) try { f.focus(); } catch (e) { }
+    }, 40);
+    return card;
+  }
+  function err(card, msg) {
+    var e = card.querySelector(".ild-err");
+    if (!e) {
+      e = h("p.ild-err", { role: "alert" });
+      var f = card.querySelector("form") || card, at = null;
+      for (var i = 0; i < f.children.length; i++) { var ch = f.children[i]; if (ch.tagName === "LABEL" || /ild-(words|keys|pair)/.test(ch.className || "") || ch.querySelector("label")) { at = ch; break; } }
+      f.insertBefore(e, at);
+    }
+    e.textContent = msg || ""; e.hidden = !msg;
+    return false;
+  }
+  function busy(card, on) { Array.prototype.forEach.call(card.querySelectorAll(".ild-key"), function (b) { b.disabled = !!on; }); }
+  function corner() { return h("div.ild-corner", null, langSeg()); }
 
-  /* each screen is remembered, so that changing the language draws the same screen again */
-  function screen(fn) { return function () { var a = arguments; door.view = function () { fn.apply(null, a); }; return fn.apply(null, a); }; }
+  /* ---------- where the door starts ---------- */
   door.show = function (why) {
+    if (B.mode === "practice") B.useBooks(false);
     return B.boot().then(function (r) {
       info = r;
-      if (!r.hasStore) return welcome();
+      if (!r.hasStore) return intro();
       return signIn(why);
     });
   };
 
-  /* ---------- signing in ---------- */
-  function waitLeft() {
-    var until = +U.prefGet("waitUntil", "0"); return Math.max(0, until - Date.now());
-  }
-  var signIn = screen(function (why) {
-    var pw = ui.input({ type: "password", autocomplete: "current-password", id: "doorPassword" });
-    var msg = h("p.door-msg", { role: "status" }, why === "idle" ? t("door.lockedIdle") : why === "hand" ? t("door.lockedHand") : "");
-    var go = h("button.key.primary.lg", { type: "submit", id: "doorOpen" }, [ui.emo("🔓"), t("door.open")]);
-    var form = h("form.door-form", { onsubmit: function (e) {
-      e.preventDefault();
-      var left = waitLeft();
-      if (left > 0) { msg.textContent = t("door.wait", { s: Math.ceil(left / 1000) }); return; }
-      if (!pw.value) { ui.fieldError(pw, t("door.needPassword")); return; }
-      go.disabled = true; msg.textContent = t("door.opening");
-      B.openWithPassword(pw.value).then(function () {
-        pw.value = ""; U.prefSet("fails", "0"); U.prefSet("waitUntil", "0"); E.app.opened();
-      }, function (e) {
-        go.disabled = false; pw.select();
-        if (e && e.code === "wrong") {
-          var n = (+U.prefGet("fails", "0")) + 1; U.prefSet("fails", n);
-          if (n >= 5) { var s = Math.min(900, 30 * Math.pow(2, n - 5)); U.prefSet("waitUntil", Date.now() + s * 1000); msg.textContent = t("door.tooMany", { s: s }); }
-          else msg.textContent = "";
-          ui.fieldError(pw, t("door.wrong"));
-        } else { msg.textContent = t("door.problem"); console.error(e); }
-      });
-    } }, [ui.field("door.password", pw), go, msg]);
-    frame([crest(), h("p.door-store", null, (info.door && info.door.storeName) || ""), h("p.door-date", null, ui.dateLong(new Date())), form,
-      h("div.door-links", null, [
-        h("button.link", { type: "button", onclick: masterRecovery }, [ui.emo("🗝️"), t("door.useMaster")]),
-        h("button.link", { type: "button", onclick: function () { restore(true); } }, [ui.emo("💾"), t("door.restore")])])]);
+  /* ---------- the introduction (no store of its own yet) ---------- */
+  var intro = screen(function () {
+    var app = clearApp();
+    var ghost = h("div.intro-ghost", { "aria-hidden": "true" }, [
+      h("div.g-rail", null, [h("i"), h("i"), h("i"), h("i"), h("i"), h("i"), h("i")]),
+      h("div.g-main", null, [h("i"), h("i"), h("div.g-row", null, [h("i"), h("i"), h("i")])])]);
+    var enter = h("button.i-primary#introEnter", { type: "button" }, t("intro.enter"));
+    var msg = h("p.intro-tourline.intro-msg", { role: "status" });
+    function go() {
+      enter.disabled = true; enter.textContent = t("intro.opening");
+      B.openPractice(function (f) { msg.textContent = t("intro.preparing", { n: Math.round(f * 100) }); }).then(function () {
+        E.app.opened(true);
+      }, function (e) { enter.disabled = false; enter.textContent = t("intro.enter"); msg.textContent = t("door.problem"); console.error(e); });
+    }
+    enter.addEventListener("click", go);
+    var seal = ui.crestKey(112, { cls: "intro-seal", id: "introSeal", rise: true, flourish: "burst", title: t("intro.knock"), onPress: function () { setTimeout(go, E.crest.still() ? 60 : 520); } });
+    var card = h("div.intro-card", { role: "dialog", "aria-label": t("intro.aria", { app: E.appName() }) }, [
+      h("div.intro-corner.intro-corner-l", null, langSeg()),
+      h("div.intro-corner", null, themeSeg()),
+      seal,
+      h("div.intro-word", null, E.appName()),
+      h("div.intro-subword", null, E.tagline()),
+      h("p.intro-lede", null, t("intro.lede")),
+      h("p.intro-tourline", null, [h("span", null, t("intro.moving") + " "), h("button.intro-tour#introRestore", { type: "button", onclick: function () { restore("intro"); } }, t("intro.restore"))]),
+      enter, msg,
+      h("p.intro-tourline.intro-protect", null, [h("button.intro-tour#introProtect", { type: "button", onclick: function () { door.startReal("intro"); } }, t("intro.protect")),
+        h("br"), h("span", null, t("intro.protectP"))]),
+      h("p.intro-credit", null, t("intro.credit"))]);
+    app.appendChild(h("div#introDoor.intro-door", null, [ghost, h("div.intro-frost"), card]));
+    setTimeout(function () { try { enter.focus(); } catch (e) { } }, 60);
   });
 
-  /* ---------- a new store ---------- */
-  var welcome = screen(function () {
-    frame([crest(), h("p.door-lead", null, t("setup.lead")),
-      h("button.key.primary.lg", { type: "button", id: "setupBegin", onclick: function () { setup.step1(); } }, [ui.emo("✨"), t("setup.begin")]),
-      h("div.door-links", null, [h("button.link", { type: "button", onclick: function () { restore(false); } }, [ui.emo("💾"), t("door.restoreHere")])])]);
-  });
-  var draft = {};
-  function steps(n) {
-    return h("div.steps", { "aria-label": t("setup.stepOf", { n: n, of: 5 }) }, [1, 2, 3, 4, 5].map(function (i) {
-      return h("span.dot" + (i < n ? ".done" : i === n ? ".now" : ""), { "aria-hidden": "true" });
-    }).concat([h("span.steps-text", null, t("setup.stepOf", { n: n, of: 5 }))]));
-  }
-  var setup = {
-    step1: function () {
-      door.view = setup.step1;
-      frame([steps(1), h("h2.door-h", null, [ui.emo("👋"), t("setup.s1.h")]), h("p", null, t("setup.s1.p1")),
-        h("ul.plain-list", null, [h("li", null, [ui.emo("🏪"), t("setup.s1.need1")]), h("li", null, [ui.emo("🔐"), t("setup.s1.need2")]), h("li", null, [ui.emo("✍️"), t("setup.s1.need3")])]),
-        h("p.hint", null, t("setup.s1.p2")),
-        h("div.door-actions", null, [h("button.key", { type: "button", onclick: welcome }, [U.icon("back"), t("back")]),
-          h("button.key.primary", { type: "button", id: "s1Next", onclick: setup.step2 }, [t("next"), U.icon("next")])])], true);
-    },
-    step2: function () {
-      door.view = setup.step2;
-      var name = ui.input({ id: "setupStore", value: draft.storeName || "", maxlength: "80", autocomplete: "organization" });
-      var owner = ui.input({ id: "setupOwner", value: draft.ownerName || "", maxlength: "80", autocomplete: "name" });
-      var cur = ui.select([["USD", t("cur.USD")], ["CAD", t("cur.CAD")], ["EUR", t("cur.EUR")], ["HTG", t("cur.HTG")]], draft.currency || "USD", { id: "setupCurrency" });
-      function next() {
-        if (!name.value.trim()) return ui.fieldError(name, t("setup.needStore"));
-        ui.fieldError(name, "");
-        if (!owner.value.trim()) return ui.fieldError(owner, t("setup.needOwner"));
-        draft.storeName = name.value.trim(); draft.ownerName = owner.value.trim(); draft.currency = cur.value;
-        setup.step3();
-      }
-      frame([steps(2), h("h2.door-h", null, [ui.emo("🏪"), t("setup.s2.h")]),
-        h("form", { onsubmit: function (e) { e.preventDefault(); next(); } }, [
-          ui.field("setup.storeName", name, { required: true, hint: t("setup.storeHint") }),
-          ui.field("setup.ownerName", owner, { required: true }),
-          ui.field("setup.currency", cur, { tip: "tip.currency" }),
-          h("div.door-actions", null, [h("button.key", { type: "button", onclick: setup.step1 }, [U.icon("back"), t("back")]),
-            h("button.key.primary", { type: "submit", id: "s2Next" }, [t("next"), U.icon("next")])])])], true);
-    },
-    step3: function () {
-      door.view = setup.step3;
-      var p1 = ui.input({ type: "password", id: "setupPw1", autocomplete: "new-password" }), p2 = ui.input({ type: "password", id: "setupPw2", autocomplete: "new-password" });
-      var advice = h("p.advice", { "aria-live": "polite" });
-      var show = h("input", { type: "checkbox", id: "setupShow" });
-      show.addEventListener("change", function () { p1.type = p2.type = show.checked ? "text" : "password"; });
-      p1.addEventListener("input", function () { var a = C.passwordAdvice(p1.value); advice.textContent = p1.value ? t(a.key) : ""; advice.className = "advice " + (a.ok ? "ok" : "bad"); });
-      var go = h("button.key.primary", { type: "submit", id: "s3Next" }, [t("next"), U.icon("next")]);
-      var wait = h("p.door-msg", { role: "status" });
-      frame([steps(3), h("h2.door-h", null, [ui.emo("🔐"), t("setup.s3.h")]), h("p", null, t("setup.s3.p1")),
-        h("form", { onsubmit: function (e) {
-          e.preventDefault();
-          var a = C.passwordAdvice(p1.value);
-          if (!a.ok) return ui.fieldError(p1, t(a.key));
-          ui.fieldError(p1, "");
-          if (p1.value !== p2.value) return ui.fieldError(p2, t("setup.noMatch"));
-          go.disabled = true; wait.textContent = t("setup.preparing");
-          B.prepareSetup({ storeName: draft.storeName, ownerName: draft.ownerName, currency: draft.currency, password: p1.value }).then(function (prep) {
-            p1.value = p2.value = ""; setup.step4(prep);
-          }, function (e) { go.disabled = false; wait.textContent = t("door.problem"); console.error(e); });
-        } }, [ui.field("setup.password", p1, { required: true, tip: "tip.password" }), advice, ui.field("setup.password2", p2, { required: true }),
-          h("label.check", { for: "setupShow" }, [show, t("setup.show")]), wait,
-          h("div.door-actions", null, [h("button.key", { type: "button", onclick: setup.step2 }, [U.icon("back"), t("back")]), go])])], true);
-    },
-    step4: function (prep) {
-      door.view = function () { setup.step4(prep); };
-      frame([steps(4), h("h2.door-h", null, [ui.emo("🗝️"), t("setup.s4.h")]), h("p", null, t("setup.s4.p1")),
-        masterGrid(prep.code), h("p.hint", null, t("setup.s4.p2")),
-        h("div.door-actions", null, [
-          h("button.key", { type: "button", onclick: function () { printMaster(prep.code, draft.storeName); } }, [ui.emo("🖨️"), t("setup.print")]),
-          h("button.key.primary", { type: "button", id: "s4Next", onclick: function () { setup.step5(prep); } }, [t("setup.written"), U.icon("next")])])], true);
-    },
-    step5: function (prep) {
-      door.view = function () { setup.step5(prep); };
-      var groups = C.groups(prep.code), a = 1 + Math.floor(Math.random() * 6), b = 7 + Math.floor(Math.random() * 6);
-      var ga = ui.input({ id: "confirmA", maxlength: "4", autocapitalize: "characters", class: "mono" }), gb = ui.input({ id: "confirmB", maxlength: "4", autocapitalize: "characters", class: "mono" });
-      var go = h("button.key.primary", { type: "submit", id: "s5Finish" }, [ui.emo("🎉"), t("setup.finish")]);
-      var wait = h("p.door-msg", { role: "status" });
-      frame([steps(5), h("h2.door-h", null, [ui.emo("✅"), t("setup.s5.h")]), h("p", null, t("setup.s5.p1")),
-        h("form", { onsubmit: function (e) {
-          e.preventDefault();
-          if (C.cleanMasterText(ga.value) !== groups[a - 1]) return ui.fieldError(ga, t("setup.groupWrong"));
-          ui.fieldError(ga, "");
-          if (C.cleanMasterText(gb.value) !== groups[b - 1]) return ui.fieldError(gb, t("setup.groupWrong"));
-          go.disabled = true; wait.textContent = t("setup.writing");
-          prep.finish().then(function () { draft = {}; E.app.opened(true); }, function (e) { go.disabled = false; wait.textContent = t("door.problem"); console.error(e); });
-        } }, [h("div.pair", null, [ui.field(t("setup.group", { n: a }), ga, { required: true }), ui.field(t("setup.group", { n: b }), gb, { required: true })]), wait,
-          h("div.door-actions", null, [h("button.key", { type: "button", onclick: function () { setup.step4(prep); } }, [U.icon("back"), t("setup.seeAgain")]), go])])], true);
+  /* ---------- the sign-in of the store's own books ---------- */
+  function waitLeft() { var until = +U.prefGet("waitUntil", "0"); return Math.max(0, until - Date.now()); }
+  var signIn = screen(function (why) {
+    clearApp();
+    var card = lockDoor("door");
+    var known = (info && info.door && info.door.user) || "";
+    var nm = field("ldName", "text", "username", known), pw = field("ldPw", "password", "current-password");
+    var go = h("button.ild-key#ldGo", { type: "submit" }, t("ld.signIn"));
+    function wrong() {
+      var n = (+U.prefGet("fails", "0")) + 1; U.prefSet("fails", n);
+      if (n >= 5) { var s = Math.min(900, 30 * Math.pow(2, n - 5)); U.prefSet("waitUntil", Date.now() + s * 1000); err(card, t("door.tooMany", { s: s })); }
+      else err(card, t("ld.wrongPair"));
+      busy(card, false); try { pw.select(); } catch (e) { }
     }
-  };
-  door.masterGrid = masterGrid;
-  function masterGrid(code) {
+    var form = h("form#ldSign", { autocomplete: "on", onsubmit: function (e) {
+      e.preventDefault();
+      var left = waitLeft();
+      if (left > 0) return err(card, t("door.wait", { s: Math.ceil(left / 1000) }));
+      if (!pw.value) return err(card, t("door.needPassword"));
+      busy(card, true); err(card, "");
+      B.openWithPassword(pw.value).then(function () {
+        if (known && !B.sameName(nm.value, known)) { B.lock("quiet"); return wrong(); }
+        pw.value = ""; U.prefSet("fails", "0"); U.prefSet("waitUntil", "0");
+        var p = known ? Promise.resolve() : B.setDoorUser(nm.value).catch(function () { });
+        return p.then(function () { E.app.opened(); });
+      }, function (x) {
+        if (x && x.code === "wrong") return wrong();
+        busy(card, false); err(card, t("door.problem")); console.error(x);
+      });
+    } }, [label(t("ld.yourName"), nm), label(t("ld.yourPw"), pw),
+      h("div.ild-keys", null, [h("button.ild-link#ldForgot", { type: "button", onclick: ways }, t("ld.cant")), go])]);
+    fill(card, [corner(), h("h1", null, E.appName()),
+      (info && info.door && info.door.storeName) ? h("p.ild-store", null, info.door.storeName) : null,
+      h("p.ild-sub", null, known ? t("ld.welcomeName", { name: known }) : t("ld.welcome")),
+      why === "idle" ? h("p.ild-hint", null, t("door.lockedIdle")) : null,
+      form,
+      h("p.ild-note", null, [t("ld.note") + " ", h("button.ild-link#ldPractice", { type: "button", onclick: openPracticeFromDoor }, t("ld.practice"))])]);
+  });
+  function openPracticeFromDoor() {
+    var d = document.getElementById("lockDoor"), card = d && d.firstChild;
+    if (card) busy(card, true);
+    B.openPractice().then(function () { E.app.opened(); }, function (e) { if (card) { busy(card, false); err(card, t("door.problem")); } console.error(e); });
+  }
+
+  /* ---------- can't sign in ---------- */
+  function way(n, key, id, fn) {
+    return h("button.ild-way#" + id, { type: "button", onclick: fn }, [h("i", null, n), h("div", null, [h("b", null, t(key + ".b")), h("small", null, t(key + ".s"))])]);
+  }
+  var ways = screen(function () {
+    var card = lockDoor("door");
+    fill(card, [h("h2", null, t("ld.ways.h")), h("p", null, t("ld.ways.p")),
+      h("div.ild-ways", null, [way("1", "ld.way1", "ldWayMaster", masterOpen), way("2", "ld.way2", "ldWayBackup", function () { restore("door"); })]),
+      h("div.ild-keys", null, [h("button.ild-link#ldBackSign", { type: "button", onclick: function () { door.show(); } }, t("ld.toSignIn"))])]);
+  });
+  var masterOpen = screen(function () {
+    var card = lockDoor("door");
+    var code = h("textarea#ldMaster", { rows: "3", spellcheck: "false", autocapitalize: "characters", autocomplete: "off" });
+    var form = h("form#ldMk", { autocomplete: "off", onsubmit: function (e) {
+      e.preventDefault(); busy(card, true); err(card, "");
+      B.checkMaster(code.value).then(function (handle) { code.value = ""; newPassword(handle); }, function (x) {
+        busy(card, false); err(card, t(x && x.code === "badcode" ? "master.badcode" : "master.wrong"));
+      });
+    } }, [label(t("ld.mk.label"), code),
+      h("div.ild-keys", null, [h("button.ild-link#ldWays", { type: "button", onclick: ways }, t("ld.otherWays")), h("button.ild-key#ldMasterGo", { type: "submit" }, t("ld.mk.go"))])]);
+    fill(card, [h("h2", null, t("ld.mk.h")), h("p", null, t("ld.mk.p")), form]);
+  });
+  var newPassword = screen(function (handle) {
+    var card = lockDoor("door");
+    var p1 = field("ldP1", "password", "new-password"), p2 = field("ldP2", "password", "new-password");
+    var form = h("form#ldNp", { autocomplete: "off", onsubmit: function (e) {
+      e.preventDefault();
+      var a = C.passwordAdvice(p1.value); if (!a.ok) return err(card, t(a.key));
+      if (p1.value !== p2.value) return err(card, t("setup.noMatch"));
+      busy(card, true); err(card, "");
+      B.resetPasswordWithMaster(handle, p1.value).then(function () {
+        p1.value = p2.value = ""; U.prefSet("fails", "0"); U.prefSet("waitUntil", "0"); E.app.opened(); ui.toast(t("master.done"), "good");
+      }, function (x) { busy(card, false); err(card, t("door.problem")); console.error(x); });
+    } }, [label(t("ld.pw1"), p1), label(t("ld.pw2"), p2), h("div.ild-keys", null, [h("button.ild-key#ldSave", { type: "submit" }, t("ld.np.go"))])]);
+    fill(card, [h("h2", null, t("ld.np.h")), h("p", null, t("ld.np.p")), form]);
+  });
+
+  /* ---------- protecting the real store with a sign-in (from the introduction, or from inside the practice store) ---------- */
+  door.startReal = function (from) { draft = { from: from || "intro" }; setup1(); };
+  function setupMode() { return draft.from === "app" && B.isOpen ? "app" : draft.from === "intro" ? "intro" : "door"; }
+  function cancelSetup() {
+    var from = draft.from; draft = {};
+    if (from === "app" && B.isOpen) { hideLock(); return; }
+    if (from === "intro" && document.getElementById("introDoor")) { hideLock(); door.view = intro; return; }
+    door.show();
+  }
+  var setup1 = screen(function () {
+    var card = lockDoor(setupMode());
+    var store = field("ldStore", "text", "organization", draft.storeName), user = field("ldUser", "text", "username", draft.user);
+    var p1 = field("ldP1", "password", "new-password"), p2 = field("ldP2", "password", "new-password");
+    var form = h("form#ldSet", { autocomplete: "off", onsubmit: function (e) {
+      e.preventDefault();
+      var sn = store.value.trim(), un = user.value.trim();
+      if (!sn) return err(card, t("setup.needStore"));
+      if (!un) return err(card, t("ld.needUser"));
+      var a = C.passwordAdvice(p1.value); if (!a.ok) return err(card, t(a.key));
+      if (p1.value !== p2.value) return err(card, t("setup.noMatch"));
+      draft.storeName = sn; draft.user = un; busy(card, true); err(card, "");
+      var pwd = p1.value; p1.value = p2.value = "";
+      B.boot().then(function (r) {
+        /* the real store is made in its own database, never in the practice one */
+        var reopen = B.mode === "practice";
+        if (reopen) return B.useBooks(false), B.boot().then(function (r2) { return r2; });
+        return r;
+      }).then(function (r) {
+        if (r.hasStore) throw Object.assign(new Error("exists"), { code: "exists" });
+        return B.prepareSetup({ storeName: sn, ownerName: un, currency: "USD", password: pwd });
+      }).then(function (prep) { draft.prep = prep; draft.ab = null; setup2(); }, function (x) {
+        busy(card, false); err(card, t(x && x.code === "exists" ? "ld.exists" : "door.problem")); if (!x || x.code !== "exists") console.error(x);
+      });
+    } }, [label(t("ld.storeName"), store), label(t("ld.user"), user), label(t("ld.pw1"), p1), label(t("ld.pw2"), p2),
+      h("div.ild-keys", null, [h("button.ild-key.ild-ghost#ldCancel", { type: "button", onclick: cancelSetup }, t("ld.notNow")), h("button.ild-key#ldNext", { type: "submit" }, t("ld.next"))])]);
+    fill(card, [h("h2", null, t("ld.setup.h")), h("p", null, t("ld.setup.p")), form]);
+  });
+  function keyGrid(code) {
+    return h("ol.ild-words", { "aria-label": t("master.title") }, C.groups(code).map(function (g, i) { return h("li", null, [h("b", null, String(i + 1)), g]); }));
+  }
+  var setup2 = screen(function () {
+    var prep = draft.prep, card = lockDoor(setupMode());
+    fill(card, [h("h2", null, t("ld.key.h")), h("p", null, t("ld.key.p")), keyGrid(prep.code),
+      h("div.ild-keys", null, [
+        h("button.ild-key.ild-ghost#ldPrint", { type: "button", onclick: function () { printMaster(prep.code, draft.storeName); } }, t("setup.print")),
+        h("button.ild-key#ldWrote", { type: "button", onclick: setup3 }, t("ld.wrote"))])]);
+  });
+  var setup3 = screen(function () {
+    var prep = draft.prep, groups = C.groups(prep.code);
+    if (!draft.ab) draft.ab = [1 + Math.floor(Math.random() * 6), 7 + Math.floor(Math.random() * 7)];
+    var a = draft.ab[0], b = draft.ab[1], card = lockDoor(setupMode());
+    var g1 = h("input#ldG1.mono", { type: "text", maxlength: "4", autocapitalize: "characters", autocomplete: "off", spellcheck: "false" });
+    var g2 = h("input#ldG2.mono", { type: "text", maxlength: "4", autocapitalize: "characters", autocomplete: "off", spellcheck: "false" });
+    var form = h("form#ldCf", { autocomplete: "off", onsubmit: function (e) {
+      e.preventDefault();
+      if (C.cleanMasterText(g1.value) !== groups[a - 1] || C.cleanMasterText(g2.value) !== groups[b - 1]) return err(card, t("ld.groupsWrong"));
+      busy(card, true); err(card, "");
+      prep.finish().then(function () { draft = {}; hideLock(); E.app.opened(true); }, function (x) { busy(card, false); err(card, t("door.problem")); console.error(x); });
+    } }, [h("div.ild-pair", null, [label(t("ld.group", { n: a }), g1), label(t("ld.group", { n: b }), g2)]),
+      h("div.ild-keys", null, [h("button.ild-key.ild-ghost#ldAgain", { type: "button", onclick: setup2 }, t("ld.showAgain")), h("button.ild-key#ldSeal", { type: "submit" }, t("ld.seal"))])]);
+    fill(card, [h("h2", null, t("ld.two.h")), h("p", null, t("ld.two.p", { a: a, b: b })), form]);
+  });
+
+  /* ---------- the Master Key card, and its grid (also used by Settings) ---------- */
+  door.masterGrid = function (code) {
     return h("ol.master-grid", { "aria-label": t("master.title") }, C.groups(code).map(function (g, i) {
       return h("li", null, [h("span.mg-n", null, String(i + 1)), h("span.mg-g.mono", null, g)]);
     }));
-  }
+  };
   door.printMaster = printMaster;
   function printMaster(code, storeName) {
-    ui.print(h("div.print-card", null, [ui.seal(90), h("h1", null, "🗝️ " + t("master.card.h")), h("p", null, storeName),
-      masterGrid(code), h("p", null, t("master.card.p1")), h("p", null, t("master.card.p2")),
-      h("p.small", null, t("master.card.made", { d: ui.dateLong(new Date()) }) + " · Emporium " + t("build") + " " + E.BUILD.number)]));
+    ui.print(h("div.print-card", null, [ui.seal(90), h("h1", null, t("master.card.h")), h("p", null, storeName),
+      door.masterGrid(code), h("p", null, t("master.card.p1")), h("p", null, t("master.card.p2")),
+      h("p.small", null, t("master.card.made", { d: ui.dateLong(new Date()) }) + " · Lakay " + t("build") + " " + E.BUILD.number)]));
   }
 
-  /* ---------- the Master Key opens the store and sets a new password ---------- */
-  var masterRecovery = screen(function () {
-    var code = h("textarea.mono", { id: "masterIn", rows: "3", spellcheck: "false", autocapitalize: "characters", autocomplete: "off" });
-    var msg = h("p.door-msg", { role: "status" });
-    var go = h("button.key.primary", { type: "submit", id: "masterCheck" }, [ui.emo("🗝️"), t("master.check")]);
-    frame([crest(t("master.title")), h("p", null, t("master.p1")),
-      h("form", { onsubmit: function (e) {
-        e.preventDefault(); go.disabled = true; msg.textContent = t("master.checking");
-        B.checkMaster(code.value).then(function (handle) { code.value = ""; newPassword(handle); }, function (e) {
-          go.disabled = false; msg.textContent = "";
-          ui.fieldError(code, t(e && e.code === "badcode" ? "master.badcode" : "master.wrong"));
-        });
-      } }, [ui.field("master.label", code, { hint: t("master.hint") }), msg,
-        h("div.door-actions", null, [h("button.key", { type: "button", onclick: function () { door.show(); } }, [U.icon("back"), t("back")]), go])])], true);
-  });
-  var newPassword = screen(function (handle) {
-    var p1 = ui.input({ type: "password", id: "newPw1", autocomplete: "new-password" }), p2 = ui.input({ type: "password", id: "newPw2", autocomplete: "new-password" });
-    var go = h("button.key.primary", { type: "submit", id: "newPwSave" }, [U.icon("check"), t("master.save")]);
-    var msg = h("p.door-msg", { role: "status" });
-    frame([crest(t("master.newPw")), h("p", null, t("master.newPwP")),
-      h("form", { onsubmit: function (e) {
-        e.preventDefault();
-        var a = C.passwordAdvice(p1.value);
-        if (!a.ok) return ui.fieldError(p1, t(a.key));
-        ui.fieldError(p1, "");
-        if (p1.value !== p2.value) return ui.fieldError(p2, t("setup.noMatch"));
-        go.disabled = true; msg.textContent = t("setup.writing");
-        B.resetPasswordWithMaster(handle, p1.value).then(function () { p1.value = p2.value = ""; U.prefSet("fails", "0"); U.prefSet("waitUntil", "0"); E.app.opened(); ui.toast(t("master.done"), "good"); },
-          function (e) { go.disabled = false; msg.textContent = t("door.problem"); console.error(e); });
-      } }, [ui.field("setup.password", p1, { required: true, tip: "tip.password" }), ui.field("setup.password2", p2, { required: true }), msg, h("div.door-actions", null, [go])])], true);
-  });
-
-  /* ---------- restoring a backup (at the door, or from Settings) ---------- */
-  var restore = screen(function (fromDoor) {
-    var file = h("input", { type: "file", id: "restoreFile", accept: ".emporium,.json,application/json" });
-    var msg = h("p.door-msg", { role: "status" });
+  /* ---------- bringing a store from a backup (at the door, or from Settings while open) ---------- */
+  var restore = door.restore = screen(function (from) {
+    var mode = from === "intro" ? "intro" : B.isOpen ? "app" : "door";
+    var card = lockDoor(mode);
+    var file = h("input#restoreFile", { type: "file", accept: ".lakay,.emporium,.json,application/json", hidden: true });
+    var picked = h("span.ild-file", null, t("ld.rs.none"));
+    var pick = h("button.ild-key.ild-ghost#restorePick", { type: "button", onclick: function () { file.click(); } }, t("ld.rs.choose"));
     var body = h("div");
-    function back() { if (B.isOpen) ui.shell(); else door.show(); }
+    function back() { if (mode === "app") hideLock(); else if (mode === "intro") { hideLock(); door.view = intro; } else ways(); }
     file.addEventListener("change", function () {
       var f = file.files && file.files[0]; if (!f) return;
-      msg.textContent = t("restore.reading");
-      f.text().then(B.readBackup).then(function (bk) { msg.textContent = ""; chosen(bk); }, function (e) {
-        msg.textContent = t(e && e.code === "corrupt" ? "restore.corrupt" : "restore.notBackup");
-      });
+      picked.textContent = f.name; err(card, "");
+      f.text().then(B.readBackup).then(chosen, function (x) { err(card, t(x && x.code === "corrupt" ? "restore.corrupt" : "restore.notBackup")); });
     });
     function chosen(bk) {
       U.clear(body);
-      var secret = ui.input({ type: "password", id: "restoreSecret", autocomplete: "off" }), useMaster = h("input", { type: "checkbox", id: "restoreMaster" });
+      var secret = field("restoreSecret", "password", "off"), useMaster = h("input#restoreMaster", { type: "checkbox" });
       useMaster.addEventListener("change", function () { secret.type = useMaster.checked ? "text" : "password"; });
-      var go = h("button.key.primary", { type: "submit", id: "restoreGo" }, [ui.emo("💾"), t("restore.go")]);
-      body.appendChild(h("div.card.inset", null, [h("p", null, [h("strong", null, (bk.door && bk.door.storeName) || "Emporium")]),
-        h("p.hint", null, t("restore.summary", { d: E.fmtDate(new Date(bk.at), "long") + " " + E.fmtTime(new Date(bk.at)), n: bk.journal.length, b: bk.build }))]));
-      body.appendChild(h("form", { onsubmit: function (e) {
+      var go = h("button.ild-key#restoreGo", { type: "submit" }, t("ld.rs.go")), armed = false;
+      body.appendChild(h("p.ild-hint", null, [h("b", null, (bk.door && bk.door.storeName) || "Lakay"), " · ",
+        t("restore.summary", { d: E.fmtDate(new Date(bk.at), "long") + " " + E.fmtTime(new Date(bk.at)), n: bk.journal.length, b: bk.build })]));
+      body.appendChild(h("form#ldRs", { autocomplete: "off", onsubmit: function (e) {
         e.preventDefault();
-        if (!secret.value) return ui.fieldError(secret, t("restore.needSecret"));
-        var go2 = function () {
-          go.disabled = true; msg.textContent = t("restore.working");
-          B.restoreBackup(bk, secret.value, useMaster.checked).then(function () { secret.value = ""; E.app.opened(); ui.toast(t("restore.done"), "good"); }, function (e) {
-            go.disabled = false; msg.textContent = "";
-            ui.fieldError(secret, t(e && (e.code === "wrong" || e.code === "wrongmaster" || e.code === "badcode") ? "restore.wrong" : e && e.code === "chain" ? "restore.chain" : "door.problem"));
+        if (!secret.value) return err(card, t("restore.needSecret"));
+        B.useBooks(false);
+        B.boot().then(function (r) {
+          info = r;
+          if (r.hasStore && !armed) { armed = true; go.classList.add("ild-danger"); go.textContent = t("ld.rs.replace"); err(card, t("restore.replaceP")); return; }
+          busy(card, true); err(card, "");
+          return B.restoreBackup(bk, secret.value, useMaster.checked).then(function () { secret.value = ""; hideLock(); E.app.opened(); ui.toast(t("restore.done"), "good"); }, function (x) {
+            busy(card, false);
+            err(card, t(x && (x.code === "wrong" || x.code === "wrongmaster" || x.code === "badcode") ? "restore.wrong" : x && x.code === "chain" ? "restore.chain" : "door.problem"));
           });
-        };
-        if (info && info.hasStore) ui.confirm(t("restore.replaceT"), t("restore.replaceP"), t("restore.replaceYes"), "danger").then(function (ok) { if (ok) go2(); });
-        else go2();
-      } }, [ui.field("restore.secret", secret, { hint: t("restore.secretHint") }), h("label.check", { for: "restoreMaster" }, [useMaster, t("restore.isMaster")]), msg,
-        h("div.door-actions", null, [h("button.key", { type: "button", onclick: back }, [U.icon("back"), t("back")]), go])]));
+        });
+      } }, [label(t("restore.secret"), secret), h("label.ild-check", null, [useMaster, h("span", null, t("restore.isMaster"))]),
+        h("div.ild-keys", null, [h("button.ild-link#restoreBack", { type: "button", onclick: back }, t("back")), go])]));
     }
-    B.boot().then(function (r) {
-      info = r;
-      frame([crest(t("restore.title")), h("p", null, t("restore.p1")), ui.field("restore.file", file), msg, body,
-        h("div.door-actions", null, [h("button.key", { type: "button", onclick: back }, [U.icon("back"), t("back")])])], true);
-    });
+    fill(card, [h("h2", null, t("ld.rs.h")), h("p", null, t("ld.rs.p")),
+      h("div.ild-filepick", null, [file, pick, picked]), body,
+      h("div.ild-keys.ild-keys-back", null, [h("button.ild-link#restoreCancel", { type: "button", onclick: back }, t("back"))])]);
   });
-  door.restore = restore;
 })();

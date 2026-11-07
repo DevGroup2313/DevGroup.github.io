@@ -6,29 +6,19 @@
   var U = E.util, h = U.h, t = E.t, B = E.books;
   var ui = E.ui = {};
 
-  /* ---------- the seal (a fixed drawing that lives in this page) ---------- */
-  var SEAL = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><defs>' +
-    '<radialGradient id="emg1" cx="50%" cy="36%" r="72%"><stop offset="0" stop-color="#6F7CD0"/><stop offset="1" stop-color="#2C3474"/></radialGradient>' +
-    '<linearGradient id="emg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4DC97"/><stop offset=".52" stop-color="#C99B3F"/><stop offset="1" stop-color="#8C6820"/></linearGradient>' +
-    '<path id="emt" d="M 35 120 A 85 85 0 0 1 205 120"/><path id="emb" d="M 30 120 A 90 90 0 0 0 210 120"/></defs>' +
-    '<circle cx="120" cy="120" r="117" fill="url(#emg2)"/><circle cx="120" cy="120" r="109" fill="url(#emg1)"/>' +
-    '<circle cx="120" cy="120" r="104" fill="none" stroke="#E5C77F" stroke-width="1.3" stroke-dasharray="1.5 3.5"/>' +
-    '<circle cx="120" cy="120" r="70" fill="#353F86" stroke="url(#emg2)" stroke-width="3.5"/>' +
-    '<text font-family="Palatino Linotype,Palatino,Book Antiqua,Georgia,serif" font-size="21" font-weight="700" letter-spacing="7" fill="#F4DC97"><textPath href="#emt" startOffset="50%" text-anchor="middle">EMPORIUM</textPath></text>' +
-    '<text font-family="Palatino Linotype,Palatino,Book Antiqua,Georgia,serif" font-size="13" font-weight="700" letter-spacing="5" fill="#E5C77F"><textPath href="#emb" startOffset="50%" text-anchor="middle">· MMXXVI ·</textPath></text>' +
-    '<path d="M120 52.5l3.1 6.8 7.4.8-5.5 5 1.6 7.3-6.6-3.8-6.6 3.8 1.6-7.3-5.5-5 7.4-.8z" fill="#F4DC97"/>' +
-    '<g fill="none" stroke="url(#emg2)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">' +
-    '<path d="M120 80V158M100 160h40M82 92h76M82 92l-12 30M82 92l12 30M158 92l-12 30M158 92l12 30"/></g>' +
-    '<circle cx="120" cy="84" r="5.5" fill="#F4DC97"/>' +
-    '<path d="M66 122q16 15 32 0z M142 122q16 15 32 0z" fill="#E9CB82" stroke="#C99B3F" stroke-width="1.5"/>' +
-    '<path d="M106 166q14 6 28 0" fill="none" stroke="#C99B3F" stroke-width="2.4" stroke-linecap="round"/></svg>';
-  ui.SEAL = SEAL;
+  /* ---------- the crest (09-crest.js): a still drawing for print and small places, a live one everywhere else ---------- */
+  ui.seal = function (size, label) { return E.crest.flat(size, label); };
   ui.sealWrap = function (size, label) { return h("span.seal-wrap", null, ui.seal(size, label)); };
-  ui.seal = function (size, label) {
-    var doc = new DOMParser().parseFromString(SEAL, "image/svg+xml"), svg = document.importNode(doc.documentElement, true);
-    svg.setAttribute("width", size); svg.setAttribute("height", size); svg.setAttribute("class", "seal");
-    if (label) { svg.setAttribute("role", "img"); svg.setAttribute("aria-label", label); } else svg.setAttribute("aria-hidden", "true");
-    return svg;
+  ui.crest = function (size, o) { return E.crest.make(size, o); };
+  /* a crest that is a key: it plays a flourish when pressed, then does its own job (if any) */
+  ui.crestKey = function (size, o) {
+    o = o || {};
+    var c = ui.crest(size, { rise: o.rise });
+    var b = h("button.crest-key" + (o.cls ? "." + o.cls : ""), { type: "button", title: o.title || E.appName(), "aria-label": o.label || o.title || E.appName(), onclick: function (e) {
+      E.crest.play(c, o.flourish); if (o.onPress) o.onPress(e);
+    } }, c);
+    if (o.id) b.id = o.id;
+    return b;
   };
 
   /* ---------- the look ---------- */
@@ -40,10 +30,10 @@
     root.setAttribute("data-calm", U.prefGet("calm", "0"));
     root.setAttribute("data-fold", U.prefGet("fold", "0"));
     var look = E.custom && E.custom.look;
-    root.setAttribute("data-palette", look && look.palette ? look.palette : "indigo");
+    root.setAttribute("data-palette", look && look.palette ? look.palette : "dawn");
     root.setAttribute("data-density", look && look.density === "comfortable" ? "comfortable" : "compact");
-    try { document.title = E.appName ? E.appName() : "Emporium"; } catch (e) { }
-    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#0A1A20" : "#F6F1E7");
+    try { document.title = E.appName ? E.appName() : "Lakay"; } catch (e) { }
+    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#131430" : "#f6f4fa");
   };
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ui.applyLook); } catch (e) { }
 
@@ -137,10 +127,61 @@
     if (text) { input.setAttribute("aria-invalid", "true"); input.focus(); } else input.removeAttribute("aria-invalid");
   };
   ui.input = function (attrs) { return h("input", Object.assign({ type: "text", autocomplete: "off", spellcheck: "false" }, attrs || {})); };
+  /* A chooser drawn by the app itself: a key that shows the choice, and a list that opens under it. It behaves like a
+     select for the code that reads it (.value, and a "change" event), and is worked by keyboard as a list box. */
   ui.select = function (options, value, attrs) {
-    var s = h("select", attrs || {});
-    options.forEach(function (o) { var op = h("option", { value: o[0] }, o[1]); if (String(o[0]) === String(value)) op.selected = true; s.appendChild(op); });
-    return s;
+    attrs = attrs || {};
+    var cur = String(value === undefined || value === null ? (options[0] ? options[0][0] : "") : value);
+    if (!options.some(function (o) { return String(o[0]) === cur; }) && options[0]) cur = String(options[0][0]);
+    var text = h("span.sel-text");
+    var btn = h("button.sel", Object.assign({ type: "button", "aria-haspopup": "listbox", "aria-expanded": "false" }, attrs), [text, h("span.sel-chev", { "aria-hidden": "true" }, U.icon("chevron"))]);
+    function label() { var o = options.filter(function (x) { return String(x[0]) === cur; })[0]; text.textContent = o ? o[1] : ""; }
+    Object.defineProperty(btn, "value", { get: function () { return cur; }, set: function (v) { cur = String(v); label(); } });
+    btn.options = options;
+    var pop = null, active = -1;
+    function close(focus) { if (!pop) return; pop.remove(); pop = null; btn.setAttribute("aria-expanded", "false"); document.removeEventListener("pointerdown", outside, true); window.removeEventListener("resize", place); if (focus) btn.focus(); }
+    function outside(e) { if (pop && !pop.contains(e.target) && e.target !== btn && !btn.contains(e.target)) close(false); }
+    function place() { if (!pop) return; var r = btn.getBoundingClientRect(), H = pop.offsetHeight, below = window.innerHeight - r.bottom;
+      pop.style.minWidth = r.width + "px"; pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - pop.offsetWidth - 8)) + "px";
+      pop.style.top = (below < H + 12 && r.top > below ? Math.max(8, r.top - H - 6) : r.bottom + 6) + "px"; }
+    function choose(i) { var o = options[i]; if (!o) return; var changed = String(o[0]) !== cur; cur = String(o[0]); label(); close(true);
+      if (changed) { btn.dispatchEvent(new Event("input", { bubbles: true })); btn.dispatchEvent(new Event("change", { bubbles: true })); } }
+    function mark(i) { active = Math.max(0, Math.min(options.length - 1, i)); Array.prototype.forEach.call(pop.children, function (n, k) { n.classList.toggle("active", k === active); });
+      var n = pop.children[active]; if (n) { btn.setAttribute("aria-activedescendant", n.id); n.scrollIntoView({ block: "nearest" }); } }
+    function open() {
+      if (pop) return close(true);
+      var id = btn.id || (btn.id = U.uid("sel"));
+      pop = h("div.sel-pop", { role: "listbox", id: id + "-list", "aria-labelledby": id });
+      options.forEach(function (o, i) {
+        pop.appendChild(h("div.sel-opt", { role: "option", id: id + "-o" + i, "aria-selected": String(String(o[0]) === cur), onclick: function () { choose(i); },
+          onpointermove: function () { if (active !== i) mark(i); } }, [h("span.sel-tick", { "aria-hidden": "true" }, "✓"), h("span", null, o[1])]));
+      });
+      document.body.appendChild(pop); btn.setAttribute("aria-expanded", "true"); btn.setAttribute("aria-controls", pop.id);
+      place(); mark(Math.max(0, options.findIndex(function (o) { return String(o[0]) === cur; })));
+      setTimeout(function () { document.addEventListener("pointerdown", outside, true); }, 0); window.addEventListener("resize", place);
+    }
+    btn.addEventListener("click", open);
+    btn.addEventListener("keydown", function (e) {
+      var k = e.key;
+      if (!pop && (k === "ArrowDown" || k === "ArrowUp" || k === "Enter" || k === " ")) { e.preventDefault(); open(); return; }
+      if (!pop) return;
+      if (k === "ArrowDown") { e.preventDefault(); mark(active + 1); } else if (k === "ArrowUp") { e.preventDefault(); mark(active - 1); }
+      else if (k === "Home") { e.preventDefault(); mark(0); } else if (k === "End") { e.preventDefault(); mark(options.length - 1); }
+      else if (k === "Enter" || k === " ") { e.preventDefault(); choose(active); } else if (k === "Escape") { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (k === "Tab") close(false);
+      else if (k.length === 1) { var q = U.norm(k), j = options.findIndex(function (o, i) { return i > active && U.norm(o[1]).indexOf(q) === 0; });
+        if (j < 0) j = options.findIndex(function (o) { return U.norm(o[1]).indexOf(q) === 0; }); if (j >= 0) mark(j); }
+    });
+    label();
+    return btn;
+  };
+  /* A file is chosen with one of the app's own keys; the browser's grey box stays hidden. */
+  ui.filePick = function (o) {
+    var input = h("input", { type: "file", id: o.id, accept: o.accept || "", tabindex: "-1", "aria-hidden": "true" });
+    var name = h("span.file-name", null, o.none);
+    var key = h("button.key", { type: "button", id: o.keyId || null, onclick: function () { input.click(); } }, [ui.emo(o.emoji || "📂"), o.label]);
+    input.addEventListener("change", function () { var f = input.files && input.files[0]; if (!f) return; name.textContent = f.name; name.classList.add("chosen"); if (o.onFile) o.onFile(f, input); });
+    return h("div.filepick", null, [input, key, name]);
   };
   ui.seg = function (options, value, onChange, label) {
     var g = h("div.seg", { role: "radiogroup", "aria-label": label || "" });
@@ -177,62 +218,149 @@
     }, 60);
   };
 
-  /* ---------- the shell and its rooms ---------- */
-  var ROOMS = ["home", "register", "inventory", "reports", "guide", "settings", "studio"];
+  /* ---------- the shell, after Ingenium's (the side menu of plain words) with Carpe Diem's capsule of top keys ---------- */
+  var GROUPS = [["nav.g.store", [["home", "home"], ["register", "register"], ["inventory", "box"], ["reports", "chart"]]],
+                ["nav.g.learn", [["guide", "book"], ["settings", "gear"]]],
+                ["nav.g.owner", [["studio", "edit"]]]];
   ui.rooms = {};
   ui.current = null;
   ui.shell = function () {
     var app = document.getElementById("app"); U.clear(app);
     var st = B.state();
-    var nav = h("nav.rail", { "aria-label": t("menu") }, [
-      h("div.rail-brand", null, [ui.sealWrap(42), h("div", null, [h("div.brand-name", null, E.appName()), h("div.brand-store", null, st.settings.storeName)]),
-        h("button.icon-key.rail-fold", { type: "button", "aria-label": t("menu.fold"), title: t("menu.fold"), onclick: function () {
-          U.prefSet("fold", U.prefGet("fold", "0") === "1" ? "0" : "1"); ui.applyLook();
-          this.textContent = U.prefGet("fold", "0") === "1" ? "›" : "‹";
-        } }, U.prefGet("fold", "0") === "1" ? "›" : "‹")]),
-      h("div.rail-keys", null, ROOMS.map(function (r, i) {
-        var key = h("button.nav-key", { type: "button", "data-room": r, "aria-label": t("room." + r), title: t("room." + r), onclick: function () { ui.go(r); } },
-          [ui.emo(ui.ROOM_EMO[r], "nav-emo"), h("span.long", null, t("room." + r)), h("span.short", { "aria-hidden": "true" }, t("short." + r))]);
-        return i === 2 || i === 4 ? [h("span.rail-rule", { "aria-hidden": "true" }), key] : key;
-      })),
-      h("div.rail-foot", null, [
-        h("button.nav-key.lock-key", { type: "button", "aria-label": t("lockNow"), title: t("lockNow"), onclick: function () { B.lock("hand"); } }, [ui.emo("🔒", "nav-emo"), h("span.long", null, t("lockNow"))]),
-        h("button.nav-key.more-key", { type: "button", "aria-label": t("menu.more"), onclick: function () {
-          var d = ui.dialog({ title: t("menu.more"), emoji: "☰", body: h("div.more-list", null, [["guide", "📖"], ["studio", "⚒️"]].map(function (r) {
-            return h("button.key", { type: "button", onclick: function () { d.close(); ui.go(r[0]); } }, [ui.emo(r[1]), t("room." + r[0])]);
-          }).concat([h("button.key", { type: "button", onclick: function () { d.close(); B.lock("hand"); } }, [ui.emo("🔒"), t("lockNow")])])) });
-        } }, [ui.emo("☰", "nav-emo"), h("span.short", { "aria-hidden": "true" }, t("short.more"))]),
-        h("p.build-line", null, t("build") + " " + E.BUILD.number)])
-    ]);
-    var main = h("main#room", { tabindex: "-1" });
-    /* the slim top bar, as in the Forge and Carpe Diem: the day, the language and the light, always one press away */
-    var when = h("span.when", { id: "topWhen" });
-    function tick() { when.textContent = E.fmtDate(new Date(), "long") + " · " + E.fmtTime(new Date()); }
-    tick(); clearInterval(ui._tick); ui._tick = setInterval(tick, 30000);
-    var mark = h("div.store-mark", null, [ui.seal(30), h("div", null, [h("div.store-name", { id: "topStore" }, st.settings.storeName), h("div.store-sub", null, t("top.system", { app: E.appName() }))])]);
-    var top = h("header.topbar", null, [mark, h("div.top-tools", null, [when,
-      ui.seg([["en", "EN"], ["fr", "FR"], ["ht", "KR"]], E.lang, function (l) { E.setLang(l); ui.shell(); }, t("language")),
-      ui.seg([["day", "", "sun"], ["auto", "", "auto"], ["night", "", "moon"]], U.prefGet("theme", "auto"), function (v) { U.prefSet("theme", v); ui.applyLook(); }, t("theme"))])]);
-    Array.prototype.forEach.call(top.querySelectorAll(".seg")[1].children, function (b) { b.setAttribute("aria-label", t("theme." + b.getAttribute("data-v"))); b.title = t("theme." + b.getAttribute("data-v")); });
-    app.appendChild(h("div.shell", null, [nav, h("div.page", null, [top, main])]));
+    var folded = U.prefGet("fold", "0") === "1";
+    var fold = h("button.cl-chev#navFold", { type: "button", "aria-label": t("menu.fold"), title: t("menu.fold"), "aria-expanded": String(!folded), onclick: function () {
+      var f = U.prefGet("fold", "0") === "1" ? "0" : "1"; U.prefSet("fold", f); ui.applyLook(); fold.textContent = f === "1" ? "›" : "‹"; fold.setAttribute("aria-expanded", String(f !== "1"));
+    } }, folded ? "›" : "‹");
+    var sealNode = ui.crest(36);
+    var brand = h("button.brand#brandSeal", { type: "button", title: E.appName() + " · " + t("room.home"), "aria-label": t("room.home"), onclick: function () {
+      E.crest.play(sealNode, "burst"); ui.go("home");
+    } }, [sealNode, h("span.bname", null, [h("span.wordmark", null, E.appName()), h("span.storename", null, st.settings.storeName)])]);
+    var dock = h("nav.dock", { "aria-label": t("menu") }, [h("div.dock-brand", null, [brand, fold])]);
+    GROUPS.forEach(function (g) {
+      dock.appendChild(h("div.grp-label", null, t(g[0])));
+      g[1].forEach(function (r) {
+        dock.appendChild(h("button.nav-btn", { type: "button", "data-room": r[0], title: t("room." + r[0]), onclick: function () { ui.go(r[0]); } },
+          [U.icon(r[1]), h("span.long", null, t("room." + r[0]))]));
+      });
+    });
+    var main = h("main#room.main", { tabindex: "-1" });
+    app.appendChild(h("div.shell", null, [dock, main]));
+    app.appendChild(ui.cluster());
+    app.appendChild(ui.fabs());
     ui.go(location.hash.replace("#", "") || "home", true);
   };
   ui.go = function (room, quiet) {
     if (!ui.rooms[room]) room = "home";
     ui.current = room;
     if (location.hash !== "#" + room) history.replaceState(null, "", "#" + room);
-    Array.prototype.forEach.call(document.querySelectorAll(".nav-key[data-room]"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".nav-btn[data-room]"), function (b) {
       if (b.getAttribute("data-room") === room) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     });
     var main = document.getElementById("room"); if (!main) return;
     U.clear(main);
     ui.rooms[room](main);
+    main.appendChild(ui.footer());
     if (!quiet) { try { main.focus({ preventScroll: true }); } catch (e) { } window.scrollTo(0, 0); }
   };
   ui.refresh = function () { if (ui.current && document.getElementById("room")) { var y = window.scrollY; ui.go(ui.current, true); window.scrollTo(0, y); } };
+  /* A room's head: Ingenium's page title, its tip, the room's own keys on the right, and a plain lede below. */
   ui.roomHead = function (titleKey, tipKey, right) {
-    var emo = ui.ROOM_EMO[titleKey.replace("room.", "")];
-    return h("div.room-head", null, [h("div.room-title", null, [emo ? ui.emo(emo) : null, h("h1", null, t(titleKey)), tipKey ? ui.tip(tipKey) : null]), right ? h("div.room-tools", null, right) : null]);
+    var room = titleKey.replace("room.", "");
+    return h("div.room-intro", null, [
+      h("div.room-head", null, [h("div.room-title", null, [h("h1.page-title", null, t(titleKey)), tipKey ? ui.tip(tipKey) : null]), right ? h("div.room-tools", null, right) : null]),
+      E.has("lede." + room) ? h("p.lede", null, t("lede." + room)) : null]);
+  };
+  /* The foot of every page, as in Ingenium and the rest of the Offline Project: the emblem, the name, the maker. */
+  ui.footer = function () {
+    return h("footer.app-foot", null, [ui.crestKey(18, { cls: "foot-crest", title: t("top.about"), flourish: "turn", onPress: function () { setTimeout(ui.about, 380); } }), h("span", null, E.appName()), h("span.sep", { "aria-hidden": "true" }, "·"), h("span", null, E.tagline()),
+      h("span.sep", { "aria-hidden": "true" }, "·"), h("span", null, t("foot.made")), h("span.sep", { "aria-hidden": "true" }, "·"), h("span", null, "© 2026 Yannie D. Forest. " + t("foot.rights"))]);
+  };
+
+  /* ---------- the flags of the three languages, drawn so that they look the same on every device ---------- */
+  var FLAGS = {
+    en: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#b22234"/><path d="M0 2.31h30M0 5.38h30M0 8.46h30M0 11.54h30M0 14.62h30M0 17.69h30" stroke="#fff" stroke-width="1.54"/><rect width="13" height="10.77" fill="#3c3b6e"/><g fill="#fff"><circle cx="2.2" cy="1.8" r=".55"/><circle cx="4.9" cy="1.8" r=".55"/><circle cx="7.6" cy="1.8" r=".55"/><circle cx="10.3" cy="1.8" r=".55"/><circle cx="3.5" cy="3.9" r=".55"/><circle cx="6.2" cy="3.9" r=".55"/><circle cx="8.9" cy="3.9" r=".55"/><circle cx="2.2" cy="6" r=".55"/><circle cx="4.9" cy="6" r=".55"/><circle cx="7.6" cy="6" r=".55"/><circle cx="10.3" cy="6" r=".55"/><circle cx="3.5" cy="8.1" r=".55"/><circle cx="6.2" cy="8.1" r=".55"/><circle cx="8.9" cy="8.1" r=".55"/></g></svg>',
+    fr: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="10" height="20" fill="#0055a4"/><rect x="10" width="10" height="20" fill="#ffffff"/><rect x="20" width="10" height="20" fill="#ef4135"/></svg>',
+    ht: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="10" fill="#00209f"/><rect y="10" width="30" height="10" fill="#d21034"/><rect x="10.5" y="6.2" width="9" height="7.6" rx=".8" fill="#ffffff"/><path d="M15 12.6V8.9M13.4 9.7l1.6-1.1 1.6 1.1M12.4 12.8h5.2" fill="none" stroke="#1d7a3c" stroke-width=".8" stroke-linecap="round"/></svg>' };
+  ui.flag = function (code) {
+    var doc = new DOMParser().parseFromString(FLAGS[code] || FLAGS.en, "image/svg+xml"), svg = document.importNode(doc.documentElement, true);
+    svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+    return h("span.flag", null, svg);
+  };
+
+  /* ---------- the top keys: Carpe Diem's floating capsule ---------- */
+  ui.cluster = function () {
+    var practice = B.mode === "practice", folded = U.prefGet("barFold", "0") === "1";
+    var c = h("div#topCluster.cl-cluster" + (folded ? ".folded" : ""), { role: "toolbar", "aria-label": t("top.tools") });
+    var fold = h("button.cl-fold#barFold", { type: "button", "aria-label": t("top.fold"), title: t("top.fold"), "aria-expanded": String(!folded), onclick: function () {
+      var f = !c.classList.contains("folded"); c.classList.toggle("folded", f); U.prefSet("barFold", f ? "1" : "0"); fold.textContent = f ? "‹" : "›"; fold.setAttribute("aria-expanded", String(!f));
+    } }, folded ? "‹" : "›");
+    var alertsN = ui.alerts().length;
+    var NEXT = { en: "fr", fr: "ht", ht: "en" }, next = NEXT[E.lang] || "fr";
+    c.appendChild(fold);
+    c.appendChild(h("button.cl-key#statusPill" + (practice ? ".practice" : ""), { type: "button", title: practice ? t("practice.pillTip") : t("status.h"), onclick: ui.statusPanel },
+      [h("span.pdot", { "aria-hidden": "true" }), h("span.nm", null, practice ? t("practice.pill") : t("status.h"))]));
+    c.appendChild(h("button.cl-key#alertsBtn", { type: "button", title: t("top.alerts"), onclick: ui.alertsPanel }, [t("top.alerts"), alertsN ? h("span.cnt", { "aria-label": String(alertsN) }) : null]));
+    c.appendChild(h("button.cl-key#displayBtn", { type: "button", title: t("top.display"), onclick: ui.displayPanel }, t("top.display")));
+    c.appendChild(h("button.cl-key#guideBtn", { type: "button", title: t("room.guide"), onclick: function () { ui.go("guide"); } }, t("top.guide")));
+    c.appendChild(h("button.cl-key#aboutBtn", { type: "button", title: t("top.about") + " " + E.appName(), onclick: ui.about }, t("top.about")));
+    /* one key for the language, as Carpe Diem's: it shows the flag of the language it switches to */
+    c.appendChild(h("button.cl-key.lang#langBtn", { type: "button", title: "Langue · Language · Lang: " + t("lang." + next), "aria-label": t("lang." + next), onclick: function () { E.setLang(next); ui.shell(); } }, ui.flag(next)));
+    return c;
+  };
+  ui.refreshTop = function () { var old = document.getElementById("topCluster"); if (old) old.replaceWith(ui.cluster()); var f = document.getElementById("fabs"); if (f) f.replaceWith(ui.fabs()); };
+  /* the round keys on the right, as in Ingenium and Carpe Diem: day or night, and the lock */
+  ui.fabs = function () {
+    var night = document.documentElement.getAttribute("data-theme") === "night";
+    return h("div#fabs.fabs", null, [
+      h("button.fab#fabTheme", { type: "button", "data-tip": t("top.dayNight"), "aria-label": t("top.dayNight"), onclick: function () {
+        U.prefSet("theme", night ? "day" : "night"); ui.applyLook(); ui.refreshTop();
+      } }, ui.emo(night ? "☀️" : "🌙")),
+      h("button.fab#fabLock", { type: "button", "data-tip": t("top.lock"), "aria-label": t("top.lock"), onclick: function () { B.lock("hand"); } }, ui.emo("🔒"))]);
+  };
+  /* what needs the owner: items low on stock, a backup not saved for a week */
+  ui.alerts = function () {
+    var out = [], stock = B.stockSummary(), last = U.prefGet("lastBackup", "");
+    stock.low.slice(0, 12).forEach(function (it) { out.push({ emo: ui.catEmo(it.cat), text: it.name + " · " + t("inv.inStock", { n: it.stock }), go: "inventory", tone: it.stock <= 0 ? "bad" : "warn" }); });
+    if (B.mode !== "practice" && (!last || Date.now() - Date.parse(last) > 7 * 86400000)) out.push({ emo: "💾", text: t(last ? "alerts.backup" : "alerts.backupNever"), go: "settings", tone: "warn" });
+    return out;
+  };
+  ui.alertsPanel = function () {
+    var list = ui.alerts();
+    var d = ui.dialog({ title: t("top.alerts"), emoji: "🔔", body: list.length ? h("ul.alert-list", null, list.map(function (a) {
+      return h("li", null, [ui.emo(a.emo), h("span", null, a.text), h("button.key.sm", { type: "button", onclick: function () { d.close(); ui.go(a.go); } }, t("alerts.open"))]);
+    })) : h("p", null, t("alerts.none")), actions: [{ label: t("close") }] });
+  };
+  ui.statusPanel = function () {
+    var st = B.state(), practice = B.mode === "practice";
+    var rows = [h("p", null, h("b", null, practice ? t("practice.pill") : t("status.signedIn", { name: (st.users.owner && st.users.owner.name) || "" }))),
+      h("p.muted", null, st.settings.storeName + (ui.openedAt ? " · " + t("status.since", { t: E.fmtTime(ui.openedAt) }) : "")),
+      practice ? h("p", null, t("practice.pillTip")) : h("p.hint", null, t("status.team"))];
+    var actions = [];
+    if (practice) {
+      actions.push({ label: t("practice.reset"), onClick: function (close) { close(); ui.confirm(t("practice.resetQ"), t("practice.resetP"), t("practice.reset")).then(function (yes) {
+        if (!yes) return; B.resetPractice().then(function () { return B.openPractice(); }).then(function () { E.app.opened(); ui.toast(t("practice.done"), "good"); });
+      }); } });
+      actions.push({ label: t("practice.real"), kind: "primary", onClick: function (close) { close(); E.door.startReal("app"); } });
+    } else actions.push({ label: t("lockNow"), kind: "primary", onClick: function (close) { close(); B.lock("hand"); } });
+    ui.dialog({ title: t("status.h"), emoji: practice ? "🧪" : "🟢", body: rows, actions: actions });
+  };
+  ui.displayPanel = function () {
+    function row(label, seg) { return h("div.display-row", null, [h("span", null, label), seg]); }
+    ui.dialog({ title: t("top.display"), emoji: "🎨", body: h("div.display-rows", null, [
+      row(t("theme"), ui.seg([["day", t("theme.day"), "sun"], ["auto", t("theme.auto"), "auto"], ["night", t("theme.night"), "moon"]], U.prefGet("theme", "auto"), function (v) { U.prefSet("theme", v); ui.applyLook(); ui.refreshTop(); }, t("theme"))),
+      row(t("set.size"), ui.seg([["m", t("set.sizeM")], ["l", t("set.sizeL")], ["xl", t("set.sizeXL")]], U.prefGet("size", "m"), function (v) { U.prefSet("size", v); ui.applyLook(); }, t("set.size"))),
+      row(t("set.calm"), ui.seg([["0", t("off")], ["1", t("on")]], U.prefGet("calm", "0"), function (v) { U.prefSet("calm", v); ui.applyLook(); }, t("set.calm"))),
+      row(t("disp.menu"), ui.seg([["0", t("disp.menu.full")], ["1", t("disp.menu.icons")]], U.prefGet("fold", "0"), function (v) { U.prefSet("fold", v); ui.applyLook(); }, t("disp.menu"))),
+      h("p.hint", null, t("set.calmHint"))]), actions: [{ label: t("close"), kind: "primary" }] });
+  };
+  ui.about = function () {
+    var st = B.state();
+    ui.dialog({ title: t("top.about"), body: h("div.about-card", null, [ui.crestKey(84, { rise: true, title: t("crest.press") }), h("h3", null, E.appName()), h("span.eyebrow", null, E.tagline()),
+      h("dl.about-facts", null, [h("dt", null, t("about.store")), h("dd", null, st.settings.storeName), h("dt", null, t("about.books")), h("dd", null, String(st.head ? st.head.seq : 0)),
+        h("dt", null, t("about.lang")), h("dd", null, "English · Français · Kreyòl")]),
+      h("p.hint", null, t("about.sealed")),
+      h("p.about-foot", null, [E.appName() + " · " + t("build") + " " + E.BUILD.number + " · " + E.BUILD.date, h("br"), t("foot.made") + " · © 2026 Yannie D. Forest. " + t("foot.rights")])]),
+      actions: [{ label: t("close"), kind: "primary" }] });
   };
 
   /* ---------- small joys: they never run in Calm mode or when the device asks for less motion ---------- */

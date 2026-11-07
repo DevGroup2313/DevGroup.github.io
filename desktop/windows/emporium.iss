@@ -4,8 +4,8 @@
 ; The Windows installer, made by Inno Setup on GitHub's Windows computer
 ; (.github/workflows/windows.yml). You do not run this file yourself.
 ;
-; It installs Emporium for the current user only (no administrator password)
-; into %LOCALAPPDATA%\Programs\Emporium, puts it in the Start menu (and on the
+; It installs Lakay for the current user only (no administrator password)
+; into %LOCALAPPDATA%\Programs\Lakay, puts it in the Start menu (and on the
 ; Desktop if ticked), and registers an uninstaller in Settings, Apps.
 ;
 ; The books stay in %LOCALAPPDATA%\Emporium, a different folder that neither
@@ -25,30 +25,30 @@
   #define AppNumeric "1.0.0.0"
 #endif
 #ifndef ProgramDir
-  #define ProgramDir "..\..\dist\Emporium"
+  #define ProgramDir "..\..\dist\Lakay"
 #endif
 #ifndef OutputDir
   #define OutputDir "..\..\dist"
 #endif
 #ifndef SetupName
-  #define SetupName "Emporium-Windows-Setup"
+  #define SetupName "Lakay-Windows-Setup"
 #endif
 
 [Setup]
 AppId=com.yannieforest.emporium.windows
-AppName=Emporium
+AppName=Lakay
 AppVersion={#AppVersion}
-AppVerName=Emporium {#AppVersion}
+AppVerName=Lakay {#AppVersion}
 AppPublisher=Yannie D. Forest
 AppCopyright=Copyright (c) 2026 Yannie D. Forest. All rights reserved.
 VersionInfoVersion={#AppNumeric}
 VersionInfoCompany=Yannie D. Forest
-VersionInfoDescription=Emporium installer
-VersionInfoProductName=Emporium
+VersionInfoDescription=Lakay installer
+VersionInfoProductName=Lakay
 VersionInfoProductVersion={#AppNumeric}
 VersionInfoCopyright=Copyright (c) 2026 Yannie D. Forest. All rights reserved.
-DefaultDirName={localappdata}\Programs\Emporium
-DefaultGroupName=Emporium
+DefaultDirName={localappdata}\Programs\Lakay
+DefaultGroupName=Lakay
 DisableProgramGroupPage=yes
 DisableDirPage=yes
 DisableReadyPage=yes
@@ -56,8 +56,8 @@ PrivilegesRequired=lowest
 OutputDir={#OutputDir}
 OutputBaseFilename={#SetupName}
 SetupIconFile=emporium.ico
-UninstallDisplayIcon={app}\Emporium.exe
-UninstallDisplayName=Emporium
+UninstallDisplayIcon={app}\Lakay.exe
+UninstallDisplayName=Lakay
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -68,7 +68,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 SetupLogging=yes
 
 [Tasks]
-Name: "desktopicon"; Description: "Put Emporium on the Desktop"; GroupDescription: "Shortcuts:"
+Name: "desktopicon"; Description: "Put Lakay on the Desktop"; GroupDescription: "Shortcuts:"
 
 [InstallDelete]
 ; The program's own libraries are cleared before the new ones are copied, so an
@@ -77,20 +77,24 @@ Type: filesandordirs; Name: "{app}\_internal"
 ; An update starts clean: a run the update itself interrupted does not count as
 ; a bad ending. Only this one small file; the books beside it are not touched.
 Type: files; Name: "{localappdata}\Emporium\storage\emporium_session.flag"
+; The app was called Emporium before Build 3: its old program file and shortcuts go, the books stay.
+Type: files; Name: "{app}\Emporium.exe"
+Type: files; Name: "{userprograms}\Emporium.lnk"
+Type: files; Name: "{userdesktop}\Emporium.lnk"
 
 [Files]
 Source: "{#ProgramDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{userprograms}\Emporium"; Filename: "{app}\Emporium.exe"; WorkingDir: "{app}"; Comment: "Emporium {#AppVersion}"
-Name: "{userdesktop}\Emporium"; Filename: "{app}\Emporium.exe"; WorkingDir: "{app}"; Comment: "Emporium {#AppVersion}"; Tasks: desktopicon
+Name: "{userprograms}\Lakay"; Filename: "{app}\Lakay.exe"; WorkingDir: "{app}"; Comment: "Lakay {#AppVersion}"
+Name: "{userdesktop}\Lakay"; Filename: "{app}\Lakay.exe"; WorkingDir: "{app}"; Comment: "Lakay {#AppVersion}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\Emporium.exe"; Description: "Open Emporium now"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Lakay.exe"; Description: "Open Lakay now"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
-; Ask Emporium to close, not forcefully, so it records a clean ending.
-Filename: "{sys}\taskkill.exe"; Parameters: "/IM ""Emporium.exe"""; Flags: runhidden; RunOnceId: "CloseEmporium"
+; Ask Lakay to close, not forcefully, so it records a clean ending.
+Filename: "{sys}\taskkill.exe"; Parameters: "/IM ""Lakay.exe"""; Flags: runhidden; RunOnceId: "CloseLakay"
 
 [Code]
 var
@@ -141,9 +145,9 @@ begin
   WebView2Page := CreateOutputMsgPage(wpWelcome,
     'Microsoft Edge WebView2',
     'One free part of Windows is missing on this PC.',
-    'Emporium draws its window with Microsoft Edge WebView2, a free part of Windows. It is not on this PC.' + #13#10#13#10 +
-    'You can carry on. Emporium installs now, and opens in your browser until WebView2 is added.' + #13#10#13#10 +
-    'To add it: open Microsoft''s page, click Download WebView2, and run the file. Then open Emporium again.' + #13#10#13#10 +
+    'Lakay draws its window with Microsoft Edge WebView2, a free part of Windows. It is not on this PC.' + #13#10#13#10 +
+    'You can carry on. Lakay installs now, and opens in your browser until WebView2 is added.' + #13#10#13#10 +
+    'To add it: open Microsoft''s page, click Download WebView2, and run the file. Then open Lakay again.' + #13#10#13#10 +
     'https://developer.microsoft.com/microsoft-edge/webview2/consumer/');
   Button := TNewButton.Create(WebView2Page);
   Button.Caption := 'Open Microsoft''s page';
@@ -170,13 +174,13 @@ var
   Code: Integer;
 begin
   Result := False;
-  if Exec(ExpandConstant('{cmd}'), '/C ' + ExpandConstant('{sys}\tasklist.exe') + ' /FI "IMAGENAME eq Emporium.exe" /FO CSV /NH | ' +
-          ExpandConstant('{sys}\find.exe') + ' /I "Emporium.exe"',
+  if Exec(ExpandConstant('{cmd}'), '/C ' + ExpandConstant('{sys}\tasklist.exe') + ' /FI "IMAGENAME eq Lakay.exe" /FO CSV /NH | ' +
+          ExpandConstant('{sys}\find.exe') + ' /I "Lakay.exe"',
           '', SW_HIDE, ewWaitUntilTerminated, Code) then
     Result := (Code = 0);
 end;
 
-{ Uninstalling while Emporium is open: ask it to close, not forcefully, and give
+{ Uninstalling while Lakay is open: ask it to close, not forcefully, and give
   it up to 15 seconds, before any file is removed. }
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
@@ -186,7 +190,7 @@ begin
   begin
     if ProgramIsRunning then
     begin
-      Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM "Emporium.exe"', '', SW_HIDE, ewWaitUntilTerminated, Code);
+      Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM "Lakay.exe"', '', SW_HIDE, ewWaitUntilTerminated, Code);
       Tries := 0;
       while ProgramIsRunning and (Tries < 30) do
       begin
@@ -194,9 +198,9 @@ begin
         Tries := Tries + 1;
       end;
       if ProgramIsRunning then
-        Log('Emporium was still open after 15 seconds; some of its files may stay until it closes.')
+        Log('Lakay was still open after 15 seconds; some of its files may stay until it closes.')
       else
-        Log('Emporium closed before its files were removed.');
+        Log('Lakay closed before its files were removed.');
     end;
   end;
 end;

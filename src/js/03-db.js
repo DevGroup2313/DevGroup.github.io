@@ -9,6 +9,13 @@
   D.NAME = "emporium";
   D.VERSION = 1;
   var dbp = null;
+  /* Two databases, never mixed: "emporium" holds the store's own books; "emporium-practice" holds the practice
+     store, with sample goods, that opens without a sign-in. */
+  D.use = function (name) {
+    if (name === D.NAME) return;
+    var old = dbp; dbp = null; D.NAME = name;
+    if (old) old.then(function (db) { try { db.close(); } catch (e) { } }, function () { });
+  };
 
   D.open = function () {
     if (dbp) return dbp;

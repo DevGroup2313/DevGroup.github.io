@@ -115,7 +115,7 @@
     });
 
     /* about */
-    main.appendChild(sec("set-about", "set.about", null, [h("div.about", null, [ui.sealWrap(84, "Emporium"), h("div", null, [
+    main.appendChild(sec("set-about", "set.about", null, [h("div.about", null, [ui.crestKey(84, { title: t("crest.press") }), h("div", null, [
       h("p", null, [h("strong", null, E.appName()), " · " + E.made() + " · " + E.BUILD.date]),
       h("p", null, t("about.p1")), h("p", null, "Copyright © 2026 Yannie D. Forest. " + t("about.rights")), h("p.hint", null, t("about.p2"))])])]));
 
@@ -125,7 +125,7 @@
 
   function saveBackup() {
     B.makeBackup().then(function (text) {
-      var st = B.state(), nm = "Emporium backup " + st.settings.storeName.replace(/[^\p{L}\p{N} _-]/gu, "") + " " + U.dayKey() + ".emporium";
+      var st = B.state(), nm = "Lakay backup " + st.settings.storeName.replace(/[^\p{L}\p{N} _-]/gu, "") + " " + U.dayKey() + ".lakay";
       return ui.saveFile(nm, "application/json", text);
     }).then(function (ok) {
       if (ok) { U.prefSet("lastBackup", new Date().toISOString()); ui.toast(t("set.backupSaved"), "good"); ui.refresh(); }
@@ -189,6 +189,7 @@
   /* ---------- the Guidebook ---------- */
   var ARTICLES = ["start", "door", "master", "sale", "items", "receive", "correct", "reports", "backup", "sealed", "verify", "display", "studio", "build", "limits"];
   var ART_EMO = { start: "🌟", door: "🚪", master: "🗝️", sale: "🛒", items: "🏷️", receive: "🚚", correct: "✏️", reports: "📊", backup: "💾", sealed: "🔐", verify: "🛡️", display: "🎨", studio: "⚒️", build: "🔢", limits: "🧭" };
+  E.guideCount = function () { return ARTICLES.length; };
   ui.rooms.guide = function (main) {
     var q = ui.input({ id: "guideSearch", type: "search", placeholder: t("guide.searchPh"), "aria-label": t("guide.search") });
     var list = h("ul.guide-list", { id: "guideList" }), art = h("article.guide-article.card", { id: "guideArticle", tabindex: "-1" });
@@ -201,6 +202,7 @@
       paras.forEach(function (p) { art.appendChild(h("p", null, p)); });
       art.appendChild(h("div.tip-box", null, [ui.emo("💡"), h("p", null, [h("strong", null, t("tip") + ": "), t("guide." + id + ".tip")])]));
       var ra = ui.readAloud(t("guide." + id + ".t") + ". " + paras.join(" ") + " " + t("guide." + id + ".tip")); if (ra) art.appendChild(ra);
+      art.appendChild(h("p.guide-foot", null, E.appName() + " · " + t("build") + " " + E.BUILD.number + " · " + E.BUILD.date));
       Array.prototype.forEach.call(list.querySelectorAll("button"), function (b) { if (b.getAttribute("data-a") === id) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
     }
     function draw() {

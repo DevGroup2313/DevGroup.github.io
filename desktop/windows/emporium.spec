@@ -2,14 +2,14 @@
 # NO LICENCE IS GRANTED. See LICENCE.txt.
 # -*- mode: python ; coding: utf-8 -*-
 #
-# Emporium for Windows, built as a PROGRAM FOLDER that the installer
+# Lakay for Windows, built as a PROGRAM FOLDER that the installer
 # (emporium.iss) puts in place. Built on GitHub by .github/workflows/windows.yml;
 # you do not run this file yourself.
 #
 # The same recipe as the Forge's Windows program (the_forge.spec, 9s80) and
 # Inkwell's: windowed, one folder, PyInstaller's standard starter, no UPX, the
 # quiet console hook, and pywebview, clr_loader and pythonnet collected whole.
-# The page is the one committed in app/Emporium.html, checked byte for byte
+# The page is the one committed in app/Lakay.html, checked byte for byte
 # by the workflow after the build.
 
 import json
@@ -17,7 +17,7 @@ import os
 
 from PyInstaller.utils.hooks import collect_all
 
-APP_NAME = 'Emporium'
+APP_NAME = 'Lakay'
 ROOT = os.path.abspath(os.path.join(SPECPATH, '..', '..'))
 
 try:
@@ -69,7 +69,7 @@ a = Analysis(
     [os.path.join(ROOT, 'desktop', 'emporium_app.py')],
     pathex=[],
     binaries=extra_binaries,
-    datas=[(os.path.join(ROOT, 'app', 'Emporium.html'), '.'),
+    datas=[(os.path.join(ROOT, 'app', 'Lakay.html'), '.'),
            (os.path.join(SPECPATH, 'emporium.ico'), '.')] + extra_datas,
     hiddenimports=['webview.platforms.winforms', 'webview.platforms.edgechromium', 'clr'] + extra_hidden,
     hookspath=[],

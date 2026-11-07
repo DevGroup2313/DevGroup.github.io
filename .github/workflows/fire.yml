@@ -1,16 +1,16 @@
-name: Emporium for the Fire tablet
+name: Lakay for the Fire tablet
 
-# Builds Emporium's APK for the Fire tablet (and any Android tablet) on GitHub's
+# Builds Lakay's APK for the Fire tablet (and any Android tablet) on GitHub's
 # Linux computer with Android's own tools, and puts it on the build's release
 # page. The app is Ingenium 6.0's Android shell (packages/fire) holding
-# Emporium's page in assets/.
+# Lakay's page in assets/.
 #
 # SIGNING. Android installs a new version over an old one only when both carry
 # the same key. The lasting key is kept as two repository secrets,
 # EMPORIUM_ANDROID_KEY (the PKCS #12 key file, in base64) and
 # EMPORIUM_ANDROID_KEY_PASSWORD; it never enters the repository, which is
 # public. Until those secrets exist, each build is signed with a key made for
-# that build alone: it installs on a tablet that has no Emporium yet, and a
+# that build alone: it installs on a tablet that has no Lakay yet, and a
 # later build installs only after the earlier one is removed (which removes
 # that tablet's books, so save a sealed backup first).
 
@@ -33,6 +33,8 @@ concurrency:
 
 jobs:
   apk:
+    # each device has its own repository; this one builds only in Lakay-Apps
+    if: contains(github.repository, 'Lakay-Apps')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -47,7 +49,7 @@ jobs:
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
           echo "BT=$BT" >> "$GITHUB_ENV"
           echo "PLAT=$PLAT" >> "$GITHUB_ENV"
-          echo "APK=Emporium-Android-Fire.apk" >> "$GITHUB_ENV"
+          echo "APK=Lakay-Android-Fire.apk" >> "$GITHUB_ENV"
           echo "Build $BUILD; build tools $BT; platform $PLAT"; java -version
 
       - name: Compile the shell
@@ -61,8 +63,8 @@ jobs:
       - name: Put the page, the icons and the manifest together
         run: |
           mkdir -p build/assets
-          cp app/Emporium.html build/assets/Emporium.html
-          printf '{"page": "Emporium.html", "background": "#F3F2F8", "bridges": ["EmporiumHost"]}' > build/assets/shell.json
+          cp app/Lakay.html build/assets/Lakay.html
+          printf '{"page": "Lakay.html", "background": "#f6f4fa", "bridges": ["EmporiumHost"]}' > build/assets/shell.json
           "$BT/aapt2" compile --dir packages/fire/res -o build/res.zip
           "$BT/aapt2" link -o build/base.apk -I "$PLAT/android.jar" --manifest packages/fire/AndroidManifest.xml \
             -R build/res.zip -A build/assets --min-sdk-version 22 --target-sdk-version 34 \
@@ -84,8 +86,8 @@ jobs:
             KEY_PASS=$(openssl rand -hex 24)
             ALIAS=emporium
             keytool -genkeypair -keystore "$RUNNER_TEMP/key.p12" -storetype PKCS12 -alias "$ALIAS" -keyalg RSA -keysize 3072 \
-              -validity 10000 -dname "CN=Emporium build $BUILD (one-build key)" -storepass "$KEY_PASS" -keypass "$KEY_PASS" 2>/dev/null
-            echo "SIGN_NOTE=signed with a one-build key: remove an earlier Emporium (after a sealed backup) before installing" >> "$GITHUB_ENV"
+              -validity 10000 -dname "CN=Lakay build $BUILD (one-build key)" -storepass "$KEY_PASS" -keypass "$KEY_PASS" 2>/dev/null
+            echo "SIGN_NOTE=signed with a one-build key: remove an earlier Lakay (after a sealed backup) before installing" >> "$GITHUB_ENV"
             echo "::warning::No lasting signing key in the repository's secrets: this APK is signed with a key made for this build alone."
           fi
           "$BT/apksigner" sign --ks "$RUNNER_TEMP/key.p12" --ks-type PKCS12 --ks-key-alias "$ALIAS" \
@@ -93,9 +95,9 @@ jobs:
           rm -f "$RUNNER_TEMP/key.p12"
           "$BT/apksigner" verify --verbose "$RUNNER_TEMP/$APK" | head -n 8
           "$BT/aapt2" dump badging "$RUNNER_TEMP/$APK" | head -n 6
-          unzip -p "$RUNNER_TEMP/$APK" assets/Emporium.html | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/inside.txt"
-          echo "page inside $(cat "$RUNNER_TEMP/inside.txt"), recorded $(cut -d' ' -f1 app/Emporium.html.sha256)"
-          test "$(cat "$RUNNER_TEMP/inside.txt")" = "$(cut -d' ' -f1 app/Emporium.html.sha256)"
+          unzip -p "$RUNNER_TEMP/$APK" assets/Lakay.html | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/inside.txt"
+          echo "page inside $(cat "$RUNNER_TEMP/inside.txt"), recorded $(cut -d' ' -f1 app/Lakay.html.sha256)"
+          test "$(cat "$RUNNER_TEMP/inside.txt")" = "$(cut -d' ' -f1 app/Lakay.html.sha256)"
 
       - name: Put it on the build's release page
         env:

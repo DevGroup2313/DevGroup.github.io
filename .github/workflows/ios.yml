@@ -1,11 +1,11 @@
-name: Emporium for iPhone and iPad
+name: Lakay for iPhone and iPad
 
-# Builds Emporium for iPhone and iPad on GitHub's own Macs (they have Xcode) and
-# puts Emporium-Build-N-iPhone-iPad.ipa on the build's release page. One file
+# Builds Lakay for iPhone and iPad on GitHub's own Macs (they have Xcode) and
+# puts Lakay-Build-N-iPhone-iPad.ipa on the build's release page. One file
 # works on both. The IPA is NOT signed: Sideloadly signs it with your Apple ID
 # while it installs it over the cable, as Ingenium and Inkwell are installed.
 # The app is Ingenium 6.0's iPhone and iPad shell (packages/ios) holding
-# Emporium's page; made after Ingenium's shell build (build-shells.yml).
+# Lakay's page; made after Ingenium's shell build (build-shells.yml).
 
 on:
   push:
@@ -26,6 +26,8 @@ concurrency:
 
 jobs:
   ipa:
+    # each device has its own repository; this one builds only in Lakay-Apps
+    if: contains(github.repository, 'Lakay-Apps')
     runs-on: macos-15
     timeout-minutes: 45
     steps:
@@ -36,13 +38,13 @@ jobs:
         run: |
           BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
-          echo "IPA=Emporium-iPhone-iPad-unsigned.ipa" >> "$GITHUB_ENV"
+          echo "IPA=Lakay-iPhone-iPad-unsigned.ipa" >> "$GITHUB_ENV"
           xcodebuild -version
 
       - name: Put the page and the build number in the shell
         working-directory: packages/ios
         run: |
-          cp ../../app/Emporium.html Shell/www/Emporium.html
+          cp ../../app/Lakay.html Shell/www/Lakay.html
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.$BUILD" -c "Set :CFBundleVersion $BUILD" Shell/Info.plist
           ls -la Shell/www Shell/Icons
 
@@ -56,15 +58,15 @@ jobs:
         working-directory: packages/ios
         run: |
           set -o pipefail
-          xcodebuild -project Emporium.xcodeproj -target Shell -configuration Release -sdk iphoneos \
+          xcodebuild -project Lakay.xcodeproj -target Shell -configuration Release -sdk iphoneos \
             SYMROOT="$RUNNER_TEMP/build" \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             build > "$RUNNER_TEMP/build-log.txt" 2>&1
-          APP="$RUNNER_TEMP/build/Release-iphoneos/Emporium.app"
+          APP="$RUNNER_TEMP/build/Release-iphoneos/Lakay.app"
           ls -la "$APP"
-          file "$APP/Emporium"
+          file "$APP/Lakay"
           plutil -lint "$APP/Info.plist"
-          A=$(shasum -a 256 "$APP/www/Emporium.html" | cut -d' ' -f1); B=$(cut -d' ' -f1 ../../app/Emporium.html.sha256)
+          A=$(shasum -a 256 "$APP/www/Lakay.html" | cut -d' ' -f1); B=$(cut -d' ' -f1 ../../app/Lakay.html.sha256)
           echo "page inside $A, recorded $B"; test "$A" = "$B"
           echo "APP=$APP" >> "$GITHUB_ENV"
 

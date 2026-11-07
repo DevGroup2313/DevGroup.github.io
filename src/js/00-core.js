@@ -65,6 +65,7 @@ var ICONS = {
   info: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.3",
   tip: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z",
   x: "M6 6l12 12M18 6 6 18",
+  chevron: "M6 9.5l6 6 6-6",
   trash: "M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13",
   edit: "M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4",
   archive: "M3.5 4.5h17v4h-17zM5 8.5V20h14V8.5M10 12h4",
@@ -155,4 +156,4 @@ function prefSet(k, v) { try { localStorage.setItem("emporium." + k, String(v));
 E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, money: money, moneyPlain: moneyPlain, divRound: divRound,
   parseRate: parseRate, rateText: rateText, taxOn: taxOn, dayKey: dayKey, fromDayKey: fromDayKey, addDays: addDays,
   startOfWeek: startOfWeek, b64e: b64e, b64d: b64d, hex: hex, rnd: rnd, uid: uid, canon: canon, sha256hex: sha256hex,
-  norm: norm, debounce: debounce, prefGet: prefGet, prefSet: prefSet, TE: TE, TD: TD };
+  norm: norm, debounce: debounce, prefGet: prefGet, prefSet: prefSet, pad2: pad2, TE: TE, TD: TD };

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- EMPORIUM  |  Copyright (c) 2026 Yannie D. Forest. All rights reserved.
      NO LICENCE IS GRANTED. See LICENCE.txt.
-     Emporium for the Fire tablet: one activity holding the web view that runs
-     Emporium.html from inside the package (assets/), at
+     Lakay for the Fire tablet: one activity holding the web view that runs
+     Lakay.html from inside the package (assets/), at
      https://appassets.androidplatform.net/assets/. The version is written by
      the build (.github/workflows/fire.yml) from build.json.
      INTERNET is declared only because Android's web view asks for it to load
@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="Emporium"
+        android:label="Lakay"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:hardwareAccelerated="true"

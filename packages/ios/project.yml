@@ -1,9 +1,9 @@
 # EMPORIUM  |  Copyright (c) 2026 Yannie D. Forest. All rights reserved.
 # NO LICENCE IS GRANTED. See LICENCE.txt.
 #
-# Emporium for iPhone and iPad, for XcodeGen: Ingenium 6.0's shell (source/shells/ios),
-# built by .github/workflows/ios.yml with Emporium's page in Shell/www.
-name: Emporium
+# Lakay for iPhone and iPad, for XcodeGen: Ingenium 6.0's shell (source/shells/ios),
+# built by .github/workflows/ios.yml with Lakay's page in Shell/www.
+name: Lakay
 options:
   bundleIdPrefix: com.yannieforest
   deploymentTarget:
@@ -37,7 +37,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.yannieforest.emporium
-        PRODUCT_NAME: Emporium
+        PRODUCT_NAME: Lakay
         INFOPLIST_FILE: Shell/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_OUTPUT_FORMAT: xml

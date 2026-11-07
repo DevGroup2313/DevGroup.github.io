@@ -2,7 +2,7 @@
 # NO LICENCE IS GRANTED. See LICENCE.txt.
 # -*- mode: python ; coding: utf-8 -*-
 #
-# Emporium for the Mac (Apple silicon and Intel): the same window program as on
+# Lakay for the Mac (Apple silicon and Intel): the same window program as on
 # Windows (desktop/emporium_app.py), opened in the Mac's own web view (WebKit).
 # Built on GitHub's Macs by .github/workflows/mac.yml; you do not run this file.
 # Made after Ingenium's Mac recipe (ingenium.spec): pywebview and PyObjC
@@ -14,7 +14,7 @@ import sys
 
 from PyInstaller.utils.hooks import collect_all
 
-APP_NAME = 'Emporium'
+APP_NAME = 'Lakay'
 APP_ID = 'com.yannieforest.emporium'
 ROOT = os.path.abspath(os.path.join(SPECPATH, '..', '..'))
 
@@ -40,7 +40,7 @@ a = Analysis(
     [os.path.join(ROOT, 'desktop', 'emporium_app.py')],
     pathex=[],
     binaries=extra_binaries,
-    datas=[(os.path.join(ROOT, 'app', 'Emporium.html'), '.')] + extra_datas,
+    datas=[(os.path.join(ROOT, 'app', 'Lakay.html'), '.')] + extra_datas,
     hiddenimports=['webview.platforms.cocoa'] + extra_hidden,
     hookspath=[],
     hooksconfig={},

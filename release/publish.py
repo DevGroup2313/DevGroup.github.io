@@ -6,7 +6,7 @@
     python release/publish.py <file> <label> [note]
 
 The release is named after the build number in build.json ("build-2",
-"Emporium build 2"); the first package to finish makes it, with the notes in
+"Lakay build 2"); the first package to finish makes it, with the notes in
 release/NOTES.md. Each package then adds one line to the notes: its label, its
 file name and its SHA-256. Run by the GitHub workflows; uses the gh command
 with the workflow's own token.
@@ -34,7 +34,7 @@ def main():
     build = int(info["build"])
     # One release, "latest", updated in place with fixed file names, as the
     # owner's other apps publish theirs (Ingenium-Mac-Mini, Ingenium-Android-fire).
-    tag, title = "latest", "Emporium (latest build)"
+    tag, title = "latest", "Lakay (latest build)"
     commit = (os.environ.get("GITHUB_SHA") or "")[:7]
     name = os.path.basename(path)
     with open(path, "rb") as fh:

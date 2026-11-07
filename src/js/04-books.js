@@ -28,8 +28,28 @@
     }).then(function (dev) {
       B.device = dev;
       return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.get("meta", "custom")]);
-    }).then(function (r) { E.custom = E.cleanCustom ? E.cleanCustom(r[2]) : (r[2] || null); return { hasStore: !!r[0], door: r[1] || null, vault: r[0] || null }; });
+    }).then(function (r) {
+      E.custom = E.cleanCustom ? E.cleanCustom(r[2]) : (r[2] || null);
+      return { hasStore: !!r[0], door: r[1] || null, vault: r[0] || null, practice: !!(r[0] && r[0].practice) };
+    });
   };
+
+  /* ---------- one clock for the books ----------
+     Every time the books write comes from here. Only the practice store may set it back (B._at), to lay down its
+     sample weeks of sales; the store's own books always write the time it is. */
+  function clock() { return (B.mode === "practice" && B._at) ? new Date(B._at) : new Date(); }
+  B.mode = "real";
+
+  /* ---------- the owner's user name at the door (as Ingenium keeps its own: plain, so the sign-in can greet) ---------- */
+  B.setDoorUser = function (name) {
+    var n = String(name || "").normalize("NFC").trim().replace(/\s+/g, " ").slice(0, 60);
+    if (!n) return Promise.resolve(false);
+    return D.get("meta", "door").then(function (d) {
+      d = d || {}; if (d.user === n) return false;
+      d.user = n; return D.write([{ store: "meta", key: "door", value: d }]).then(function () { return true; });
+    });
+  };
+  B.sameName = function (a, b) { function n(x) { return String(x || "").normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase(); } return n(a) === n(b); };
 
   /* ---------- the default shelves of the store ---------- */
   var DEFAULT_CATS = ["music", "movies", "perfume", "grocery", "drinks", "food", "services", "other"];
@@ -77,7 +97,7 @@
       return Promise.all([C.seal(p.key, line, aadLine(id, 1)), C.seal(p.key, head, aadRec(id, "head:main"))]
         .concat(recs.map(function (r) { return C.seal(p.key, r.value, aadRec(id, r.kind + ":" + r.id)); })));
     }).then(function (sealed) {
-      var ops = [{ store: "meta", key: "vault", value: vault }, { store: "meta", key: "door", value: { storeName: o.storeName, created: now.toISOString() } },
+      var ops = [{ store: "meta", key: "vault", value: vault }, { store: "meta", key: "door", value: { storeName: o.storeName, user: o.ownerName, created: now.toISOString() } },
         { store: "journal", key: 1, value: sealed[0], add: true }, { store: "rec", key: "head:main", value: sealed[1] }];
       recs.forEach(function (r, i) { ops.push({ store: "rec", key: r.kind + ":" + r.id, value: sealed[i + 2] }); });
       return D.write(ops);
@@ -163,6 +183,138 @@
   };
   B.state = function () { return state; };
 
+  /* ---------- the practice store ----------
+     A store of its own, in its own database, with sample goods and two weeks of sample sales, that opens with no
+     sign-in: to see every page, and to train. Its Store Key is sealed by a key kept on this device only, made so that
+     it cannot be copied out of the browser; nothing in the practice store is real, and it never touches the store's
+     own books, which stay sealed with the owner's password and the Master Key. */
+  B.PRACTICE_DB = "emporium-practice";
+  function quietLock() { KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null; }
+  B.useBooks = function (practice) {
+    quietLock();
+    D.use(practice ? B.PRACTICE_DB : "emporium");
+    B.mode = practice ? "practice" : "real";
+  };
+  B.openPractice = function (progress) {
+    B.useBooks(true);
+    return B.boot().then(function (r) {
+      if (r.vault && r.vault.device) {
+        return D.get("meta", "devkey").then(function (kek) {
+          if (!kek) throw err("damaged");
+          return C.unwrap(r.vault.device, kek, aadEnv(r.vault.storeId, "device"), false).then(function (key) { return load(r.vault, key); });
+        });
+      }
+      if (r.vault) throw err("damaged");
+      return createPractice(progress);
+    });
+  };
+  B.resetPractice = function (progress) {
+    B.useBooks(true);
+    return D.wipe().then(function () { return createPractice(progress); });
+  };
+  function createPractice(progress) {
+    var id = U.hex(U.rnd(16)), now = new Date(), storeKey, kek, env;
+    return C.newStoreKey().then(function (k) {
+      storeKey = k;
+      return crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["wrapKey", "unwrapKey"]);
+    }).then(function (k2) { kek = k2; return C.wrap(storeKey, kek, aadEnv(id, "device")); }).then(function (e) {
+      env = e;
+      var start = new Date(now.getTime() - 16 * 86400000);
+      var settings = { storeName: E.t("practice.store"), ownerName: E.t("practice.owner"), currency: "USD",
+        taxes: [{ id: "tx1", name: E.t("practice.tax"), rate: 7000 }], weekStart: 1, lockMinutes: 15, receiptNote: "", created: start.toISOString(), practice: true };
+      var recs = [{ kind: "settings", id: "main", value: settings },
+        { kind: "user", id: "owner", value: { id: "owner", name: settings.ownerName, role: "owner", created: start.toISOString() } },
+        { kind: "counter", id: "receipt", value: { next: 1 } }];
+      DEFAULT_CATS.forEach(function (c, i) { recs.push({ kind: "cat", id: c, value: { id: c, key: "cat." + c, order: i } }); });
+      var line = { seq: 1, at: start.toISOString(), day: U.dayKey(start), by: "owner", dev: B.device.id, type: "store.created",
+        data: { storeName: settings.storeName, ownerName: settings.ownerName, currency: "USD", practice: true }, prev: ZERO, build: E.BUILD.number };
+      var vault = { v: 1, app: "emporium", storeId: id, created: now.toISOString(), practice: true, device: env };
+      return U.sha256hex(U.canon(line)).then(function (hash) {
+        var head = { seq: 1, hash: hash, at: line.at };
+        return Promise.all([C.seal(storeKey, line, aadLine(id, 1)), C.seal(storeKey, head, aadRec(id, "head:main"))]
+          .concat(recs.map(function (r) { return C.seal(storeKey, r.value, aadRec(id, r.kind + ":" + r.id)); })));
+      }).then(function (sealed) {
+        var ops = [{ store: "meta", key: "vault", value: vault }, { store: "meta", key: "devkey", value: kek },
+          { store: "meta", key: "door", value: { storeName: settings.storeName, practice: true, created: now.toISOString() } },
+          { store: "journal", key: 1, value: sealed[0], add: true }, { store: "rec", key: "head:main", value: sealed[1] }];
+        recs.forEach(function (r, i) { ops.push({ store: "rec", key: r.kind + ":" + r.id, value: sealed[i + 2] }); });
+        return D.write(ops);
+      }).then(function () { return C.unwrap(env, kek, aadEnv(id, "device"), false); })
+        .then(function (key) { storeKey = null; return load(vault, key); })
+        .then(function () { return seedPractice(start, progress); });
+    });
+  }
+  /* The sample goods of a Caribbean store: [shelf, name, price, cost (cents), stock, reorder at, taxed, barcode]. */
+  var SAMPLE = [
+    ["music", "Kompa classics, volume 1 (CD)", 1299, 650, 18, 5, 1, "0850001000017"], ["music", "Konpa love songs (CD)", 1299, 650, 14, 5, 1, "0850001000024"],
+    ["music", "Rara and carnival hits (CD)", 1499, 760, 9, 4, 1, "0850001000031"], ["music", "Zouk evenings (CD)", 1299, 640, 4, 5, 1, "0850001000048"],
+    ["music", "Haitian gospel favourites (CD)", 1199, 600, 12, 4, 1, ""], ["movies", "Haitian comedy night (DVD)", 999, 480, 15, 5, 1, "0850002000016"],
+    ["movies", "Carnival in Jacmel (DVD)", 1499, 720, 7, 3, 1, ""], ["movies", "Family drama, season 1 (DVD set)", 1999, 1050, 5, 2, 1, ""],
+    ["perfume", "Florida water, 7.5 oz", 699, 310, 24, 8, 1, "0850003000015"], ["perfume", "Kananga water, 7.5 oz", 599, 270, 16, 6, 1, ""],
+    ["perfume", "Bay rum aftershave", 799, 380, 10, 4, 1, ""], ["perfume", "Eau de parfum, vanilla musk", 3499, 1600, 6, 2, 1, "0850003000039"],
+    ["grocery", "Djon djon mushrooms, 1 oz", 999, 520, 22, 8, 0, "0850004000014"], ["grocery", "Pikliz, 16 oz jar", 649, 300, 20, 6, 0, ""],
+    ["grocery", "Haitian coffee, 1 lb", 1199, 640, 13, 5, 0, "0850004000038"], ["grocery", "Akasan mix, 1 lb", 499, 230, 17, 6, 0, ""],
+    ["grocery", "Peanut butter (manba), 16 oz", 799, 380, 11, 4, 0, ""], ["grocery", "Coconut candy (tablèt)", 249, 100, 30, 10, 0, ""],
+    ["grocery", "Plantain chips", 199, 80, 40, 12, 0, "0850004000076"], ["grocery", "Rice, 5 lb", 849, 520, 19, 6, 0, ""],
+    ["drinks", "Cola champagne, 12 oz", 175, 70, 60, 24, 1, "0850005000013"], ["drinks", "Malta, 12 oz", 199, 85, 48, 24, 1, "0850005000020"],
+    ["drinks", "Ginger beer, 12 oz", 199, 90, 36, 12, 1, ""], ["drinks", "Coconut water, 16 oz", 249, 120, 30, 12, 1, ""],
+    ["drinks", "Spring water, 16 oz", 125, 40, 72, 24, 1, ""], ["food", "Patty, beef", 275, 110, 40, 12, 1, ""],
+    ["food", "Patty, chicken", 275, 110, 40, 12, 1, ""], ["food", "Patty, herring", 300, 125, 24, 8, 1, ""],
+    ["food", "Patty, codfish", 300, 125, 6, 8, 1, ""], ["other", "Phone charger, USB-C", 999, 400, 8, 3, 1, ""]
+  ];
+  function seedPractice(start, progress) {
+    var seed = 20261107;
+    function rnd(n) { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n; }
+    var made = [], left = {}, chain = Promise.resolve(), steps = SAMPLE.length + 3, done = 0;
+    function tick() { done++; if (progress) try { progress(Math.min(1, done / steps)); } catch (e) { } }
+    B._at = start.toISOString();
+    SAMPLE.forEach(function (s) {
+      chain = chain.then(function () {
+        return B.addItem({ name: s[1], cat: s[0], price: s[2], cost: s[3], openingStock: s[4] <= s[5] ? s[4] : s[4] + 30, reorderAt: s[5], taxId: s[6] ? "tx1" : null, barcode: s[7] }).then(function (it) {
+          made.push(it); left[it.id] = it.stock; tick();
+        });
+      });
+    });
+    /* fourteen days of sales, from two weeks ago to an hour ago, in the order they happened */
+    chain = chain.then(function () {
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      var plan = [];
+      for (var d = 14; d >= 0; d--) {
+        var day = new Date(today.getTime() - d * 86400000), n = 4 + rnd(6);
+        for (var k = 0; k < n; k++) {
+          var at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9 + rnd(11), rnd(60), rnd(60));
+          if (at.getTime() < Date.now() - 3600000) plan.push(at);
+        }
+      }
+      plan.sort(function (a, b) { return a - b; });
+      steps = SAMPLE.length + plan.length + 3;
+      var c2 = Promise.resolve();
+      plan.forEach(function (at, j) {
+        c2 = c2.then(function () {
+          var lines = [], n = 1 + rnd(3);
+          for (var x = 0; x < n; x++) {
+            var it = made[rnd(made.length)], q = 1 + rnd(it.cat === "drinks" || it.cat === "food" ? 3 : 1);
+            if (left[it.id] - q < 2 || lines.some(function (l) { return l.itemId === it.id; })) continue;
+            left[it.id] -= q; lines.push({ itemId: it.id, qty: q });
+          }
+          if (!lines.length) { tick(); return null; }
+          B._at = at.toISOString();
+          var total = B.priceTicket(lines).total, paid = total <= 2000 ? Math.ceil(total / 500) * 500 : Math.ceil(total / 1000) * 1000;
+          return B.completeSale(lines, paid).then(tick);
+        });
+        if (j === Math.floor(plan.length / 2)) {
+          c2 = c2.then(function () {
+            var patty = made.filter(function (m) { return m.cat === "food"; })[0];
+            B._at = new Date(at.getTime() + 60000).toISOString();
+            return B.adjust(patty.id, -3, "expired", "").then(function () { left[patty.id] -= 3; tick(); });
+          });
+        }
+      });
+      return c2;
+    });
+    return chain.then(function () { B._at = null; return state; }, function (e) { B._at = null; throw e; });
+  }
+
   /* ---------- writing: one change at a time, each worked out from the books as they stand at that moment ---------- */
   var queue = Promise.resolve();
   B.change = function (fn) {
@@ -176,7 +328,7 @@
     return p;
   };
   function commit(type, data, recs, metaOps) {
-    var now = new Date(), seq = state.head.seq + 1;
+    var now = clock(), seq = state.head.seq + 1;
     var line = { seq: seq, at: now.toISOString(), day: U.dayKey(now), by: B.user.id, dev: B.device.id, type: type, data: data,
       prev: state.head.hash, build: E.BUILD.number };
     var key = KEY, id = ID;
@@ -250,7 +402,7 @@
   }
   B.addItem = function (f) {
     return B.change(function (st) {
-      var now = new Date().toISOString();
+      var now = clock().toISOString();
       var it = { id: U.uid("i"), name: String(f.name || "").trim(), cat: f.cat, price: f.price, cost: f.cost === undefined ? null : f.cost,
         barcode: String(f.barcode || "").trim() || null, sku: String(f.sku || "").trim() || null, taxId: f.taxId || null,
         reorderAt: f.reorderAt === undefined ? null : f.reorderAt, notes: String(f.notes || "").trim(), stock: 0, archived: false, created: now, updated: now };
@@ -274,7 +426,7 @@
       });
       if (!Object.keys(diff).length) return null;
       var bad = checkItem(it, st, id); if (bad) throw err(bad);
-      it.updated = new Date().toISOString();
+      it.updated = clock().toISOString();
       return { type: "item.updated", data: { id: id, changes: diff }, recs: [{ kind: "item", id: id, value: it }], result: it };
     });
   };
@@ -282,7 +434,7 @@
     return B.change(function (st) {
       var it = clone(st.items[id]); if (!it) throw err("noitem");
       if (!!it.archived === !!flag) return null;
-      it.archived = !!flag; it.updated = new Date().toISOString();
+      it.archived = !!flag; it.updated = clock().toISOString();
       return { type: "item.archived", data: { id: id, archived: !!flag }, recs: [{ kind: "item", id: id, value: it }], result: it };
     });
   };
@@ -300,10 +452,10 @@
       if (!Number.isSafeInteger(qty) || qty <= 0) throw err("qty");
       if (unitCost !== null && (!Number.isSafeInteger(unitCost) || unitCost < 0)) throw err("cost");
       var before = it.stock, costBefore = it.cost, costAfter = averageCost(before, costBefore, qty, unitCost);
-      it.stock = before + qty; it.cost = costAfter; it.updated = new Date().toISOString();
+      it.stock = before + qty; it.cost = costAfter; it.updated = clock().toISOString();
       var mv = { id: U.uid("m"), kind: "receive", itemId: id, qty: qty, unitCost: unitCost, costBefore: costBefore, costAfter: costAfter,
         stockBefore: before, stockAfter: it.stock, supplier: String(supplier || "").trim(), note: String(note || "").trim(),
-        at: new Date().toISOString(), day: U.dayKey(), by: B.user.id };
+        at: clock().toISOString(), day: U.dayKey(clock()), by: B.user.id };
       return { type: "stock.received", data: clone(mv), recs: [{ kind: "item", id: id, value: it }, { kind: "move", id: mv.id, value: mv }], result: it };
     });
   };
@@ -314,9 +466,9 @@
       if (!Number.isSafeInteger(delta) || delta === 0) throw err("qty");
       if (B.REASONS.indexOf(reason) < 0) throw err("reason");
       if (reason === "other" && !String(note || "").trim()) throw err("note");
-      var before = it.stock; it.stock = before + delta; it.updated = new Date().toISOString();
+      var before = it.stock; it.stock = before + delta; it.updated = clock().toISOString();
       var mv = { id: U.uid("m"), kind: "adjust", itemId: id, qty: delta, reason: reason, unitCost: it.cost, stockBefore: before, stockAfter: it.stock,
-        note: String(note || "").trim(), at: new Date().toISOString(), day: U.dayKey(), by: B.user.id };
+        note: String(note || "").trim(), at: clock().toISOString(), day: U.dayKey(clock()), by: B.user.id };
       return { type: "stock.adjusted", data: clone(mv), recs: [{ kind: "item", id: id, value: it }, { kind: "move", id: mv.id, value: mv }], result: it };
     });
   };
@@ -347,7 +499,7 @@
       if (!Number.isSafeInteger(tendered) || tendered < t.total) throw err("short");
       var counter = clone(st.counters.receipt || { next: 1 }), no = B.device.code + "-" + String(counter.next).padStart(6, "0");
       counter.next += 1;
-      var now = new Date();
+      var now = clock();
       var sale = { id: U.uid("s"), no: no, at: now.toISOString(), day: U.dayKey(now), hour: now.getHours(), by: B.user.id, dev: B.device.id,
         lines: t.lines, subtotal: t.subtotal, taxes: t.taxes, tax: t.tax, total: t.total, items: t.items,
         pay: [{ method: "cash", amount: t.total, tendered: tendered, change: tendered - t.total }], status: "completed" };
@@ -363,12 +515,15 @@
   };
 
   /* ---------- reports ---------- */
-  B.report = function (fromKey, toKey) {
-    var st = state, r = { from: fromKey, to: toKey, count: 0, items: 0, net: 0, tax: 0, gross: 0, cogs: 0, noCost: 0, profit: 0,
+  /* A report for whole days (fromKey to toKey, by the store's calendar), or for part of a day: win = { from, to } in
+     milliseconds narrows it to the sales and moves made in that window (this hour, this morning, this afternoon). */
+  B.report = function (fromKey, toKey, win) {
+    function inWin(x) { if (!win) return true; var at = Date.parse(x.at); return at >= win.from && at < win.to; }
+    var st = state, r = { from: fromKey, to: toKey, win: win || null, count: 0, items: 0, net: 0, tax: 0, gross: 0, cogs: 0, noCost: 0, profit: 0,
       byCat: {}, byItem: {}, byHour: [], byDay: {}, byMethod: {}, losses: { value: 0, qty: 0, byReason: {} }, received: { qty: 0, value: 0 } };
     for (var h = 0; h < 24; h++) r.byHour.push({ count: 0, gross: 0 });
     st.sales.forEach(function (s) {
-      if (s.status !== "completed" || s.day < fromKey || s.day > toKey) return;
+      if (s.status !== "completed" || s.day < fromKey || s.day > toKey || !inWin(s)) return;
       r.count++; r.items += s.items; r.net += s.subtotal; r.tax += s.tax; r.gross += s.total;
       r.byHour[s.hour].count++; r.byHour[s.hour].gross += s.total;
       var d = r.byDay[s.day] = r.byDay[s.day] || { count: 0, gross: 0, net: 0, profit: 0 };
@@ -388,7 +543,7 @@
     /* profit counts only lines whose cost is known; sales of items with no cost are shown apart */
     r.profit = r.net - r.noCost - r.cogs;
     st.moves.forEach(function (m) {
-      if (m.day < fromKey || m.day > toKey) return;
+      if (m.day < fromKey || m.day > toKey || !inWin(m)) return;
       if (m.kind === "receive") { r.received.qty += m.qty; r.received.value += (m.unitCost || 0) * m.qty; }
       if (m.kind === "adjust" && m.qty < 0) {
         var v = (m.unitCost || 0) * -m.qty;

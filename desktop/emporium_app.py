@@ -2,10 +2,10 @@
 # EMPORIUM  |  Copyright (c) 2026 Yannie D. Forest. All rights reserved.
 # NO LICENCE IS GRANTED. See LICENCE.txt.
 """
-Emporium: the desktop program for Windows and Mac.
+Lakay: the desktop program for Windows and Mac.
 
-A thin window around the app. Everything Emporium does lives in the one page,
-Emporium.html; this program only opens that page in a window of its own, with
+A thin window around the app. Everything Lakay does lives in the one page,
+Lakay.html; this program only opens that page in a window of its own, with
 the system's own web view (Microsoft Edge WebView2 on Windows, WebKit on Mac).
 Nothing is sent anywhere: the page runs offline, and its sealed books stay in
 the web view's storage in the person's own profile.
@@ -22,26 +22,29 @@ import json
 import os
 import re
 import sys
+import subprocess
+import shutil
 import threading
 import time
 
 _START = time.perf_counter()
 _START_WALL = time.time()
 
-WINDOW_TITLE = "Emporium"
-APP_FILE = "Emporium.html"
-DATA_FOLDER = "Emporium"            # %LOCALAPPDATA%\Emporium on Windows
+WINDOW_TITLE = "Lakay"
+APP_FILE = "Lakay.html"
+DATA_FOLDER = "Emporium"            # %LOCALAPPDATA%\Emporium on Windows: kept from the first builds, so the books
+                                    # set up before the name became Lakay open as they were
 DEFAULT_WIDTH = 1280
 DEFAULT_HEIGHT = 820
 MIN_WIDTH = 380
 MIN_HEIGHT = 560
 DAY_COLOUR = "#F3F2F8"               # the page's own background by day
-SINGLE_INSTANCE_NAME = "Local\\Emporium.windows.single"
+SINGLE_INSTANCE_NAME = "Local\\Lakay.windows.single"
 READY_LIMIT_S = 120
 READY_POLL_S = 0.25
 
 
-def tell_user(text, title="Emporium"):
+def tell_user(text, title="Lakay"):
     """A message the person will see: a native box on Windows (the program has
     no console), the terminal elsewhere."""
     try:
@@ -149,7 +152,7 @@ def _seconds():
 
 
 # ---------------------------------------------------------------- saving files
-# Emporium's page forbids code made from text (its Content Security Policy has
+# Lakay's page forbids code made from text (its Content Security Policy has
 # no 'unsafe-eval'). pywebview builds its JavaScript bridge with new Function
 # and reads values back with eval, so the bridge is not offered at all: no
 # js_api. The page then saves a file the way it does in a browser, as a
@@ -222,7 +225,7 @@ def _window_shown():
 _READY_JS = (
     "(function(){var d=document,a=d.getElementById('app'),bg='';"
     "try{bg=getComputedStyle(d.body).backgroundColor;}catch(e){}"
-    "return JSON.stringify([d.readyState,a?a.childElementCount:0,!!d.querySelector('.door button, .shell'),bg,d.title]);})()"
+    "return JSON.stringify([d.readyState,a?a.childElementCount:0,!!d.querySelector('#introDoor .intro-card, #lockDoor .ild-card, .shell'),bg,d.title]);})()"
 )
 
 _RGB_RE = re.compile(r"rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)")
@@ -297,12 +300,188 @@ def _watch_start(window):
         log_note("start: the ready watch stopped (%s)" % (exc,))
 
 
+# ---------------------------------------------------------------- the clipboard, for the page's right-press panel
+# Ingenium's own helpers (R78), carried over: the Windows clipboard through user32, the Mac pasteboard through AppKit
+# (pbpaste and pbcopy when AppKit is missing).
+def _clipboard_read():
+    """R78: the text on the computer's clipboard, for the page's own Paste.
+    A web view will not hand the clipboard to the page unless the keyboard is
+    used, so the edit panel asks the app instead: AppKit's general pasteboard
+    on a Mac (pbpaste if AppKit is missing), the Windows clipboard otherwise."""
+    try:
+        if sys.platform == "darwin":
+            try:
+                from AppKit import NSPasteboard, NSPasteboardTypeString
+                t = NSPasteboard.generalPasteboard().stringForType_(NSPasteboardTypeString)
+                return {"ok": True, "text": str(t) if t is not None else ""}
+            except ImportError:
+                env = dict(os.environ, LANG="en_US.UTF-8", LC_ALL="en_US.UTF-8")
+                r = subprocess.run(["/usr/bin/pbpaste", "-Prefer", "txt"], capture_output=True, timeout=5, env=env)
+                return {"ok": True, "text": r.stdout.decode("utf-8", "replace")}
+        if sys.platform.startswith("win"):
+            return {"ok": True, "text": _win_clipboard_text()}
+        for cmd in (["wl-paste", "--no-newline"], ["xclip", "-selection", "clipboard", "-o"], ["xsel", "--clipboard", "--output"]):
+            if shutil.which(cmd[0]):
+                r = subprocess.run(cmd, capture_output=True, timeout=5)
+                return {"ok": True, "text": r.stdout.decode("utf-8", "replace")}
+        return {"ok": False, "error": "no clipboard tool on this computer"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def _clipboard_write(text):
+    """R78: puts text on the computer's clipboard (the panel's Copy and Cut)."""
+    text = "" if text is None else str(text)
+    try:
+        if sys.platform == "darwin":
+            try:
+                from AppKit import NSPasteboard, NSPasteboardTypeString
+                pb = NSPasteboard.generalPasteboard()
+                pb.clearContents()
+                return {"ok": bool(pb.setString_forType_(text, NSPasteboardTypeString))}
+            except ImportError:
+                env = dict(os.environ, LANG="en_US.UTF-8", LC_ALL="en_US.UTF-8")
+                subprocess.run(["/usr/bin/pbcopy"], input=text.encode("utf-8"), timeout=5, env=env, check=True)
+                return {"ok": True}
+        if sys.platform.startswith("win"):
+            _win_clipboard_set(text)
+            return {"ok": True}
+        for cmd in (["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"]):
+            if shutil.which(cmd[0]):
+                subprocess.run(cmd, input=text.encode("utf-8"), timeout=5, check=True)
+                return {"ok": True}
+        return {"ok": False, "error": "no clipboard tool on this computer"}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def _win_clipboard_api():
+    import ctypes
+    from ctypes import wintypes
+    u = ctypes.WinDLL("user32", use_last_error=True)
+    k = ctypes.WinDLL("kernel32", use_last_error=True)
+    u.OpenClipboard.argtypes = [wintypes.HWND]
+    u.OpenClipboard.restype = wintypes.BOOL
+    u.CloseClipboard.restype = wintypes.BOOL
+    u.EmptyClipboard.restype = wintypes.BOOL
+    u.IsClipboardFormatAvailable.argtypes = [wintypes.UINT]
+    u.IsClipboardFormatAvailable.restype = wintypes.BOOL
+    u.GetClipboardData.argtypes = [wintypes.UINT]
+    u.GetClipboardData.restype = wintypes.HANDLE
+    u.SetClipboardData.argtypes = [wintypes.UINT, wintypes.HANDLE]
+    u.SetClipboardData.restype = wintypes.HANDLE
+    k.GlobalLock.argtypes = [wintypes.HGLOBAL]
+    k.GlobalLock.restype = wintypes.LPVOID
+    k.GlobalUnlock.argtypes = [wintypes.HGLOBAL]
+    k.GlobalUnlock.restype = wintypes.BOOL
+    k.GlobalAlloc.argtypes = [wintypes.UINT, ctypes.c_size_t]
+    k.GlobalAlloc.restype = wintypes.HGLOBAL
+    k.GlobalFree.argtypes = [wintypes.HGLOBAL]
+    k.GlobalFree.restype = wintypes.HGLOBAL
+    return ctypes, u, k
+
+
+def _win_clipboard_open(u):
+    # another program may hold the clipboard for a moment; try for about a second
+    for _ in range(20):
+        if u.OpenClipboard(None):
+            return True
+        time.sleep(0.05)
+    raise OSError("the clipboard is busy in another program")
+
+
+def _win_clipboard_text():
+    ctypes, u, k = _win_clipboard_api()
+    CF_UNICODETEXT = 13
+    _win_clipboard_open(u)
+    try:
+        if not u.IsClipboardFormatAvailable(CF_UNICODETEXT):
+            return ""
+        h = u.GetClipboardData(CF_UNICODETEXT)
+        if not h:
+            return ""
+        ptr = k.GlobalLock(h)
+        if not ptr:
+            return ""
+        try:
+            return ctypes.wstring_at(ptr)
+        finally:
+            k.GlobalUnlock(h)
+    finally:
+        u.CloseClipboard()
+
+
+def _win_clipboard_set(text):
+    ctypes, u, k = _win_clipboard_api()
+    CF_UNICODETEXT, GMEM_MOVEABLE = 13, 0x0002
+    data = ctypes.create_unicode_buffer(text)
+    size = ctypes.sizeof(data)
+    _win_clipboard_open(u)
+    try:
+        u.EmptyClipboard()
+        h = k.GlobalAlloc(GMEM_MOVEABLE, size)
+        if not h:
+            raise OSError("no memory for the clipboard")
+        ptr = k.GlobalLock(h)
+        if not ptr:
+            k.GlobalFree(h)
+            raise OSError("the clipboard memory could not be locked")
+        ctypes.memmove(ptr, data, size)
+        k.GlobalUnlock(h)
+        if not u.SetClipboardData(CF_UNICODETEXT, h):
+            k.GlobalFree(h)
+            raise OSError("the clipboard refused the text")
+    finally:
+        u.CloseClipboard()
+
+
+
+# The page cannot call the app directly (its security policy refuses the bridge pywebview would inject), so it leaves
+# notes in a mailbox (window.__lakayClip) and this thread reads them a few times a second with run_js, which the policy
+# allows, does what they ask, and answers. The page's protections stay as strict as they were.
+_CLIP_TAKE_JS = "(function(){window.__lakayDesk=1;var c=window.__lakayClip;return JSON.stringify(c&&c.take?c.take():[]);})()"
+
+
+def _clipboard_mailbox(window):
+    try:
+        while True:
+            try:
+                if window.events.closing.is_set():
+                    return
+            except Exception:
+                pass
+            notes = []
+            try:
+                if window.events.loaded.is_set():
+                    got = window.run_js(_CLIP_TAKE_JS)
+                    notes = json.loads(got) if isinstance(got, str) else (got or [])
+            except Exception:
+                notes = []
+            for n in notes if isinstance(notes, list) else []:
+                try:
+                    nid = int(n.get("id"))
+                    if n.get("op") == "read":
+                        r = _clipboard_read()
+                    elif n.get("op") == "write":
+                        r = _clipboard_write(str(n.get("text", ""))[:1000000])
+                    else:
+                        continue
+                    ok = bool(r.get("ok"))
+                    text = r.get("text", "") if ok else r.get("error", "")
+                    window.run_js("window.__lakayClip&&window.__lakayClip.answer(%d,%s,%s)" % (nid, "true" if ok else "false", json.dumps(text)))
+                except Exception:
+                    log_problem("clipboard note")
+            time.sleep(0.15)
+    except Exception as exc:
+        log_note("clipboard mailbox stopped (%s)" % (exc,))
+
+
 # ---------------------------------------------------------------- one copy at a time
 _single_instance = []
 
 
 def _another_copy_is_open():
-    """True when Emporium is already open in this sign-in. Its window is then
+    """True when Lakay is already open in this sign-in. Its window is then
     brought forward and this copy ends. A named mutex (CreateMutexW) tells; it
     disappears with the process that holds it, so a crash never leaves it."""
     if not sys.platform.startswith("win"):
@@ -335,7 +514,7 @@ def _another_copy_is_open():
             log_note("start: already open; brought its window forward")
         else:
             log_note("start: already open, but its window has not appeared yet")
-            tell_user("Emporium is still opening.\n\nIts window will appear in a moment.")
+            tell_user("Lakay is still opening.\n\nIts window will appear in a moment.")
     except Exception as exc:
         log_note("start: already open; its window could not be brought forward (%s)" % (exc,))
     return True
@@ -437,10 +616,10 @@ def _prepare_windows_graphics(prior_failures):
     if not remembered:
         try:
             with open(path, "w", encoding="utf-8") as fh:
-                fh.write("Safe graphics are on for Emporium on this PC, because a run did not end\n"
+                fh.write("Safe graphics are on for Lakay on this PC, because a run did not end\n"
                          "cleanly. The window is drawn without the graphics chip's help.\n\n"
-                         "To try full graphics again: close Emporium, delete this file, and open\n"
-                         "Emporium. If its window ever closes by itself again, safe graphics\n"
+                         "To try full graphics again: close Lakay, delete this file, and open\n"
+                         "Lakay. If its window ever closes by itself again, safe graphics\n"
                          "switch back on by themselves.\n")
         except Exception as exc:
             log_note("graphics: safe graphics could not be remembered (%s)" % (exc,))
@@ -456,8 +635,8 @@ def main():
 
     app_html = find_app_html()
     if not app_html:
-        tell_user("Emporium could not find its page, Emporium.html.\n\n"
-                  "Install Emporium again with its installer from the Releases page.")
+        tell_user("Lakay could not find its page, Lakay.html.\n\n"
+                  "Install Lakay again with its installer from the Releases page.")
         sys.exit(1)
 
     prior = _begin_session()
@@ -469,11 +648,11 @@ def main():
         log_problem("import webview failed", sys.exc_info())
         if open_in_browser(app_html):
             _end_session()
-            tell_user("Emporium has opened in your browser, because the part that draws its own\n"
+            tell_user("Lakay has opened in your browser, because the part that draws its own\n"
                       "window would not start on this computer. Everything works the same there,\n"
                       "offline. Details are in:\n  %s" % log_path())
             return
-        tell_user("Emporium could not open. Details are in:\n  %s" % log_path())
+        tell_user("Lakay could not open. Details are in:\n  %s" % log_path())
         sys.exit(1)
 
     try:
@@ -499,11 +678,11 @@ def main():
             log_note("webview2 runtime: not found")
             if open_in_browser(app_html):
                 _end_session()
-                tell_user("Emporium has opened in your browser.\n\n"
+                tell_user("Lakay has opened in your browser.\n\n"
                           "Its own window needs Microsoft Edge WebView2, a free part of Windows\n"
-                          "that is missing on this PC. Once it is installed, Emporium opens in its\n"
+                          "that is missing on this PC. Once it is installed, Lakay opens in its\n"
                           "own window.\n\n"
-                          "Note: the books kept in the browser and the books kept in Emporium's own\n"
+                          "Note: the books kept in the browser and the books kept in Lakay's own\n"
                           "window are separate. A sealed backup moves a store from one to the other.")
                 return
         else:
@@ -520,7 +699,7 @@ def main():
         log_problem("create_window failed", sys.exc_info())
         if open_in_browser(app_html):
             _end_session()
-            tell_user("Emporium could not open its own window on this computer, so it has opened\n"
+            tell_user("Lakay could not open its own window on this computer, so it has opened\n"
                       "in your browser instead. Details are in:\n  %s" % log_path())
             return
         sys.exit(1)
@@ -547,11 +726,12 @@ def main():
     # opens in the browser instead, which keeps its storage.
     store = storage_dir()
     if not store:
-        tell_user("Emporium could not make its folder for the books:\n  %s\n\n"
+        tell_user("Lakay could not make its folder for the books:\n  %s\n\n"
                   "Nothing was opened, so nothing can be lost." % os.path.join(data_root(), "storage"))
         _end_session()
         sys.exit(1)
     threading.Thread(target=_watch_start, args=(window,), name="start-watch", daemon=True).start()
+    threading.Thread(target=_clipboard_mailbox, args=(window,), name="clipboard", daemon=True).start()
     kw = {"debug": False, "private_mode": False, "storage_path": store}
     if sys.platform.startswith("win"):
         kw["gui"] = "edgechromium"
@@ -564,7 +744,7 @@ def main():
         log_problem("webview.start failed", sys.exc_info())
     if open_in_browser(app_html):
         _end_session()
-        tell_user("Emporium could not open its own window, so it has opened in your browser.\n"
+        tell_user("Lakay could not open its own window, so it has opened in your browser.\n"
                   "Details are in:\n  %s" % log_path())
 
 
@@ -575,5 +755,5 @@ if __name__ == "__main__":
         raise
     except Exception:
         log_problem("fatal")
-        tell_user("Emporium stopped unexpectedly.\n\nDetails are in:\n  %s" % log_path())
+        tell_user("Lakay stopped unexpectedly.\n\nDetails are in:\n  %s" % log_path())
         sys.exit(1)

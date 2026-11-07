@@ -1,6 +1,6 @@
-name: Emporium for Mac
+name: Lakay for Mac
 
-# Builds Emporium for the Mac on GitHub's own Macs, one app for Apple silicon
+# Builds Lakay for the Mac on GitHub's own Macs, one app for Apple silicon
 # (M1 and later) and one for Intel, opens each once, and puts each zip on the
 # build's release page. Made after Ingenium's Mac build (build-mac.yml).
 
@@ -23,6 +23,8 @@ concurrency:
 
 jobs:
   mac:
+    # each device has its own repository; this one builds only in Lakay-Mac
+    if: contains(github.repository, 'Lakay-Mac')
     name: mac (${{ matrix.chip }})
     strategy:
       fail-fast: false
@@ -46,7 +48,7 @@ jobs:
         run: |
           BUILD=$(python3 -c "import json;print(int(json.load(open('build.json'))['build']))")
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
-          echo "ZIP=Emporium-${{ matrix.zip }}.zip" >> "$GITHUB_ENV"
+          echo "ZIP=Lakay-${{ matrix.zip }}.zip" >> "$GITHUB_ENV"
           uname -m; sw_vers
 
       - name: Set up Python 3.12
@@ -58,22 +60,22 @@ jobs:
         # the versions Ingenium's and the Forge's builds use
         run: python3 -m pip install --disable-pip-version-check "pyinstaller==6.22.3" "pywebview==6.2.1"
 
-      - name: Build Emporium.app
+      - name: Build Lakay.app
         run: |
           python3 -m PyInstaller --noconfirm --clean desktop/mac/emporium-mac.spec 2>&1 | tail -n 8
-          test -d dist/Emporium.app
-          PAGE=$(find dist/Emporium.app -name Emporium.html -type f | head -n 1)
+          test -d dist/Lakay.app
+          PAGE=$(find dist/Lakay.app -name Lakay.html -type f | head -n 1)
           echo "Page inside: $PAGE"
-          A=$(shasum -a 256 "$PAGE" | cut -d' ' -f1); B=$(cut -d' ' -f1 app/Emporium.html.sha256)
+          A=$(shasum -a 256 "$PAGE" | cut -d' ' -f1); B=$(cut -d' ' -f1 app/Lakay.html.sha256)
           echo "inside $A, recorded $B"
           test "$A" = "$B"
-          file dist/Emporium.app/Contents/MacOS/Emporium
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" dist/Emporium.app/Contents/Info.plist
+          file dist/Lakay.app/Contents/MacOS/Lakay
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" dist/Lakay.app/Contents/Info.plist
 
       - name: Seal the app (ad hoc, no Apple ID)
         run: |
-          codesign --force --deep --sign - --timestamp=none dist/Emporium.app
-          codesign --verify --deep --strict --verbose=2 dist/Emporium.app
+          codesign --force --deep --sign - --timestamp=none dist/Lakay.app
+          codesign --verify --deep --strict --verbose=2 dist/Lakay.app
 
       - name: Open the app once
         # Starts the app and waits for its own line "start: page ready" (the
@@ -83,7 +85,7 @@ jobs:
         run: |
           LOG="$HOME/Library/Application Support/Emporium/emporium.log"
           rm -f "$LOG"
-          dist/Emporium.app/Contents/MacOS/Emporium &
+          dist/Lakay.app/Contents/MacOS/Lakay &
           PID=$!
           for i in $(seq 1 240); do
             sleep 0.5
@@ -105,7 +107,7 @@ jobs:
 
       - name: Zip the app
         run: |
-          ditto -c -k --sequesterRsrc --keepParent dist/Emporium.app "$RUNNER_TEMP/$ZIP"
+          ditto -c -k --sequesterRsrc --keepParent dist/Lakay.app "$RUNNER_TEMP/$ZIP"
           ls -la "$RUNNER_TEMP/$ZIP"
 
       - name: Put it on the build's release page

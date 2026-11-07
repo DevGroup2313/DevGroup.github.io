@@ -7,12 +7,12 @@
   var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
   var S = E.studio = { room: "start" };
   var LANGS = ["en", "fr", "ht"];
-  var PALETTES = ["indigo", "royal", "amethyst", "burgundy", "graphite"];
-  var SWATCH = { indigo: ["#3F4797", "#E6E3F5", "#A8864E", "#101119"], royal: ["#1B5E8C", "#DDE9F2", "#A8864E", "#0E1318"],
+  var PALETTES = ["dawn", "amethyst", "indigo", "royal", "burgundy", "graphite"];
+  var SWATCH = { dawn: ["#6f78d8", "#e9e7f8", "#c08b2f", "#131430"], indigo: ["#3F4797", "#E6E3F5", "#A8864E", "#101119"], royal: ["#1B5E8C", "#DDE9F2", "#A8864E", "#0E1318"],
     amethyst: ["#5B3FA8", "#E8E0F6", "#A8864E", "#120F18"], burgundy: ["#7A2E3B", "#EEDFDD", "#A8864E", "#141011"], graphite: ["#3A4150", "#E3E4E8", "#A8864E", "#111214"] };
   var LIMIT = { app: 40, tagline: 70, word: 2000, lines: 300, thanks: 80 };
 
-  function blank() { return { v: 1, names: { app: "", tagline: { en: "", fr: "", ht: "" } }, words: { en: {}, fr: {}, ht: {} }, look: { palette: "indigo", density: "compact" }, receipt: { lines: "", thanks: { en: "", fr: "", ht: "" } } }; }
+  function blank() { return { v: 2, names: { app: "", tagline: { en: "", fr: "", ht: "" } }, words: { en: {}, fr: {}, ht: {} }, look: { palette: "dawn", density: "compact" }, receipt: { lines: "", thanks: { en: "", fr: "", ht: "" } } }; }
   function clip(s, n) { return (typeof s === "string" ? s : "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").slice(0, n); }
   /* Only what the Studio knows, only text, within limits: anything else in a file is left out. */
   E.cleanCustom = function (c) {
@@ -27,6 +27,8 @@
     });
     if (c.look && typeof c.look === "object") {
       if (PALETTES.indexOf(c.look.palette) >= 0) o.look.palette = c.look.palette;
+      /* a set saved before Lakay (build 2 or earlier) was the old default, not a choice: Lakay's own Dawn takes its place */
+      if (c.v !== 2 && (c.look.palette === "indigo" || c.look.palette === "amethyst")) o.look.palette = "dawn";
       if (c.look.density === "comfortable") o.look.density = "comfortable";
     }
     if (c.receipt && typeof c.receipt === "object") {
@@ -36,12 +38,12 @@
     return o;
   };
   function cur() { return JSON.parse(JSON.stringify(E.custom || blank())); }
-  E.appName = function () { var n = E.custom && E.custom.names && E.custom.names.app; return n || "Emporium"; };
+  E.appName = function () { var n = E.custom && E.custom.names && E.custom.names.app; return n || "Lakay"; };
   E.tagline = function () { var c = E.custom && E.custom.names && E.custom.names.tagline; return (c && c[E.lang]) || t("door.tag"); };
   E.thanks = function () { var c = E.custom && E.custom.receipt && E.custom.receipt.thanks; return (c && c[E.lang]) || t("receipt.thanks"); };
   /* The software's own identity stays on receipts, reports and About, whatever the app is called: it is what an auditor
      checks against the release. */
-  E.made = function () { var n = E.appName(); return (n === "Emporium" ? "Emporium " : n + " · Emporium ") + t("build") + " " + E.BUILD.number; };
+  E.made = function () { var n = E.appName(); return (n === "Lakay" ? "Lakay " : n + " · Lakay ") + t("build") + " " + E.BUILD.number; };
   E.receiptLines = function () { return E.custom && E.custom.receipt && E.custom.receipt.lines ? E.custom.receipt.lines.split("\n").filter(function (x) { return x.trim(); }) : []; };
 
   /* Which parts changed, in plain paths, for the ledger line. */
@@ -96,13 +98,13 @@
   function names(pane) {
     var st = B.state(), c = cur();
     paneHead(pane, "names");
-    var app = ui.input({ id: "stApp", maxlength: String(LIMIT.app), value: c.names.app, placeholder: "Emporium" });
+    var app = ui.input({ id: "stApp", maxlength: String(LIMIT.app), value: c.names.app, placeholder: "Lakay" });
     var store = ui.input({ id: "stStore", maxlength: "80", value: st.settings.storeName });
     var owner = ui.input({ id: "stOwner", maxlength: "80", value: st.settings.ownerName });
     var tags = {};
     LANGS.forEach(function (l) { tags[l] = ui.input({ id: "stTag-" + l, maxlength: String(LIMIT.tagline), value: c.names.tagline[l], placeholder: E.original("door.tag", l) }); });
     var pvName = h("span.pv-name"), pvTag = h("em"), pvStore = h("span.pv-store");
-    function paint() { pvName.textContent = app.value.trim() || "Emporium"; pvTag.textContent = tags[E.lang].value.trim() || E.original("door.tag", E.lang); pvStore.textContent = store.value.trim(); }
+    function paint() { pvName.textContent = app.value.trim() || "Lakay"; pvTag.textContent = tags[E.lang].value.trim() || E.original("door.tag", E.lang); pvStore.textContent = store.value.trim(); }
     [app, store, tags.en, tags.fr, tags.ht].forEach(function (x) { x.addEventListener("input", paint); });
     paint();
     pane.appendChild(h("div.studio-split", null, [
@@ -120,7 +122,7 @@
           } }, [ui.emo("💾"), t("save")]),
           h("button.key", { type: "button", onclick: function () { app.value = ""; LANGS.forEach(function (l) { tags[l].value = ""; }); paint(); } }, [ui.emo("↩️"), t("studio.original")])])]),
       h("div.studio-preview", { "aria-label": t("studio.preview") }, [h("p.label-caps", null, [ui.emo("👀"), t("studio.preview")]),
-        h("div.pv-door", null, [h("span.seal-ring", null, ui.sealWrap(64)), pvName, h("div.door-rule", null, [h("span"), pvTag, h("span")]), pvStore])])]));
+        h("div.pv-door", null, [h("span.seal-ring", null, ui.crestKey(64, { title: t("crest.press") })), pvName, h("div.door-rule", null, [h("span"), pvTag, h("span")]), pvStore])])]));
   }
 
   /* ---------- words ---------- */
@@ -236,7 +238,7 @@
   /* ---------- safekeeping ---------- */
   function exportAll() {
     var body = { format: "emporium-author", v: 1, build: E.BUILD.number, at: new Date().toISOString(), custom: cur() };
-    ui.saveFile("Emporium Author Studio " + U.dayKey() + ".json", "application/json", JSON.stringify(body, null, 1)).then(function () { ui.toast(t("studio.exported"), "good"); });
+    ui.saveFile("Lakay Author Studio " + U.dayKey() + ".json", "application/json", JSON.stringify(body, null, 1)).then(function () { ui.toast(t("studio.exported"), "good"); });
   }
   function resetAll() {
     ui.confirm(t("studio.resetT"), t("studio.resetP"), t("studio.resetYes"), "danger").then(function (ok) {
@@ -245,10 +247,8 @@
   }
   function safe(pane) {
     paneHead(pane, "safe");
-    var file = h("input", { type: "file", id: "studioFile", accept: ".json,application/json" });
     var msg = h("p.door-msg", { role: "status" });
-    file.addEventListener("change", function () {
-      var f = file.files && file.files[0]; if (!f) return;
+    var file = ui.filePick({ id: "studioFile", keyId: "studioFileKey", accept: ".json,application/json", label: t("studio.import"), none: t("ld.rs.none"), emoji: "📥", onFile: function (f) {
       f.text().then(function (text) {
         var body; try { body = JSON.parse(text); } catch (e) { body = null; }
         if (!body || body.format !== "emporium-author" || body.v !== 1 || !body.custom) { msg.textContent = t("studio.importBad"); return; }
@@ -257,10 +257,10 @@
           if (ok) save(next, true).then(function () { ui.toast(t("studio.imported"), "good"); ui.shell(); });
         });
       });
-    });
+    } });
     pane.appendChild(h("div.studio-row", null, [h("span.emo", { "aria-hidden": "true" }, "📤"), h("div", null, [h("strong", null, t("studio.export")), h("p.hint", null, t("studio.safe.export"))]),
       h("button.key.sm", { type: "button", onclick: exportAll }, t("studio.export"))]));
-    pane.appendChild(h("div.studio-row", null, [h("span.emo", { "aria-hidden": "true" }, "📥"), h("div", null, [h("strong", null, t("studio.import")), h("p.hint", null, t("studio.safe.import")), ui.field("studio.importFile", file), msg])]));
+    pane.appendChild(h("div.studio-row", null, [h("span.emo", { "aria-hidden": "true" }, "📥"), h("div", null, [h("strong", null, t("studio.import")), h("p.hint", null, t("studio.safe.import")), file, msg])]));
     pane.appendChild(h("div.studio-row", null, [h("span.emo", { "aria-hidden": "true" }, "↩️"), h("div", null, [h("strong", null, t("studio.reset")), h("p.hint", null, t("studio.resetP"))]),
       h("button.key.sm.danger", { type: "button", onclick: resetAll }, t("studio.reset"))]));
   }

@@ -1,6 +1,6 @@
-name: Emporium for Windows
+name: Lakay for Windows
 
-# Builds the Windows program from app/Emporium.html, tests it on GitHub's
+# Builds the Windows program from app/Lakay.html, tests it on GitHub's
 # Windows computer, makes the installer, installs and uninstalls it, scans it
 # with Microsoft Defender, and puts it on the build's release page.
 # Made after the Forge's Windows build (FFF, 9s80).
@@ -24,6 +24,8 @@ concurrency:
 
 jobs:
   windows:
+    # each device has its own repository; this one builds only in Lakay-Windows
+    if: contains(github.repository, 'Lakay-Windows')
     runs-on: windows-latest
     timeout-minutes: 60
     defaults:
@@ -45,11 +47,11 @@ jobs:
             "BUILD=$build"
             "APP_LABEL=Build $build"
             "APP_NUMERIC=1.0.$build.0"
-            "SETUP_BASE=Emporium-Windows-Setup"
+            "SETUP_BASE=Lakay-Windows-Setup"
             "OUT=$env:RUNNER_TEMP\out"
           ) | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\out" | Out-Null
-          "Emporium build $build"
+          "Lakay build $build"
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -66,11 +68,11 @@ jobs:
           python -m pip list | Select-String -Pattern "pyinstaller|pywebview|pythonnet"
           exit 0
 
-      - name: Build Emporium (a program folder)
+      - name: Build Lakay (a program folder)
         run: |
           python -m PyInstaller --noconfirm --clean desktop\windows\emporium.spec 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\build-log.txt" | Select-Object -Last 8
-          $dir = "$env:GITHUB_WORKSPACE\dist\Emporium"
-          $exe = "$dir\Emporium.exe"
+          $dir = "$env:GITHUB_WORKSPACE\dist\Lakay"
+          $exe = "$dir\Lakay.exe"
           if (-not (Test-Path $exe)) { Write-Error "No program was produced."; exit 1 }
           $v = (Get-Item $exe).VersionInfo
           "Version details: product '$($v.ProductName)', file version $($v.FileVersion), product version '$($v.ProductVersion)', company '$($v.CompanyName)'"
@@ -81,8 +83,8 @@ jobs:
 
       - name: Check the page inside is the one committed
         run: |
-          python -c "import sys,hashlib; a=open(sys.argv[1],'rb').read(); b=open(sys.argv[2],'rb').read(); rec=open(sys.argv[3]).read().split()[0]; h=hashlib.sha256(a).hexdigest(); print('inside', h, 'recorded', rec); sys.exit(0 if a==b and h==rec else 1)" "$env:PROGRAM_DIR\_internal\Emporium.html" "app\Emporium.html" "app\Emporium.html.sha256"
-          if ($LASTEXITCODE -ne 0) { Write-Error "The page inside the program is not app/Emporium.html as committed and fingerprinted."; exit 1 }
+          python -c "import sys,hashlib; a=open(sys.argv[1],'rb').read(); b=open(sys.argv[2],'rb').read(); rec=open(sys.argv[3]).read().split()[0]; h=hashlib.sha256(a).hexdigest(); print('inside', h, 'recorded', rec); sys.exit(0 if a==b and h==rec else 1)" "$env:PROGRAM_DIR\_internal\Lakay.html" "app\Lakay.html" "app\Lakay.html.sha256"
+          if ($LASTEXITCODE -ne 0) { Write-Error "The page inside the program is not app/Lakay.html as committed and fingerprinted."; exit 1 }
           exit 0
 
       - name: Open the program once
@@ -103,7 +105,7 @@ jobs:
             } catch { '' }
           }
           $clock = [Diagnostics.Stopwatch]::StartNew()
-          $p = Start-Process -FilePath ".\Emporium.exe" -PassThru
+          $p = Start-Process -FilePath ".\Lakay.exe" -PassThru
           $null = $p.Handle
           $text = ''
           while (($clock.Elapsed.TotalSeconds -lt 120) -and -not $p.HasExited) {
@@ -124,7 +126,7 @@ jobs:
           } catch { "No screenshot: $($_.Exception.Message)" }
           $second = 'not tried'
           if (-not $p.HasExited) {
-            $q = Start-Process -FilePath ".\Emporium.exe" -PassThru
+            $q = Start-Process -FilePath ".\Lakay.exe" -PassThru
             $null = $q.Handle
             $ended = $q.WaitForExit(30000)
             $fwd = (ReadLog) -match 'start: already open; brought its window forward'
@@ -173,15 +175,15 @@ jobs:
       - name: Install it, then uninstall it, silently
         run: |
           $setup = "$env:OUT\$env:SETUP_BASE.exe"
-          $dir = Join-Path $env:LOCALAPPDATA 'Programs\Emporium'
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\Lakay'
           $p = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', "/LOG=$env:RUNNER_TEMP\setup-log.txt" -PassThru
           $null = $p.Handle
           if (-not $p.WaitForExit(600000)) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue; Write-Error "The installer did not finish within 10 minutes."; exit 1 }
           "Installer exit code: $($p.ExitCode)"
           if ($p.ExitCode -ne 0) { Write-Error "The installer failed."; exit 1 }
-          if (-not (Test-Path "$dir\Emporium.exe")) { Write-Error "The installer did not put the program in $dir."; exit 1 }
-          if (-not (Test-Path "$dir\_internal\Emporium.html")) { Write-Error "The installed program has no Emporium.html."; exit 1 }
-          $lnk = Join-Path ([Environment]::GetFolderPath('Programs')) 'Emporium.lnk'
+          if (-not (Test-Path "$dir\Lakay.exe")) { Write-Error "The installer did not put the program in $dir."; exit 1 }
+          if (-not (Test-Path "$dir\_internal\Lakay.html")) { Write-Error "The installed program has no Lakay.html."; exit 1 }
+          $lnk = Join-Path ([Environment]::GetFolderPath('Programs')) 'Lakay.lnk'
           if (-not (Test-Path $lnk)) { Write-Error "No Start menu entry was made."; exit 1 }
           $key = Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -like 'com.yannieforest.emporium.windows*' }
           if (-not $key) { Write-Error "No entry in Settings, Apps."; exit 1 }
@@ -193,8 +195,8 @@ jobs:
           $un = Get-ChildItem $dir -Filter 'unins*.exe' | Select-Object -First 1
           $u = Start-Process -FilePath $un.FullName -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/LOG=$env:RUNNER_TEMP\uninstall-log.txt" -PassThru
           $null = $u.WaitForExit(300000)
-          for ($i = 0; ($i -lt 90) -and (Test-Path "$dir\Emporium.exe"); $i++) { Start-Sleep -Seconds 1 }
-          if (Test-Path "$dir\Emporium.exe") { Write-Error "The uninstaller did not remove the program."; exit 1 }
+          for ($i = 0; ($i -lt 90) -and (Test-Path "$dir\Lakay.exe"); $i++) { Start-Sleep -Seconds 1 }
+          if (Test-Path "$dir\Lakay.exe") { Write-Error "The uninstaller did not remove the program."; exit 1 }
           if (-not (Test-Path "$env:LOCALAPPDATA\Emporium\storage")) { Write-Error "The uninstaller removed the books folder; it must never do that."; exit 1 }
           "Uninstalled: the program is gone and the books folder stayed."
           exit 0
