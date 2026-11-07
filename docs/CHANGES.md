@@ -4,6 +4,17 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 6 (7 November 2026): the owner as administrator, the staff, and the time clock
+
+- **The owner is the administrator,** with every room and key, and the user ID 1001. Settings, backups, the Author Studio and the people with their keys are the owner's alone.
+- **The Team room.** The owner adds each person with a name, a user ID (1002, 1003 and on) and a level of access: Cashier, Stock keeper, Manager, or chosen one by one (sell; items and prices; deliveries; stock corrections; costs and profit; reports; the team's hours). The owner gives a first password; the person chooses their own at their first sign-in. A key can be given again, or taken back; what the person did stays in the books.
+- **Who did what.** Every ledger line, sale, receipt, stock move and shift carries the person's user ID. The receipt says who served; the history of an item says who did each thing; the reports have a Person chooser and a table of each person's sales, with the time they worked and their sales per hour.
+- **Signing in and out is the time clock.** A person signs in with their name or ID and their own password, and is clocked in as they arrive. The status key at the top shows who is in, green on the clock and amber on a break; it starts and ends breaks, clocks out, and signs out. "Clock out and sign out" brings the door back for the next person. My hours shows each week's shifts; the owner and managers see everyone's hours and who is on the clock now, and can clock out a person who forgot.
+- **What each person sees.** A person without costs and profit sees no cost, profit or value of the stock anywhere: not in Inventory, the item cards, Home, the reports or the CSV files. The rooms, keys and side-rail keys follow each person's access, and the books themselves refuse a change a person may not make.
+- **The practice store** has two sample people, Marie (a cashier) and Jean (a manager), with two weeks of shifts and sales. The status key there shows the store as each of them sees it.
+- Two new Guidebook chapters: Your team, and Signing in, the clock and breaks.
+- tests/t_build6.js: 41 checks, all passing, with the 48 of tests/t_build3.js.
+
 ## Build 5 (7 November 2026): the mark in true depth, and the downloads set up as the other apps'
 
 - **The mark in true depth.** The Spiral now stands in sixteen planes at real depth, with its drawing unchanged: the coin's gold edge (four planes behind the face, so its thickness shows as it turns), the shadows the halo and the shell cast on the plate, the shell's own sides under its faceted top, then the lattice, the pearl and the sparkles. It sways further, leans toward the pointer, and its rings, shell and pearl breathe in and out of depth out of step. A press still winds it up like a flywheel. Calm keeps it still.

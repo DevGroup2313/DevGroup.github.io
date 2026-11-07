@@ -78,7 +78,8 @@ var ICONS = {
   tag: "M3.5 12V4.5H11l9.5 9.5-7.5 7.5zM7.5 8.5v.2",
   truck: "M2.5 6h11v10h-11zM13.5 9.5H18l3.5 3.5V16h-8M6 18.5a1.5 1.5 0 1 0 0-.1M17 18.5a1.5 1.5 0 1 0 0-.1",
   clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3.5 2",
-  list: "M8 6.5h12M8 12h12M8 17.5h12M4 6.5v.2M4 12v.2M4 17.5v.2"
+  list: "M8 6.5h12M8 12h12M8 17.5h12M4 6.5v.2M4 12v.2M4 17.5v.2",
+  people: "M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M15.5 4.8a3.5 3.5 0 0 1 0 6.4M17.5 14.2A6.5 6.5 0 0 1 21.5 20"
 };
 function icon(name, cls) {
   var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");

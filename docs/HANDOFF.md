@@ -10,8 +10,8 @@ Read this first in a new session. It says where Lakay stands and what comes next
   - `DevGroup2313/Lakay-Apps`: the iPhone and iPad app and the Fire tablet's, and their build kits only.
 - **Making a release:** see "Releasing a build" in `README.md`. In short: raise `build.json`, build, test, run `python3 release/device_repos.py windows`, commit and push Lakay-Windows; then `python3 release/device_repos.py mac <clone of Lakay-Mac>` and `... apps <clone of Lakay-Apps>`, commit and push each. Put `[skip ci]` in a commit message to save work without building.
 - **GitHub commits the apps into `builds/`** after each build (`release/publish.py`, as github-actions, with `[skip ci]`). So pull before pushing: `git pull --rebase origin claude/magical-darwin-ppq4pn`.
-- **Released:** Build 5 (7 November 2026): the mark in true depth and the downloads set up as the other apps'. Build 4's files were confirmed on all three repositories before it.
-- **Tests:** `node tests/t_build3.js` drives the whole app in Chromium (48 checks). Build with `python3 build.py`.
+- **Released:** Build 6 (7 November 2026): the owner as administrator, the staff with user IDs and access levels, signing in and out with the time clock, reports by person. Build 5 (the mark in true depth, the downloads set up as the other apps') was confirmed on all three repositories before it.
+- **Tests:** `node tests/t_build3.js` (48 checks) and `node tests/t_build6.js` (41 checks) drive the whole app in Chromium. Build with `python3 build.py`.
 
 ## How the app is made
 
@@ -26,22 +26,18 @@ Read this first in a new session. It says where Lakay stands and what comes next
   - `18-peek.js`: the show-password key on every password field.
   - `19-sound.js`: live sounds.
   - `20-rail.js` + `rail.css`: the side rail (Reminders, Price check, Low stock, Calculator, Day or night, New sale).
+  - `21-team.js` + `team.css`: the Team room (who is on the clock, time cards, the people with their IDs and access). The people, their envelopes, the sign-in (`B.signIn`), access (`B.can`) and the time clock (`B.clockIn`, `B.clockOut`, `B.breakStart`, `B.breakEnd`) are in `04-books.js`; the status key and sign-out in `10-ui.js`; the first own password at the door in `11-door.js`. See `docs/02-DESIGN-AND-SECURITY.md`, "The people's own keys".
 - **The mark is the Spiral.** It was chosen and approved. Its drawing sources are in `docs/brand/source` (`gen3.py`, `spiral9` draws the planes). Le Comptoir's compass rose and the other marks are kept in `docs/brand/backup`.
 
 ## What the owner asked for that is still to come
 
-1. **Build 6: administrator and staff.**
-   - The owner is the administrator, with full control.
-   - Every person has a user id, stamped on every ledger line, sale and stock move.
-   - Roles and levels of access are given by the owner. Staff never see costs, profits, budgets, the business's reports, Settings, the Studio or backups.
-   - Sign out is clock out. The next person signs in and clocks in; breaks are recorded too.
-   - The status key shows who is on the clock. Reports can be filtered by person.
-2. **Schedae from Carpe Diem, in exact parity.** The sticky notes, their right-press menu, their side menu and their night dress, as 🗒️ on the rail.
-3. **Inventory.** Departments, tabs and pages by kind of merchandise; a massive expansion for large inventories.
-4. **Payments.** Card, Apple Pay and Google Pay through any processor (not only Square), and split payments.
-5. **Learning.** Trainings for staff and new hires; a guided interactive tour with live demonstrations; tips throughout.
-6. **The Author Studio** is to be redesigned; the owner calls it pitiful.
-7. **Other business.** Travel bookings for clients, earnings, transfer and top-up logs, schedules and shift swaps.
+1. **Schedae from Carpe Diem, in exact parity.** The sticky notes, their right-press menu, their side menu and their night dress, as 🗒️ on the rail.
+2. **Inventory.** Departments, tabs and pages by kind of merchandise; a massive expansion for large inventories.
+3. **Payments.** Card, Apple Pay and Google Pay through any processor (not only Square), and split payments.
+4. **Learning.** Trainings for staff and new hires; a guided interactive tour with live demonstrations; tips throughout.
+5. **The Author Studio** is to be redesigned; the owner calls it pitiful.
+6. **Other business.** Travel bookings for clients, earnings, transfer and top-up logs, schedules and shift swaps (the time clock is done; schedules build on it).
+7. **Devices in step.** Each device keeps its own books today; the people, sales and shifts of one device do not yet reach another.
 
 ## Rules the owner has set
 

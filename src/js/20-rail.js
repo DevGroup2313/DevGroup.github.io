@@ -21,7 +21,9 @@
   R.build = function () {
     var down = U.prefGet("railDown", "0") === "1", night = document.documentElement.getAttribute("data-theme") === "night";
     var box = h("div#rail.rail" + (down ? ".down" : ""), { role: "toolbar", "aria-label": t("rail.label") });
-    KEYS.forEach(function (k, i) {
+    /* the new-sale key only for those who sell */
+    var keys = KEYS.filter(function (k) { return k[0] !== "sale" || !B.isOpen || B.can("sell"); });
+    keys.forEach(function (k, i) {
       var emo = k[0] === "theme" ? (night ? "☀️" : "🌙") : k[1];
       var b = h("button.rail-btn#rail-" + k[0], { type: "button", title: t(k[2]), "aria-label": t(k[2]), onclick: function () { R.press(k[0], b); } },
         [h("span", { "aria-hidden": "true" }, emo), k[0] === "bell" || k[0] === "low" ? h("b.rail-badge#badge-" + k[0], { hidden: true }) : null]);
@@ -31,7 +33,7 @@
     var chev = h("button#railChevron", { type: "button", title: t(down ? "rail.up" : "rail.down"), "aria-label": t(down ? "rail.up" : "rail.down"), "aria-expanded": String(!down), onclick: function () {
       U.prefSet("railDown", U.prefGet("railDown", "0") === "1" ? "0" : "1"); closePop(); R.refresh();
     } }, down ? "‹" : "›");
-    chev.style.bottom = "calc(" + (52 + KEYS.length * 56) + "px + env(safe-area-inset-bottom, 0px))";
+    chev.style.bottom = "calc(" + (52 + keys.length * 56) + "px + env(safe-area-inset-bottom, 0px))";
     box.appendChild(chev);
     setTimeout(R.badges, 0);
     return box;
@@ -136,7 +138,7 @@
       if (!hits.length) { list.appendChild(h("li.rp-none", null, t("find.none"))); return; }
       hits.forEach(function (it) {
         list.appendChild(itemRow(it, [
-          h("button.key.sm.primary", { type: "button", title: t("find.sellTip"), onclick: function () { closePop(); toSale(it.id); } }, ["🛒 ", t("find.sell")]),
+          B.can("sell") ? h("button.key.sm.primary", { type: "button", title: t("find.sellTip"), onclick: function () { closePop(); toSale(it.id); } }, ["🛒 ", t("find.sell")]) : null,
           h("button.key.sm", { type: "button", title: t("find.openTip"), onclick: function () { closePop(); ui.go("inventory"); setTimeout(function () { if (E.inventory && E.inventory.open) E.inventory.open(it.id); }, 60); } }, t("find.open"))]));
       });
     }
@@ -151,9 +153,9 @@
     var seen = {}, rows = ss.low.concat(ss.negative || []).filter(function (it) { if (seen[it.id]) return false; seen[it.id] = 1; return !it.archived; });
     rows.sort(function (a, b) { return a.stock - b.stock; });
     rows.forEach(function (it) {
-      list.appendChild(itemRow(it, [h("button.key.sm.primary", { type: "button", title: t("low.receiveTip"), onclick: function () {
+      list.appendChild(itemRow(it, [B.can("receive") ? h("button.key.sm.primary", { type: "button", title: t("low.receiveTip"), onclick: function () {
         closePop(); if (E.inventory && E.inventory.receive) E.inventory.receive(it.id);
-      } }, ["🚚 ", t("low.receive")])]));
+      } }, ["🚚 ", t("low.receive")]) : null]));
     });
     if (!rows.length) list.appendChild(h("li.rp-none", null, t("low.none")));
     box.appendChild(head("📦", "rail.low"));

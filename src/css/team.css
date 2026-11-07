@@ -1,0 +1,35 @@
+/* LAKAY | the people and the time clock: the status key's dot, the status card, the Team room. */
+.cl-key .pdot { background: #a7a3bb; }
+.cl-key.onclock .pdot { background: #2d9a52; box-shadow: 0 0 0 3px rgba(45, 154, 82, .16); }
+.cl-key.onbreak .pdot { background: #c98a1d; box-shadow: 0 0 0 3px rgba(201, 138, 29, .16); }
+.cl-key.practice:not(.onclock):not(.onbreak) .pdot { background: #c98a1d; }
+
+.who-card { display: flex; align-items: center; gap: .7rem; padding: .55rem .7rem; border-radius: 12px; background: var(--sunk); border: 1px solid var(--line-soft); margin-bottom: .55rem; }
+.who-card b { display: block; font-size: 1.08rem; }
+.who-meta { display: block; color: var(--muted); font-size: .86rem; }
+.who-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: #a7a3bb; display: inline-block; }
+.who-dot.onclock { background: #2d9a52; box-shadow: 0 0 0 3px rgba(45, 154, 82, .16); }
+.who-dot.onbreak { background: #c98a1d; box-shadow: 0 0 0 3px rgba(201, 138, 29, .16); }
+.status-h { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: .9rem 0 .35rem; font-weight: 700; }
+.clock-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
+.clock-list li { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; padding: .35rem .5rem; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+.clock-list li .muted { margin-left: auto; font-size: .86rem; }
+.clock-list.big li { padding: .55rem .7rem; }
+.clock-list.big li .key { margin-left: .4rem; }
+.as-keys { display: flex; flex-wrap: wrap; gap: .4rem; }
+.as-keys small { opacity: .75; font-weight: 500; }
+
+.team-sec { margin-bottom: 1rem; }
+.team-tools { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .9rem; margin-bottom: .5rem; }
+.team-tools .muted { margin: 0; }
+.week-total { white-space: nowrap; }
+tr.retired td { opacity: .58; }
+.access-cell { font-size: .86rem; color: var(--ink-2); }
+.access-list { display: grid; gap: .35rem; margin: .2rem 0 .6rem; }
+.access-row { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem .6rem; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--surface-2); cursor: pointer; }
+.access-row input { margin-top: .2rem; width: 1.05rem; height: 1.05rem; accent-color: var(--pri); flex: none; }
+.access-row b { display: block; font-size: .95rem; }
+.access-row small { display: block; color: var(--muted); font-size: .84rem; }
+.big-id { font-size: 1.6rem; font-weight: 700; letter-spacing: .04em; text-align: center; padding: .5rem; border-radius: 12px; background: var(--sunk); border: 1px dashed var(--line-2); }
+@media (prefers-reduced-motion: reduce) { .who-dot, .cl-key .pdot { box-shadow: none; } }
+#peopleList .badge, #peopleList td:nth-child(3) { white-space: nowrap; }

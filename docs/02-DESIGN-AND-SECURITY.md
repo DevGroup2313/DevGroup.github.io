@@ -37,8 +37,7 @@ iPhone, iPad and Fire tablet programs keep in the user's own profile). There is 
 |---|---|---|---|
 | The owner | Password (at least 10 characters) | Everything | Build 1 |
 | The owner, recovering | The **Master Key** (a 52 character code on a printed card) | Everything, and sets a new password | Build 1 |
-| The store manager | Own password | What the owner allows | Stage 2 |
-| Employees | Own PIN, on a store device that is already opened | Only what the owner allows (for example, sales and the time clock) | Stage 2 |
+| Each person on the staff (cashier, stock keeper, manager) | Their name or user ID, and their own password (at least 10 characters) | What the owner allows | Build 6 |
 
 ### The Store Key and how it is protected
 
@@ -61,11 +60,25 @@ app locks (by hand, after the idle time you choose, or when it closes), the Stor
   nobody can open the books, including the person who wrote Emporium. This is what end to end encryption means, and it
   is why the card matters.
 
-### Employee PINs (Stage 2)
+### The people's own keys (Build 6)
 
-A short PIN cannot protect data on its own, because a stolen copy could be tried against every PIN. So PINs are used only
-to say **who** is at the register on a store device that the owner or manager has already opened. The data stays sealed
-by the Store Key. Repeated wrong PINs lock that employee out until a manager unlocks them.
+The owner asked that signing out be clocking out, and that the next person sign in on their own. So when a person signs
+out, the books lock, and the next person must open them. A short PIN cannot do that safely: a stolen copy of the books
+could be tried against every PIN in minutes. So each person has a password of their own, held to the same rule as the
+owner's (at least 10 characters), and their own envelope of the Store Key:
+
+- The owner adds a person in the Team room. The owner's password opens the Store Key in a form that can be sealed again,
+  and a new envelope is sealed with a key made from the person's first password (PBKDF2, the same settings as the
+  owner's). The envelope's additional data names the store and the person, so it cannot be moved.
+- At their first sign-in the person chooses their own password, and their envelope is sealed again under it.
+- Each person has a user ID (the owner is 1001; the people are 1002, 1003 and on). It is kept on every ledger line, sale,
+  stock move and shift they make. Their names and IDs are kept plain at the door, as the owner's name is, so the sign-in
+  can find the right envelope; a wrong name takes as long to refuse as a wrong password.
+- Taking a key back removes the person's envelope. Everything they did stays in the books, under their name and ID.
+- What each person may do (sell, items and prices, deliveries, stock corrections, costs and profit, reports, the team's
+  hours) is kept in their sealed record. Lakay keeps to it in two places: the screens (rooms, keys and figures are not
+  shown) and the books (a change a person may not make is refused). Settings, backups, the Author Studio and the people
+  are the owner's alone.
 
 ## 3b. The Author Studio's choices
 
@@ -127,6 +140,10 @@ Encryption protects data at rest and in transit. It cannot protect against every
 - A **weak password** can be guessed from a stolen copy. Choose a long password; Emporium refuses short ones.
 - **People acting together** (two employees covering for each other) cannot be stopped by software, but the ledger makes
   their actions visible after the fact.
+- **A person's key opens the same sealed books as the owner's.** The limits on what each person sees (costs, profit,
+  reports) are kept by Lakay itself, not by a separate lock on that data. Someone who copied the books and also knew a
+  staff password, and who wrote their own program, could read everything. Give keys only to people you trust with the
+  store, and take a key back when someone leaves.
 - **No program is proof against every attack.** Before Emporium is relied upon under audit, I recommend an independent
   security review by a professional, and that your accountant review the reports' arithmetic and tax rules.
 - Emporium does not file taxes, move money or replace the provider systems of RIA, CAM, Unitransfer or Boss Revolution.

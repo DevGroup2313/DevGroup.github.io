@@ -85,7 +85,7 @@
     if (B.mode === "practice") B.useBooks(false);
     return B.boot().then(function (r) {
       info = r; E.doorInfo = r.door || null;
-      return intro({ store: !!r.hasStore, open: why === "idle", why: why });
+      return intro({ store: !!r.hasStore, open: why === "idle" || why === "signout", why: why });
     });
   };
 
@@ -123,8 +123,8 @@
     } else {
       enter.addEventListener("click", openSignIn);
       kids = [d.storeName ? h("p.intro-store", null, d.storeName) : null,
-        h("p.intro-lede", null, d.user ? t("ld.welcomeName", { name: d.user }) : t("ld.welcome")),
-        o.why === "idle" ? h("p.intro-tourline", null, t("door.lockedIdle")) : null,
+        h("p.intro-lede", null, d.user && !(d.people && d.people.length) ? t("ld.welcomeName", { name: d.user }) : t("ld.welcome")),
+        o.why === "idle" ? h("p.intro-tourline", null, t("door.lockedIdle")) : o.why === "signout" ? h("p.intro-tourline#signedOutNote", null, door.outNote || t("door.signedOut")) : null,
         enter, msg];
     }
     card = h("div.intro-card", { role: "dialog", "aria-label": t("intro.aria", { app: E.appName() }) }, [
@@ -151,10 +151,11 @@
   /* the sign-in, in the introduction card's place */
   var openSignIn = screen(function () {
     var card = lockDoor(document.getElementById("introDoor") ? "intro" : "door");
-    var known = (info && info.door && info.door.user) || "";
+    var dd = (info && info.door) || {}, known = dd.user || "", team = !!(dd.people && dd.people.length);
     fill(card, [h("h1", null, E.appName()),
-      (info && info.door && info.door.storeName) ? h("p.ild-store", null, info.door.storeName) : null,
-      h("p.ild-sub", null, known ? t("ld.welcomeName", { name: known }) : t("ld.welcome")),
+      dd.storeName ? h("p.ild-store", null, dd.storeName) : null,
+      h("p.ild-sub", null, known && !team ? t("ld.welcomeName", { name: known }) : t("ld.welcome")),
+      door.outNote ? h("p.ild-note#signedOutLine", null, door.outNote) : null,
       signInForm(card, true),
       h("p.ild-note", null, [t("ld.note") + " ", h("button.ild-link#ldPractice", { type: "button", onclick: openPracticeFromDoor }, t("ld.practice"))])]);
   });
@@ -162,8 +163,10 @@
   /* ---------- the sign-in of the store's own books ---------- */
   function waitLeft() { var until = +U.prefGet("waitUntil", "0"); return Math.max(0, until - Date.now()); }
   function signInForm(card, indoor) {
-    var known = (info && info.door && info.door.user) || "";
-    var nm = field("ldName", "text", "username", known), pw = field("ldPw", "password", "current-password");
+    var dd = (info && info.door) || {}, team = !!(dd.people && dd.people.length);
+    /* the name of whoever signed in last on this device; with a team, it is chosen so the next person types over it */
+    var nm = field("ldName", "text", "username", dd.last || dd.user || ""), pw = field("ldPw", "password", "current-password");
+    if (team) nm.addEventListener("focus", function () { try { nm.select(); } catch (e) { } });
     var go = h("button.ild-key#ldGo", { type: "submit" }, t("ld.signIn"));
     function wrong() {
       var n = (+U.prefGet("fails", "0")) + 1; U.prefSet("fails", n);
@@ -178,11 +181,10 @@
       if (left > 0) return err(card, t("door.wait", { s: Math.ceil(left / 1000) }));
       if (!pw.value) return err(card, t("door.needPassword"));
       busy(card, true); err(card, "");
-      B.openWithPassword(pw.value).then(function () {
-        if (known && !B.sameName(nm.value, known)) { B.lock("quiet"); return wrong(); }
-        pw.value = ""; U.prefSet("fails", "0"); U.prefSet("waitUntil", "0");
-        var p = known ? Promise.resolve() : B.setDoorUser(nm.value).catch(function () { });
-        return p.then(function () { E.app.opened(); });
+      B.signIn(nm.value, pw.value).then(function () {
+        var first = pw.value; pw.value = ""; U.prefSet("fails", "0"); U.prefSet("waitUntil", "0"); door.outNote = "";
+        if (B.user && B.user.mustChange) return ownPassword(first);
+        return door.arrive();
       }, function (x) {
         if (x && x.code === "wrong") return wrong();
         busy(card, false); err(card, t("door.problem")); console.error(x);
@@ -191,6 +193,35 @@
       h("div.ild-keys", null, [h("button.ild-link#ldForgot", { type: "button", onclick: ways }, t("ld.cant")),
         indoor && document.getElementById("introDoor") ? h("button.ild-key.ild-ghost#ldBack", { type: "button", onclick: function () { hideLock(); door.view = intro; } }, t("back")) : null, go])]);
   }
+  /* Once the books are open: a person on the staff is clocked in as they arrive (the owner clocks in by choice, from
+     the status key), and the store opens. */
+  door.arrive = function () {
+    var p = (!B.isOwner() && !B.openShift(B.user.id)) ? B.clockIn().catch(function (e) { console.error(e); return null; }) : Promise.resolve(null);
+    return p.then(function (sh) {
+      E.app.opened();
+      if (sh) ui.toast(t("clock.inAt", { name: B.user.name, t: E.fmtTime(new Date(sh.in)) }), "good");
+    });
+  };
+  /* The first time a person signs in with the password the owner gave them, they choose their own. */
+  var ownPassword = screen(function (given) {
+    var card = lockDoor(document.getElementById("introDoor") ? "intro" : "door");
+    var a = field("ldOwn1", "password", "new-password"), b = field("ldOwn2", "password", "new-password"), meter = h("p.ild-meter", { "aria-live": "polite" });
+    a.addEventListener("input", function () { var r = C.passwordAdvice(a.value); meter.textContent = a.value ? t(r.key) : ""; });
+    var form = h("form#ldOwn", { autocomplete: "off", onsubmit: function (e) {
+      e.preventDefault(); err(card, "");
+      var r = C.passwordAdvice(a.value);
+      if (!r.ok) return err(card, t(r.key));
+      if (a.value !== b.value) return err(card, t("setup.noMatch"));
+      if (a.value === given) return err(card, t("own.notGiven"));
+      busy(card, true);
+      B.changeMyPassword(given, a.value).then(function () { a.value = ""; b.value = ""; return door.arrive(); }, function (x) {
+        busy(card, false); err(card, t(x && x.code === "password" ? x.extra : "door.problem")); console.error(x);
+      });
+    } }, [label(t("own.new"), a), meter, label(t("own.again"), b),
+      h("div.ild-keys", null, [h("button.ild-link#ldOwnLater", { type: "button", onclick: function () { B.lock("signout"); } }, t("own.later")), h("button.ild-key#ldOwnGo", { type: "submit" }, t("own.go"))])]);
+    fill(card, [h("h2", null, t("own.h", { name: B.user ? B.user.name : "" })), h("p", null, t("own.p")), form]);
+    setTimeout(function () { try { a.focus(); } catch (e) { } }, 60);
+  });
   /* the sign-in, wherever the door is asked for it: the introduction, with the fold open */
   var signIn = function (why) { return intro({ store: true, open: true, why: why }); };
   function openPracticeFromDoor() {

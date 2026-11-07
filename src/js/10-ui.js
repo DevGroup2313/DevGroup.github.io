@@ -39,7 +39,7 @@
 
   /* ---------- emojis (drawn by the device's own emoji font; hidden from screen readers, the words carry the meaning) ---------- */
   ui.emo = function (ch, cls) { return h("span.emo" + (cls ? "." + cls : ""), { "aria-hidden": "true" }, ch); };
-  ui.ROOM_EMO = { home: "🏠", register: "🛒", inventory: "📦", reports: "📊", guide: "📖", settings: "⚙️", studio: "⚒️" };
+  ui.ROOM_EMO = { home: "🏠", register: "🛒", inventory: "📦", reports: "📊", team: "👥", guide: "📖", settings: "⚙️", studio: "⚒️" };
   ui.CAT_EMO = { music: "🎵", movies: "🎬", perfume: "🌸", grocery: "🥥", drinks: "🥤", food: "🥟", services: "💸", other: "🛍️" };
   ui.catEmo = function (c) { return ui.CAT_EMO[c] || "🏷️"; };
 
@@ -219,7 +219,7 @@
   };
 
   /* ---------- the shell, after Ingenium's (the side menu of plain words) with Carpe Diem's capsule of top keys ---------- */
-  var GROUPS = [["nav.g.store", [["home", "home"], ["register", "register"], ["inventory", "box"], ["reports", "chart"]]],
+  var GROUPS = [["nav.g.store", [["home", "home"], ["register", "register"], ["inventory", "box"], ["reports", "chart"], ["team", "people"]]],
                 ["nav.g.learn", [["guide", "book"], ["settings", "gear"]]],
                 ["nav.g.owner", [["studio", "edit"]]]];
   ui.rooms = {};
@@ -237,8 +237,10 @@
     } }, [sealNode, h("span.bname", null, [h("span.wordmark", null, E.appName()), h("span.storename", null, st.settings.storeName)])]);
     var dock = h("nav.dock", { "aria-label": t("menu") }, [h("div.dock-brand", null, [brand, fold])]);
     GROUPS.forEach(function (g) {
+      var mine = g[1].filter(function (r) { return ui.allowed(r[0]); });
+      if (!mine.length) return;
       dock.appendChild(h("div.grp-label", null, t(g[0])));
-      g[1].forEach(function (r) {
+      mine.forEach(function (r) {
         dock.appendChild(h("button.nav-btn", { type: "button", "data-room": r[0], title: t("room." + r[0]), onclick: function () { ui.go(r[0]); } },
           [U.icon(r[1]), h("span.long", null, t("room." + r[0]))]));
       });
@@ -249,8 +251,15 @@
     app.appendChild(ui.fabs());
     ui.go(location.hash.replace("#", "") || "home", true);
   };
+  /* the rooms each person may open: the owner, every one; the people, those their access opens */
+  ui.allowed = function (room) {
+    if (room === "register") return B.can("sell");
+    if (room === "reports") return B.can("reports");
+    if (room === "settings" || room === "studio") return B.can("owner");
+    return true;
+  };
   ui.go = function (room, quiet) {
-    if (!ui.rooms[room]) room = "home";
+    if (!ui.rooms[room] || !ui.allowed(room)) room = "home";
     ui.current = room;
     if (location.hash !== "#" + room) history.replaceState(null, "", "#" + room);
     Array.prototype.forEach.call(document.querySelectorAll(".nav-btn[data-room]"), function (b) {
@@ -305,8 +314,10 @@
     var alertsN = ui.alerts().length;
     var NEXT = { en: "fr", fr: "ht", ht: "en" }, next = NEXT[E.lang] || "fr";
     c.appendChild(fold);
-    c.appendChild(h("button.cl-key#statusPill" + (practice ? ".practice" : ""), { type: "button", title: practice ? t("practice.pillTip") : t("status.h"), onclick: ui.statusPanel },
-      [h("span.pdot", { "aria-hidden": "true" }), h("span.nm", null, practice ? t("practice.pill") : t("status.h"))]));
+    var me = B.user, sh = me ? B.openShift(me.id) : null, clockCls = sh ? (B.onBreak(sh) ? ".onbreak" : ".onclock") : "";
+    var who = me ? me.name.split(" ")[0] : "";
+    c.appendChild(h("button.cl-key#statusPill" + (practice ? ".practice" : "") + clockCls, { type: "button", title: (practice ? t("practice.pillTip") + " · " : "") + t("status.tip"), onclick: ui.statusPanel },
+      [h("span.pdot", { "aria-hidden": "true" }), h("span.nm", null, practice ? (B.isOwner() ? t("practice.pill") : t("practice.pill") + " · " + who) : who || t("status.h"))]));
     c.appendChild(h("button.cl-key#alertsBtn", { type: "button", title: t("top.alerts"), onclick: ui.alertsPanel }, [t("top.alerts"), alertsN ? h("span.cnt", { "aria-label": String(alertsN) }) : null]));
     c.appendChild(h("button.cl-key#displayBtn", { type: "button", title: t("top.display"), onclick: ui.displayPanel }, t("top.display")));
     c.appendChild(h("button.cl-key#guideBtn", { type: "button", title: t("room.guide"), onclick: function () { ui.go("guide"); } }, t("top.guide")));
@@ -329,7 +340,8 @@
   ui.alerts = function () {
     var out = [], stock = B.stockSummary(), last = U.prefGet("lastBackup", "");
     stock.low.slice(0, 12).forEach(function (it) { out.push({ emo: ui.catEmo(it.cat), text: it.name + " · " + t("inv.inStock", { n: it.stock }), go: "inventory", tone: it.stock <= 0 ? "bad" : "warn" }); });
-    if (B.mode !== "practice" && (!last || Date.now() - Date.parse(last) > 7 * 86400000)) out.push({ emo: "💾", text: t(last ? "alerts.backup" : "alerts.backupNever"), go: "settings", tone: "warn" });
+    if (B.mode !== "practice" && B.can("owner") && (!last || Date.now() - Date.parse(last) > 7 * 86400000)) out.push({ emo: "💾", text: t(last ? "alerts.backup" : "alerts.backupNever"), go: "settings", tone: "warn" });
+    if (B.mode !== "practice" && B.user && B.user.role !== "owner" && !B.openShift(B.user.id)) out.unshift({ emo: "🕘", text: t("clock.notIn"), go: "team", tone: "warn" });
     return out;
   };
   ui.alertsPanel = function () {
@@ -338,19 +350,93 @@
       return h("li", null, [ui.emo(a.emo), h("span", null, a.text), h("button.key.sm", { type: "button", onclick: function () { d.close(); ui.go(a.go); } }, t("alerts.open"))]);
     })) : h("p", null, t("alerts.none")), actions: [{ label: t("close") }] });
   };
+  /* ---------- the status key: who is at the counter, on the clock or on a break, and signing out ---------- */
+  ui.dur = function (ms) {
+    var m = Math.max(0, Math.round(ms / 60000)), hh = Math.floor(m / 60), mm = m % 60;
+    return hh ? t("dur.hm", { h: hh, m: mm }) : t("dur.m", { m: mm });
+  };
+  ui.personTag = function (u) { return u ? u.name + " · " + t("people.id", { n: B.numberOf(u) }) : ""; };
+  ui.levelName = function (u) { return !u ? "" : u.role === "owner" ? t("level.owner") : t("level." + (B.PRESETS[u.preset] ? u.preset : "custom")); };
+  ui.failed = function (e) {
+    console.error(e);
+    ui.toast(e && e.code === "denied" ? t("people.denied") : e && e.code === "wrong" ? t("ld.wrongPw") : e && e.code === "password" ? t(e.extra) : t("door.problem"), "bad");
+  };
+  function clockAct(fn, done) {
+    return function (close) {
+      close();
+      fn().then(function (sh) { ui.refreshTop(); ui.refresh(); if (done && sh) ui.toast(done(sh), "good"); if (E.sound) E.sound.play("soft"); }, ui.failed);
+    };
+  }
+  ui.signOut = function (andClock) {
+    var me = B.user, p = andClock ? B.clockOut() : Promise.resolve(null);
+    return p.then(function (sh) {
+      E.door.outNote = sh ? t("signout.clocked", { name: me.name, t: E.fmtTime(new Date(sh.out)), h: ui.dur(B.shiftMs(sh)) }) : t("signout.only", { name: me.name });
+      B.lock("signout");
+    }, ui.failed);
+  };
   ui.statusPanel = function () {
-    var st = B.state(), practice = B.mode === "practice";
-    var rows = [h("p", null, h("b", null, practice ? t("practice.pill") : t("status.signedIn", { name: (st.users.owner && st.users.owner.name) || "" }))),
-      h("p.muted", null, st.settings.storeName + (ui.openedAt ? " · " + t("status.since", { t: E.fmtTime(ui.openedAt) }) : "")),
-      practice ? h("p", null, t("practice.pillTip")) : h("p.hint", null, t("status.team"))];
-    var actions = [];
+    var st = B.state(), practice = B.mode === "practice", me = B.user, sh = B.openShift(me.id), brk = B.onBreak(sh), d;
+    var rows = [h("div.who-card", null, [h("span.who-dot" + (sh ? (brk ? ".onbreak" : ".onclock") : ""), { "aria-hidden": "true" }),
+        h("div", null, [h("b#whoName", null, me.name), h("span.who-meta", null, [t("people.id", { n: B.numberOf(me) }), " · ", ui.levelName(me)])])]),
+      h("p#clockState", null, sh ? (brk ? t("clock.onBreak", { t: E.fmtTime(new Date(sh.breaks[sh.breaks.length - 1].from)) }) : t("clock.onSince", { t: E.fmtTime(new Date(sh.in)), d: ui.dur(B.shiftMs(sh)) })) : t("clock.off")),
+      h("p.muted", null, st.settings.storeName + (ui.openedAt ? " · " + t("status.since", { t: E.fmtTime(ui.openedAt) }) : ""))];
+    if (practice) rows.push(h("p.hint", null, t("practice.pillTip")));
+    if (B.can("team")) {
+      var on = B.onClock();
+      rows.push(h("h3.status-h", null, t("clock.nowH")));
+      rows.push(on.length ? h("ul.clock-list#onClockList", null, on.map(function (x) {
+        var u = st.users[x.user];
+        return h("li", null, [h("span.who-dot" + (B.onBreak(x) ? ".onbreak" : ".onclock"), { "aria-hidden": "true" }), h("span", null, u ? ui.personTag(u) : x.user),
+          h("span.muted", null, B.onBreak(x) ? t("clock.break") : t("clock.since", { t: E.fmtTime(new Date(x.in)) }))]);
+      })) : h("p.muted#onClockList", null, t("clock.nobody")));
+    }
     if (practice) {
+      var people = B.people();
+      rows.push(h("h3.status-h", null, t("practice.asH")));
+      rows.push(h("div.as-keys", null, people.map(function (u) {
+        return h("button.key.sm" + (u.id === me.id ? ".primary" : ""), { type: "button", "data-person": u.id, onclick: function () {
+          d.close(); B.practiceAs(u.id).then(function () {
+            var p2 = (!B.isOwner() && !B.openShift(u.id)) ? B.clockIn() : Promise.resolve(null);
+            return p2.then(function (x) { ui.shell(); ui.refreshTop(); ui.toast(t("practice.asNow", { name: u.name }) + (x ? " " + t("clock.inAt", { name: u.name, t: E.fmtTime(new Date(x.in)) }) : ""), "good"); });
+          }, ui.failed);
+        } }, [u.name, h("small", null, " " + ui.levelName(u))]);
+      })));
+    }
+    var actions = [];
+    if (!sh) actions.push({ label: t("clock.in"), emoji: "🕘", id: "clockInKey", onClick: clockAct(B.clockIn, function (x) { return t("clock.inAt", { name: me.name, t: E.fmtTime(new Date(x.in)) }); }) });
+    else {
+      actions.push(brk ? { label: t("clock.breakEnd"), emoji: "▶️", id: "breakKey", onClick: clockAct(B.breakEnd, function () { return t("clock.backAt", { t: E.fmtTime(new Date()) }); }) }
+                       : { label: t("clock.breakStart"), emoji: "☕", id: "breakKey", onClick: clockAct(B.breakStart, function () { return t("clock.breakAt", { t: E.fmtTime(new Date()) }); }) });
+      actions.push({ label: t("clock.out"), emoji: "🕔", id: "clockOutKey", onClick: clockAct(function () { return B.clockOut(); }, function (x) { return t("clock.outAt", { t: E.fmtTime(new Date(x.out)), h: ui.dur(B.shiftMs(x)) }); }) });
+    }
+    if (practice && B.isOwner()) {
       actions.push({ label: t("practice.reset"), onClick: function (close) { close(); ui.confirm(t("practice.resetQ"), t("practice.resetP"), t("practice.reset")).then(function (yes) {
         if (!yes) return; B.resetPractice().then(function () { return B.openPractice(); }).then(function () { E.app.opened(); ui.toast(t("practice.done"), "good"); });
       }); } });
       actions.push({ label: t("practice.real"), kind: "primary", onClick: function (close) { close(); E.door.startReal("app"); } });
-    } else actions.push({ label: t("lockNow"), kind: "primary", onClick: function (close) { close(); B.lock("hand"); } });
-    ui.dialog({ title: t("status.h"), emoji: practice ? "🧪" : "🟢", body: rows, actions: actions });
+    } else if (!practice) {
+      if (!B.isOwner()) actions.push({ label: t("own.change"), emoji: "🔑", id: "myPwKey", onClick: function (close) { close(); ui.myPassword(); } });
+      actions.push({ label: sh ? t("signout.andClock") : t("signout"), kind: "primary", emoji: "🚪", id: "signOutKey", onClick: function (close) { close(); ui.signOut(!!sh); } });
+      if (sh) actions.push({ label: t("signout.stay"), id: "signOutStay", onClick: function (close) { close(); ui.signOut(false); } });
+    }
+    d = ui.dialog({ title: t("status.h"), emoji: practice ? "🧪" : sh ? (brk ? "☕" : "🟢") : "⚪", body: rows, actions: actions });
+  };
+  /* a person's own password: the old one, then the new one twice */
+  ui.myPassword = function () {
+    var a = ui.input({ type: "password", id: "myPwOld", autocomplete: "current-password" }), b = ui.input({ type: "password", id: "myPwNew", autocomplete: "new-password" }),
+      c = ui.input({ type: "password", id: "myPwNew2", autocomplete: "new-password" }), meter = h("p.hint", { "aria-live": "polite" });
+    b.addEventListener("input", function () { meter.textContent = b.value ? t(E.crypto.passwordAdvice(b.value).key) : ""; });
+    ui.dialog({ title: t("own.change"), emoji: "🔑", body: [ui.field("own.current", a), ui.field("own.new", b), meter, ui.field("own.again", c)],
+      actions: [{ label: t("cancel") }, { label: t("save"), kind: "primary", id: "myPwSave", onClick: function (close, btn) {
+        var r = E.crypto.passwordAdvice(b.value);
+        if (!r.ok) { ui.fieldError(b, t(r.key)); return false; }
+        if (b.value !== c.value) { ui.fieldError(c, t("setup.noMatch")); return false; }
+        btn.disabled = true;
+        B.changeMyPassword(a.value, b.value).then(function () { close(); ui.toast(t("own.saved"), "good"); }, function (e) {
+          btn.disabled = false; if (e && e.code === "wrong") ui.fieldError(a, t("ld.wrongPw")); else ui.failed(e);
+        });
+        return false;
+      } }] });
   };
   ui.displayPanel = function () {
     function row(label, seg) { return h("div.display-row", null, [h("span", null, label), seg]); }
@@ -418,6 +504,7 @@
   ui.catName = function (c) { if (!c) return ""; return c.key ? t(c.key) : c.name; };
   ui.cats = function () { var st = B.state(); return Object.keys(st.cats).map(function (k) { return st.cats[k]; }).sort(function (a, b) { return a.order - b.order; }); };
   ui.userName = function (id) { var st = B.state(); var u = st && st.users[id]; return u ? u.name : id; };
+  ui.userTag = function (id) { var st = B.state(); var u = st && st.users[id]; return u ? ui.personTag(u) : id; };
   ui.dateLong = function (d) { return E.fmtDate(d, "long"); };
   ui.time = function (iso) { var d = new Date(iso); return U.dayKey(d) === U.dayKey() ? E.fmtTime(d) : E.fmtDate(d, "short") + " " + E.fmtTime(d); };
 })();

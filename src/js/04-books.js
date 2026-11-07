@@ -5,7 +5,7 @@
 (function () {
   var U = E.util, C = E.crypto, D = E.db;
   var B = E.books = { isOpen: false };
-  var KEY = null, ID = null, state = null, listeners = {};
+  var KEY = null, ID = null, state = null, listeners = {}, doorMeta = null;
   var ZERO = "0000000000000000000000000000000000000000000000000000000000000000";
 
   B.on = function (name, fn) { (listeners[name] = listeners[name] || []).push(fn); };
@@ -30,6 +30,7 @@
       return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.get("meta", "custom")]);
     }).then(function (r) {
       E.custom = E.cleanCustom ? E.cleanCustom(r[2]) : (r[2] || null);
+      doorMeta = r[1] || null;
       return { hasStore: !!r[0], door: r[1] || null, vault: r[0] || null, practice: !!(r[0] && r[0].practice) };
     });
   };
@@ -46,7 +47,7 @@
     if (!n) return Promise.resolve(false);
     return D.get("meta", "door").then(function (d) {
       d = d || {}; if (d.user === n) return false;
-      d.user = n; return D.write([{ store: "meta", key: "door", value: d }]).then(function () { return true; });
+      d.user = n; doorMeta = d; return D.write([{ store: "meta", key: "door", value: d }]).then(function () { return true; });
     });
   };
   B.sameName = function (a, b) { function n(x) { return String(x || "").normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase(); } return n(a) === n(b); };
@@ -139,16 +140,17 @@
     });
   };
 
-  function load(vault, key) {
+  function load(vault, key, userId) {
     ID = vault.storeId;
     return D.entries("rec").then(function (entries) {
-      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], counters: {}, pad: {}, head: null, unreadable: [] };
+      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, head: null, unreadable: [] };
       return Promise.all(entries.map(function (e) {
         return C.open(key, e[1], aadRec(ID, e[0])).then(function (val) { return [e[0], val]; }, function () { st.unreadable.push(e[0]); return null; });
       })).then(function (rows) {
         rows.forEach(function (r) { if (r) put(st, r[0], r[1]); });
         st.sales.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
         st.moves.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
+        st.shifts.sort(function (a, b) { return a.in < b.in ? -1 : a.in > b.in ? 1 : 0; });
         if (!st.head || !st.settings) throw err("damaged");
         return D.get("journal", st.head.seq).then(function (env) {
           if (!env) { st.headProblem = true; return; }
@@ -158,8 +160,10 @@
         }).then(function () { return st; });
       });
     }).then(function (st) {
+      var u = st.users[userId || "owner"];
+      if (!u || (u.role !== "owner" && u.active === false)) throw err("wrong");
       KEY = key; state = st; B.isOpen = true;
-      B.user = st.users.owner;
+      B.user = u;
       E.settings = st.settings;
       emit("open", st);
       return st;
@@ -174,6 +178,7 @@
     else if (kind === "item") st.items[id] = v;
     else if (kind === "sale") { var j = st.sales.findIndex(function (s) { return s.id === v.id; }); if (j >= 0) st.sales[j] = v; else st.sales.push(v); }
     else if (kind === "move") st.moves.push(v);
+    else if (kind === "shift") { var q = st.shifts.findIndex(function (x) { return x.id === v.id; }); if (q >= 0) st.shifts[q] = v; else st.shifts.push(v); }
     else if (kind === "counter") st.counters[id] = v;
     else if (kind === "pad") st.pad[id] = v;
   }
@@ -224,8 +229,13 @@
       var settings = { storeName: E.t("practice.store"), ownerName: E.t("practice.owner"), currency: "USD",
         taxes: [{ id: "tx1", name: E.t("practice.tax"), rate: 7000 }], weekStart: 1, lockMinutes: 15, receiptNote: "", created: start.toISOString(), practice: true };
       var recs = [{ kind: "settings", id: "main", value: settings },
-        { kind: "user", id: "owner", value: { id: "owner", name: settings.ownerName, role: "owner", created: start.toISOString() } },
+        { kind: "user", id: "owner", value: { id: "owner", no: 1001, name: settings.ownerName, role: "owner", created: start.toISOString() } },
         { kind: "counter", id: "receipt", value: { next: 1 } }];
+      /* two sample people, to see the store as they see it: a cashier and a manager */
+      SAMPLE_PEOPLE.forEach(function (x) {
+        recs.push({ kind: "user", id: x[0], value: { id: x[0], no: x[1], name: x[2], role: "staff", preset: x[3], access: B.PRESETS[x[3]].slice(), active: true,
+          mustChange: false, created: start.toISOString(), updated: start.toISOString() } });
+      });
       DEFAULT_CATS.forEach(function (c, i) { recs.push({ kind: "cat", id: c, value: { id: c, key: "cat." + c, order: i } }); });
       var line = { seq: 1, at: start.toISOString(), day: U.dayKey(start), by: "owner", dev: B.device.id, type: "store.created",
         data: { storeName: settings.storeName, ownerName: settings.ownerName, currency: "USD", practice: true }, prev: ZERO, build: E.BUILD.number };
@@ -245,6 +255,8 @@
         .then(function () { return seedPractice(start, progress); });
     });
   }
+  /* The practice store's sample people: [user id, staff number, name, level of access]. */
+  var SAMPLE_PEOPLE = [["u_practice_marie", 1002, "Marie", "cashier"], ["u_practice_jean", 1003, "Jean", "manager"]];
   /* The sample goods of a Caribbean store: [shelf, name, price, cost (cents), stock, reorder at, taxed, barcode]. */
   var SAMPLE = [
     ["music", "Kompa classics, volume 1 (CD)", 1299, 650, 18, 5, 1, "0850001000017"], ["music", "Konpa love songs (CD)", 1299, 650, 14, 5, 1, "0850001000024"],
@@ -300,9 +312,13 @@
           }
           if (!lines.length) { tick(); return null; }
           B._at = at.toISOString();
+          /* the morning's sales are Marie's, the afternoon's Jean's, and one in four the owner's own */
+          var seller = j % 4 === 3 ? "owner" : at.getHours() < 13 ? SAMPLE_PEOPLE[0][0] : SAMPLE_PEOPLE[1][0];
+          B.user = state.users[seller] || state.users.owner;
           var total = B.priceTicket(lines).total, paid = total <= 2000 ? Math.ceil(total / 500) * 500 : Math.ceil(total / 1000) * 1000;
-          return B.completeSale(lines, paid).then(tick);
+          return B.completeSale(lines, paid).then(function () { B.user = state.users.owner; tick(); });
         });
+        if (j === plan.length - 1) c2 = c2.then(function () { return sampleShifts(today); });
         if (j === Math.floor(plan.length / 2)) {
           c2 = c2.then(function () {
             var patty = made.filter(function (m) { return m.cat === "food"; })[0];
@@ -313,7 +329,22 @@
       });
       return c2;
     });
-    return chain.then(function () { B._at = null; return state; }, function (e) { B._at = null; throw e; });
+    return chain.then(function () { B._at = null; B.user = state.users.owner; return state; }, function (e) { B._at = null; B.user = state && state.users.owner; throw e; });
+  }
+  /* the sample people's shifts for the days before today: Marie from a quarter to nine, Jean from a quarter to one,
+     each with a half-hour break */
+  function sampleShifts(today) {
+    var c = Promise.resolve();
+    for (var d = 14; d >= 1; d--) {
+      [[SAMPLE_PEOPLE[0], 8, 45, 15, 15, 12, 0], [SAMPLE_PEOPLE[1], 12, 45, 20, 15, 16, 30]].forEach(function (x) {
+        var base = new Date(today.getTime() - d * 86400000);
+        function at(hh, mm) { return new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm + (d % 3) * 2, 0); }
+        var sh = { id: "t_practice_" + x[0][0] + "_" + d, user: x[0][0], no: x[0][1], in: at(x[1], x[2]).toISOString(), out: at(x[3], x[4]).toISOString(),
+          breaks: [{ from: at(x[5], x[6]).toISOString(), to: at(x[5], x[6] + 30).toISOString() }], day: U.dayKey(base), dev: B.device.id };
+        c = c.then(function () { B._at = sh.out; return recordShift(sh); });
+      });
+    }
+    return c;
   }
 
   /* ---------- the side rail's own notes: each person's reminders and caught thoughts, sealed like the rest ---------- */
@@ -325,6 +356,250 @@
     var u = (B.user && B.user.id) || "owner";
     return B.change(function () { return { type: "pad.updated", data: { what: what || "pad", thoughts: pad.thoughts.length, reminders: pad.reminders.length }, recs: [{ kind: "pad", id: u, value: pad }] }; });
   };
+
+  /* ---------- the people of the store: the owner, who is the administrator, and the staff ----------
+     Every person has a user id (kept on every ledger line, sale, stock move and shift they make) and a staff number
+     the screens show: 1001 is the owner. Each person signs in with a password of their own, which opens their own
+     envelope of the Store Key (vault.people). What each person may do is kept in their sealed record; the books keep
+     to it as well as the screens. Only the owner adds people, sets what they may do, gives them a first password, and
+     takes a key back. The names are kept plain at the door, as the owner's own name is, so the sign-in can find the
+     right envelope. A person's key opens the same sealed books as the owner's: the limits are kept by Lakay itself. */
+  B.ACCESS = ["sell", "items", "receive", "adjust", "costs", "reports", "team"];
+  B.PRESETS = { cashier: ["sell"], stock: ["sell", "items", "receive", "adjust"], manager: B.ACCESS.slice() };
+  B.isOwner = function () { return !!(B.user && B.user.role === "owner"); };
+  B.can = function (what) {
+    var u = B.user; if (!u) return false;
+    if (u.role === "owner") return true;
+    return what !== "owner" && (u.access || []).indexOf(what) >= 0;
+  };
+  function need(what) { if (!B.can(what)) throw err("denied"); }
+  B.numberOf = function (u) { return u ? (u.no || (u.role === "owner" ? 1001 : 0)) : 0; };
+  B.people = function (all) {
+    var st = state; if (!st) return [];
+    return Object.keys(st.users).map(function (k) { return st.users[k]; })
+      .filter(function (u) { return all || u.role === "owner" || u.active !== false; })
+      .sort(function (a, b) { return B.numberOf(a) - B.numberOf(b); });
+  };
+  function cleanName(n) { return String(n || "").normalize("NFC").trim().replace(/\s+/g, " ").slice(0, 60); }
+  function nameTaken(st, name, selfId) {
+    if (/^\d+$/.test(cleanName(name))) return true;
+    return Object.keys(st.users).some(function (k) { return k !== selfId && B.sameName(st.users[k].name, name); });
+  }
+  function doorWith(ch) {
+    var d = clone(doorMeta) || {};
+    Object.keys(ch).forEach(function (k) { if (ch[k] === undefined) delete d[k]; else d[k] = clone(ch[k]); });
+    return d;
+  }
+  function peopleOf(users) {
+    return Object.keys(users).map(function (k) { return users[k]; }).filter(function (u) { return u.role !== "owner" && u.active !== false; })
+      .map(function (u) { return { id: u.id, no: u.no, name: u.name }; }).sort(function (a, b) { return a.no - b.no; });
+  }
+  function nextNo(st) { return Object.keys(st.users).reduce(function (m, k) { return Math.max(m, B.numberOf(st.users[k])); }, 1001) + 1; }
+  function cleanAccess(list) { return B.ACCESS.filter(function (a) { return (list || []).indexOf(a) >= 0; }); }
+  function iterations(v) { return (v && v.kdf && v.kdf.iterations) || C.ITERATIONS; }
+  /* The Store Key, in a form that can be sealed into a new envelope: the owner's password opens it (in the practice
+     store, the key this device keeps for it). */
+  function keyToShare(ownerPassword) {
+    if (B.mode === "practice") {
+      return Promise.all([D.get("meta", "vault"), D.get("meta", "devkey")]).then(function (r) {
+        return C.unwrap(r[0].device, r[1], aadEnv(r[0].storeId, "device"), true).then(function (k) { return { vault: r[0], key: k }; });
+      });
+    }
+    return ownerKeyExtractable(ownerPassword);
+  }
+  function personEnvelope(hk, id, password) {
+    var salt = U.rnd(16);
+    return C.passwordKey(password, salt).then(function (kek) { return C.wrap(hk.key, kek, aadEnv(hk.vault.storeId, "person:" + id)); })
+      .then(function (env) { return { salt: U.b64e(salt), iv: env.iv, ct: env.ct }; });
+  }
+  function checkPw(pw) { var a = C.passwordAdvice(pw || ""); if (!a.ok) throw err("password", a.key); }
+
+  B.addPerson = function (f, ownerPassword) {
+    var name = cleanName(f.name), id = U.uid("u"), access = cleanAccess(f.access);
+    try {
+      need("owner");
+      if (!name) throw err("name");
+      if (nameTaken(state, name)) throw err("nameTaken");
+      checkPw(f.password);
+    } catch (e) { return Promise.reject(e); }
+    return keyToShare(ownerPassword).then(function (hk) {
+      return personEnvelope(hk, id, f.password).then(function (env) {
+        return B.change(function (st) {
+          need("owner");
+          if (nameTaken(st, name)) throw err("nameTaken");
+          var now = clock().toISOString(), no = nextNo(st);
+          var u = { id: id, no: no, name: name, role: "staff", preset: B.PRESETS[f.preset] ? f.preset : "custom", access: access, active: true,
+            mustChange: true, created: now, updated: now };
+          var v = clone(hk.vault); v.people = v.people || {}; v.people[id] = env;
+          var users = clone(st.users); users[id] = u;
+          return { type: "person.added", data: { id: id, no: no, name: name, preset: u.preset, access: access },
+            recs: [{ kind: "user", id: id, value: u }], meta: [{ key: "vault", value: v }, { key: "door", value: doorWith({ people: peopleOf(users) }) }], result: u };
+        });
+      });
+    });
+  };
+  B.editPerson = function (id, f) {
+    return B.change(function (st) {
+      need("owner");
+      var u = clone(st.users[id]); if (!u || u.role === "owner") throw err("noperson");
+      var diff = {};
+      if (f.name !== undefined) {
+        var n = cleanName(f.name); if (!n) throw err("name");
+        if (!B.sameName(n, u.name) && nameTaken(st, n, id)) throw err("nameTaken");
+        if (n !== u.name) { diff.name = [u.name, n]; u.name = n; }
+      }
+      if (f.access !== undefined) {
+        var a = cleanAccess(f.access), p = B.PRESETS[f.preset] ? f.preset : "custom";
+        if (JSON.stringify(a) !== JSON.stringify(u.access)) { diff.access = [u.access, a]; u.access = a; }
+        if (p !== u.preset) { diff.preset = [u.preset, p]; u.preset = p; }
+      }
+      if (!Object.keys(diff).length) return null;
+      u.updated = clock().toISOString();
+      var users = clone(st.users); users[id] = u;
+      return { type: "person.updated", data: { id: id, no: u.no, changes: diff }, recs: [{ kind: "user", id: id, value: u }],
+        meta: diff.name ? [{ key: "door", value: doorWith({ people: peopleOf(users) }) }] : [], result: u };
+    });
+  };
+  /* A new first password for a person (they forgot theirs, or they come back): they choose their own at their next sign-in. */
+  B.setPersonPassword = function (id, password, ownerPassword) {
+    try { need("owner"); checkPw(password); if (!state.users[id] || state.users[id].role === "owner") throw err("noperson"); } catch (e) { return Promise.reject(e); }
+    return keyToShare(ownerPassword).then(function (hk) {
+      return personEnvelope(hk, id, password).then(function (env) {
+        return B.change(function (st) {
+          need("owner");
+          var u = clone(st.users[id]); if (!u) throw err("noperson");
+          var back = u.active === false;
+          u.active = true; u.mustChange = true; u.updated = clock().toISOString();
+          var v = clone(hk.vault); v.people = v.people || {}; v.people[id] = env;
+          var users = clone(st.users); users[id] = u;
+          return { type: back ? "person.restored" : "person.password.set", data: { id: id, no: u.no }, recs: [{ kind: "user", id: id, value: u }],
+            meta: [{ key: "vault", value: v }, { key: "door", value: doorWith({ people: peopleOf(users) }) }], result: u };
+        });
+      });
+    });
+  };
+  /* Taking a key back: the person can no longer sign in; everything they did stays in the books, under their name. */
+  B.retirePerson = function (id) {
+    return D.get("meta", "vault").then(function (vault) {
+      return B.change(function (st) {
+        need("owner");
+        var u = clone(st.users[id]); if (!u || u.role === "owner") throw err("noperson");
+        if (u.active === false) return null;
+        var now = clock().toISOString(), recs = [];
+        var open = B.openShift(id);
+        if (open) { var sh = clone(open); (sh.breaks || []).forEach(function (b) { if (!b.to) b.to = now; }); sh.out = now; sh.outBy = B.user.id; recs.push({ kind: "shift", id: sh.id, value: sh }); }
+        u.active = false; u.mustChange = false; u.updated = now; recs.unshift({ kind: "user", id: id, value: u });
+        var v = clone(vault); if (v.people) delete v.people[id];
+        var users = clone(st.users); users[id] = u;
+        return { type: "person.retired", data: { id: id, no: u.no, clockedOut: !!open }, recs: recs,
+          meta: [{ key: "vault", value: v }, { key: "door", value: doorWith({ people: peopleOf(users) }) }], result: u };
+      });
+    });
+  };
+  /* A person's own password, changed by them (and chosen by them the first time they sign in). */
+  B.changeMyPassword = function (current, next) {
+    if (B.isOwner()) return B.changePassword(current, next);
+    var id = B.user && B.user.id;
+    try { checkPw(next); } catch (e) { return Promise.reject(e); }
+    return D.get("meta", "vault").then(function (v) {
+      var e = v.people && v.people[id]; if (!e) throw err("wrong");
+      return C.passwordKey(current, U.b64d(e.salt), iterations(v)).then(function (kek) { return C.unwrap(e, kek, aadEnv(v.storeId, "person:" + id), true); })
+        .then(function (k) { return { vault: v, key: k }; }, function () { throw err("wrong"); });
+    }).then(function (hk) {
+      return personEnvelope(hk, id, next).then(function (env) {
+        return B.change(function (st) {
+          var u = clone(st.users[id]); u.mustChange = false; u.updated = clock().toISOString();
+          var v = clone(hk.vault); v.people[id] = env;
+          return { type: "person.password.changed", data: { id: id, no: u.no }, recs: [{ kind: "user", id: id, value: u }], meta: [{ key: "vault", value: v }], result: u };
+        });
+      }).then(function (u) { B.user = state.users[id]; return u; });
+    });
+  };
+
+  /* ---------- signing in: the owner, or one of the people, each with their own password ---------- */
+  /* Who is signing in: a person, by name or staff number; or the owner, by the name kept at the door or by 1001. */
+  function whoIs(d, typed) {
+    var n = cleanName(typed), num = /^\d{3,6}$/.test(n) ? parseInt(n, 10) : null, people = (d && d.people) || [];
+    for (var i = 0; i < people.length; i++) { var x = people[i]; if (num ? x.no === num : B.sameName(x.name, n)) return x.id; }
+    if (num === 1001 || !d || !d.user || B.sameName(d.user, n)) return "owner";
+    return null;
+  }
+  B.signIn = function (name, password) {
+    return Promise.all([D.get("meta", "vault"), D.get("meta", "door")]).then(function (r) {
+      var v = r[0], d = r[1] || {};
+      if (!v) throw err("nostore");
+      var id = whoIs(d, name), env = id === "owner" ? v.owner : id && v.people ? v.people[id] : null;
+      /* the password is always worked through the same long derivation, so a wrong name takes as long as a wrong password */
+      return C.passwordKey(String(password), env ? U.b64d(env.salt) : U.rnd(16), iterations(v)).then(function (kek) {
+        if (!env) throw err("wrong");
+        return C.unwrap(env, kek, aadEnv(v.storeId, id === "owner" ? "owner" : "person:" + id), false);
+      }).then(function (key) { return load(v, key, id); }, function (e) { if (e && e.code) throw e; throw err("wrong"); }).then(function (st) {
+        var nd = clone(d); nd.last = B.user.name;
+        if (id === "owner" && !nd.user) nd.user = cleanName(name) || B.user.name;
+        doorMeta = nd;
+        return D.write([{ store: "meta", key: "door", value: nd }]).catch(function () { }).then(function () { return st; });
+      });
+    });
+  };
+  /* The practice store opens with no sign-in; there the owner can see Lakay as any of the people sees it. */
+  B.practiceAs = function (id) {
+    if (B.mode !== "practice" || !state || !state.users[id] || state.users[id].active === false) return Promise.reject(err("denied"));
+    B.user = state.users[id]; emit("user", B.user);
+    return Promise.resolve(B.user);
+  };
+
+  /* ---------- the time clock: each person's shifts, with their breaks ---------- */
+  B.openShift = function (userId) {
+    var st = state; if (!st) return null;
+    for (var i = st.shifts.length - 1; i >= 0; i--) { var x = st.shifts[i]; if (x.user === userId && !x.out) return x; }
+    return null;
+  };
+  B.onClock = function () { return state ? state.shifts.filter(function (x) { return !x.out; }) : []; };
+  B.onBreak = function (sh) { var b = sh && sh.breaks && sh.breaks[sh.breaks.length - 1]; return !!(b && !b.to); };
+  B.breakMs = function (sh, now) {
+    var end = sh.out ? Date.parse(sh.out) : (now || Date.now());
+    return (sh.breaks || []).reduce(function (m, b) { return m + Math.max(0, (b.to ? Date.parse(b.to) : end) - Date.parse(b.from)); }, 0);
+  };
+  B.shiftMs = function (sh, now) {
+    var end = sh.out ? Date.parse(sh.out) : (now || Date.now());
+    return Math.max(0, end - Date.parse(sh.in) - B.breakMs(sh, now));
+  };
+  B.shifts = function (filter) { return state ? state.shifts.filter(function (x) { return !filter || filter(x); }) : []; };
+  function shiftChange(userId, type, fn) {
+    return B.change(function (st) {
+      if (userId !== B.user.id) need("team");
+      var sh = B.openShift(userId); if (!sh) return null;
+      sh = clone(sh);
+      var now = clock().toISOString(), data = fn(sh, now); if (!data) return null;
+      data.shift = sh.id; data.user = userId; data.at = now;
+      return { type: type, data: data, recs: [{ kind: "shift", id: sh.id, value: sh }], result: sh };
+    });
+  }
+  B.clockIn = function () {
+    return B.change(function () {
+      if (B.openShift(B.user.id)) return null;
+      var now = clock(), sh = { id: U.uid("t"), user: B.user.id, no: B.numberOf(B.user), in: now.toISOString(), out: null, breaks: [], day: U.dayKey(now), dev: B.device.id };
+      return { type: "clock.in", data: { shift: sh.id, user: sh.user, at: sh.in }, recs: [{ kind: "shift", id: sh.id, value: sh }], result: sh };
+    });
+  };
+  B.clockOut = function (userId) {
+    userId = userId || (B.user && B.user.id);
+    return shiftChange(userId, "clock.out", function (sh, now) {
+      (sh.breaks || []).forEach(function (b) { if (!b.to) b.to = now; });
+      sh.out = now; if (userId !== B.user.id) sh.outBy = B.user.id;
+      return { worked: B.shiftMs(sh), breaks: B.breakMs(sh) };
+    });
+  };
+  B.breakStart = function () {
+    return shiftChange(B.user.id, "break.started", function (sh, now) { if (B.onBreak(sh)) return null; sh.breaks = (sh.breaks || []).concat([{ from: now, to: null }]); return {}; });
+  };
+  B.breakEnd = function () {
+    return shiftChange(B.user.id, "break.ended", function (sh, now) { if (!B.onBreak(sh)) return null; sh.breaks[sh.breaks.length - 1].to = now; return {}; });
+  };
+  /* the practice store's sample shifts, each written whole in one line */
+  function recordShift(sh) {
+    return B.change(function () { return { type: "shift.recorded", data: { shift: sh.id, user: sh.user, in: sh.in, out: sh.out, practice: true }, recs: [{ kind: "shift", id: sh.id, value: sh }] }; });
+  }
 
   /* ---------- writing: one change at a time, each worked out from the books as they stand at that moment ---------- */
   var queue = Promise.resolve();
@@ -351,6 +626,7 @@
         recs.forEach(function (r, i) { ops.push({ store: "rec", key: r.kind + ":" + r.id, value: sealed[i + 2] }); });
         metaOps.forEach(function (m) { ops.push({ store: "meta", key: m.key, value: m.value }); });
         return D.write(ops).then(function () {
+          metaOps.forEach(function (m) { if (m.key === "door") doorMeta = clone(m.value); });
           if (state) {
             state.head = head;
             recs.forEach(function (r) { put(state, r.kind + ":" + r.id, clone(r.value)); });
@@ -365,13 +641,15 @@
   /* ---------- settings, people, shelves ---------- */
   B.updateSettings = function (changes) {
     return B.change(function (st) {
+      need("owner");
       var s = clone(st.settings), diff = {};
       Object.keys(changes).forEach(function (k) {
         if (JSON.stringify(s[k]) !== JSON.stringify(changes[k])) { diff[k] = [s[k] === undefined ? null : s[k], changes[k]]; s[k] = clone(changes[k]); }
       });
       if (!Object.keys(diff).length) return null;
       var meta = [];
-      if (diff.storeName) meta.push({ key: "door", value: { storeName: s.storeName, created: s.created } });
+      if (diff.ownerName && nameTaken(st, s.ownerName, "owner")) throw err("nameTaken");
+      if (diff.storeName || diff.ownerName) meta.push({ key: "door", value: doorWith(diff.ownerName ? { storeName: s.storeName, user: cleanName(s.ownerName) } : { storeName: s.storeName }) });
       if (diff.ownerName) {
         var u = clone(st.users.owner); u.name = s.ownerName;
         return { type: "settings.updated", data: { changes: diff }, recs: [{ kind: "settings", id: "main", value: s }, { kind: "user", id: "owner", value: u }], meta: meta };
@@ -383,6 +661,7 @@
     name = String(name || "").trim();
     if (!name) return Promise.reject(err("name"));
     return B.change(function (st) {
+      need("items");
       var id = U.uid("c"), order = Object.keys(st.cats).length;
       var c = { id: id, name: name, order: order };
       return { type: "category.created", data: { cat: c }, recs: [{ kind: "cat", id: id, value: c }], result: c };
@@ -392,7 +671,7 @@
   /* The Author Studio's choices (names, words, look, receipt) are kept beside the envelopes, so the door can wear them
      before the store is opened; each change is also a ledger line, written in the same transaction. */
   B.saveCustom = function (custom, changed) {
-    return B.change(function () { return { type: "author.changed", data: { changed: changed }, meta: [{ key: "custom", value: custom }] }; })
+    return B.change(function () { need("owner"); return { type: "author.changed", data: { changed: changed }, meta: [{ key: "custom", value: custom }] }; })
       .then(function (r) { E.custom = custom; return r; });
   };
 
@@ -413,6 +692,7 @@
   }
   B.addItem = function (f) {
     return B.change(function (st) {
+      need("items");
       var now = clock().toISOString();
       var it = { id: U.uid("i"), name: String(f.name || "").trim(), cat: f.cat, price: f.price, cost: f.cost === undefined ? null : f.cost,
         barcode: String(f.barcode || "").trim() || null, sku: String(f.sku || "").trim() || null, taxId: f.taxId || null,
@@ -426,6 +706,7 @@
   };
   B.editItem = function (id, f) {
     return B.change(function (st) {
+      need("items");
       var old = st.items[id]; if (!old) throw err("noitem");
       var it = clone(old), diff = {};
       ITEM_FIELDS.forEach(function (k) {
@@ -443,6 +724,7 @@
   };
   B.setArchived = function (id, flag) {
     return B.change(function (st) {
+      need("items");
       var it = clone(st.items[id]); if (!it) throw err("noitem");
       if (!!it.archived === !!flag) return null;
       it.archived = !!flag; it.updated = clock().toISOString();
@@ -459,6 +741,7 @@
   B.averageCost = averageCost;
   B.receive = function (id, qty, unitCost, supplier, note) {
     return B.change(function (st) {
+      need("receive");
       var it = clone(st.items[id]); if (!it) throw err("noitem");
       if (!Number.isSafeInteger(qty) || qty <= 0) throw err("qty");
       if (unitCost !== null && (!Number.isSafeInteger(unitCost) || unitCost < 0)) throw err("cost");
@@ -473,6 +756,7 @@
   B.REASONS = ["count", "damaged", "expired", "lost", "stolen", "personal", "returned", "other"];
   B.adjust = function (id, delta, reason, note) {
     return B.change(function (st) {
+      need("adjust");
       var it = clone(st.items[id]); if (!it) throw err("noitem");
       if (!Number.isSafeInteger(delta) || delta === 0) throw err("qty");
       if (B.REASONS.indexOf(reason) < 0) throw err("reason");
@@ -505,13 +789,14 @@
   };
   B.completeSale = function (lines, tendered) {
     return B.change(function (st) {
+      need("sell");
       var t = B.priceTicket(lines, st);
       if (!t.lines.length) throw err("empty");
       if (!Number.isSafeInteger(tendered) || tendered < t.total) throw err("short");
       var counter = clone(st.counters.receipt || { next: 1 }), no = B.device.code + "-" + String(counter.next).padStart(6, "0");
       counter.next += 1;
       var now = clock();
-      var sale = { id: U.uid("s"), no: no, at: now.toISOString(), day: U.dayKey(now), hour: now.getHours(), by: B.user.id, dev: B.device.id,
+      var sale = { id: U.uid("s"), no: no, at: now.toISOString(), day: U.dayKey(now), hour: now.getHours(), by: B.user.id, byNo: B.numberOf(B.user), dev: B.device.id,
         lines: t.lines, subtotal: t.subtotal, taxes: t.taxes, tax: t.tax, total: t.total, items: t.items,
         pay: [{ method: "cash", amount: t.total, tendered: tendered, change: tendered - t.total }], status: "completed" };
       var recs = [{ kind: "sale", id: sale.id, value: sale }, { kind: "counter", id: "receipt", value: counter }];
@@ -528,14 +813,17 @@
   /* ---------- reports ---------- */
   /* A report for whole days (fromKey to toKey, by the store's calendar), or for part of a day: win = { from, to } in
      milliseconds narrows it to the sales and moves made in that window (this hour, this morning, this afternoon). */
-  B.report = function (fromKey, toKey, win) {
+  B.report = function (fromKey, toKey, win, who) {
     function inWin(x) { if (!win) return true; var at = Date.parse(x.at); return at >= win.from && at < win.to; }
-    var st = state, r = { from: fromKey, to: toKey, win: win || null, count: 0, items: 0, net: 0, tax: 0, gross: 0, cogs: 0, noCost: 0, profit: 0,
-      byCat: {}, byItem: {}, byHour: [], byDay: {}, byMethod: {}, losses: { value: 0, qty: 0, byReason: {} }, received: { qty: 0, value: 0 } };
+    function mine(x) { return !who || x.by === who; }
+    var st = state, r = { from: fromKey, to: toKey, win: win || null, who: who || null, count: 0, items: 0, net: 0, tax: 0, gross: 0, cogs: 0, noCost: 0, profit: 0,
+      byCat: {}, byItem: {}, byHour: [], byDay: {}, byMethod: {}, byPerson: {}, losses: { value: 0, qty: 0, byReason: {} }, received: { qty: 0, value: 0 } };
     for (var h = 0; h < 24; h++) r.byHour.push({ count: 0, gross: 0 });
     st.sales.forEach(function (s) {
-      if (s.status !== "completed" || s.day < fromKey || s.day > toKey || !inWin(s)) return;
+      if (s.status !== "completed" || s.day < fromKey || s.day > toKey || !inWin(s) || !mine(s)) return;
       r.count++; r.items += s.items; r.net += s.subtotal; r.tax += s.tax; r.gross += s.total;
+      var pp = r.byPerson[s.by] = r.byPerson[s.by] || { count: 0, items: 0, gross: 0 };
+      pp.count++; pp.items += s.items; pp.gross += s.total;
       r.byHour[s.hour].count++; r.byHour[s.hour].gross += s.total;
       var d = r.byDay[s.day] = r.byDay[s.day] || { count: 0, gross: 0, net: 0, profit: 0 };
       d.count++; d.gross += s.total; d.net += s.subtotal;
@@ -554,7 +842,7 @@
     /* profit counts only lines whose cost is known; sales of items with no cost are shown apart */
     r.profit = r.net - r.noCost - r.cogs;
     st.moves.forEach(function (m) {
-      if (m.day < fromKey || m.day > toKey || !inWin(m)) return;
+      if (m.day < fromKey || m.day > toKey || !inWin(m) || !mine(m)) return;
       if (m.kind === "receive") { r.received.qty += m.qty; r.received.value += (m.unitCost || 0) * m.qty; }
       if (m.kind === "adjust" && m.qty < 0) {
         var v = (m.unitCost || 0) * -m.qty;
@@ -675,6 +963,7 @@
 
   /* ---------- backups: the sealed books as they are, in one file ---------- */
   B.makeBackup = function () {
+    if (!B.can("owner")) return Promise.reject(err("denied"));
     return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.entries("rec"), D.entries("journal"), D.get("meta", "custom")]).then(function (r) {
       var body = { format: "emporium-backup", v: 1, build: E.BUILD.number, at: new Date().toISOString(), door: r[1], vault: r[0], custom: r[4] || null,
         rec: r[2].map(function (e) { return [e[0], U.b64e(e[1].iv), U.b64e(e[1].ct)]; }),
@@ -716,7 +1005,7 @@
         var meta = [["vault", v], ["door", body.door], ["device", B.device]];
         if (body.custom) meta.push(["custom", E.cleanCustom ? E.cleanCustom(body.custom) : body.custom]);
         return D.replaceAll(meta, rec, journal);
-      }).then(function () { E.custom = body.custom && E.cleanCustom ? E.cleanCustom(body.custom) : null; if (E.ui && E.ui.applyLook) E.ui.applyLook(); return load(v, key); });
+      }).then(function () { doorMeta = body.door || null; E.custom = body.custom && E.cleanCustom ? E.cleanCustom(body.custom) : null; if (E.ui && E.ui.applyLook) E.ui.applyLook(); return load(v, key); });
     });
   };
 
