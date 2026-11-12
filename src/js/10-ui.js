@@ -303,6 +303,8 @@
     return h("div#doorBar.cl-cluster.door-bar", { role: "toolbar", "aria-label": t("top.tools") }, [
       h("button.cl-key#doorDisplay", { type: "button", title: t("top.display"), onclick: ui.displayPanel }, t("top.display")),
       h("button.cl-key#doorAbout", { type: "button", title: t("top.about"), onclick: ui.about }, t("top.about")),
+      h("button.cl-key#doorRefresh", { type: "button", title: t("top.refreshTip"), onclick: ui.refreshApp }, t("top.refresh")),
+      h("button.cl-key#doorReset", { type: "button", title: t("reset.tip"), onclick: function () { E.door.reset(); } }, t("reset.h")),
       h("button.cl-key.lang#doorLang", { type: "button", title: "Langue · Language · Lang: " + t("lang." + next), "aria-label": t("lang." + next), onclick: function () { E.setLang(next); if (onLang) onLang(); } }, ui.flag(next))]);
   };
   ui.cluster = function () {
@@ -439,6 +441,8 @@
         return false;
       } }] });
   };
+  /* Refresh: the page starts again from the beginning, as a browser's refresh does. Nothing in the books is touched. */
+  ui.refreshApp = function () { try { location.reload(); } catch (e) { } };
   ui.displayPanel = function () {
     function row(label, seg) { return h("div.display-row", null, [h("span", null, label), seg]); }
     ui.dialog({ title: t("top.display"), emoji: "🎨", body: h("div.display-rows", null, [
@@ -448,7 +452,29 @@
       row(t("disp.menu"), ui.seg([["0", t("disp.menu.full")], ["1", t("disp.menu.icons")]], U.prefGet("fold", "0"), function (v) { U.prefSet("fold", v); ui.applyLook(); }, t("disp.menu"))),
       row(t("disp.sound"), ui.seg([["1", t("on")], ["0", t("off")]], U.prefGet("sound", "1"), function (v) { U.prefSet("sound", v); if (v === "1" && E.sound) E.sound.play("welcome"); }, t("disp.sound"))),
       row(t("disp.vol"), ui.seg([["0.35", t("disp.vol.soft")], ["0.7", t("disp.vol.mid")], ["1", t("disp.vol.full")]], U.prefGet("soundVol", "0.7"), function (v) { U.prefSet("soundVol", v); if (E.sound) E.sound.play("sale"); }, t("disp.vol"))),
-      h("p.hint", null, t("set.calmHint"))]), actions: [{ label: t("close"), kind: "primary" }] });
+      h("p.hint", null, t("set.calmHint")),
+      h("div.display-keys", null, [h("button.key#dispRefresh", { type: "button", onclick: ui.refreshApp }, [ui.emo("↻"), t("top.refresh")]),
+        h("button.key#dispReset", { type: "button", onclick: function (e) { var l = e.currentTarget.closest(".layer"); if (l) l.remove(); ui.resetPanel(); } }, [ui.emo("⟲"), t("reset.h")])]),
+      h("p.hint", null, t("top.refreshTip"))]), actions: [{ label: t("close"), kind: "primary" }] });
+  };
+  /* Reset, while the store is open: the sign-in's memory, the practice store, or (the owner) the store on this device. */
+  ui.resetPanel = function () {
+    if (!B.isOpen) return E.door.reset();
+    var d, practice = B.mode === "practice";
+    d = ui.dialog({ title: t("reset.h"), emoji: "⟲", body: h("div.reset-keys", null, [h("p", null, t("reset.p")),
+      h("button.key#rsClear", { type: "button", onclick: function () { B.forgetSignIn().then(function () { d.close(); ui.toast(t("reset.cleared"), "good"); }); } },
+        [ui.emo("🔓"), h("span", null, [h("b", null, t("reset.clear")), h("small", null, t("reset.clearP"))])]),
+      h("button.key#rsPractice", { type: "button", onclick: function () {
+        d.close();
+        ui.confirm(t("practice.resetQ"), t("practice.resetP"), t("practice.reset")).then(function (yes) {
+          if (!yes) return;
+          if (practice) B.resetPractice().then(function () { return B.openPractice(); }).then(function () { E.app.opened(); ui.toast(t("practice.done"), "good"); }, ui.failed);
+          else B.lock("hand");
+        });
+      } }, [ui.emo("🧪"), h("span", null, [h("b", null, t("practice.reset")), h("small", null, t("reset.practiceP"))])]),
+      !practice && B.isOwner() ? h("button.key.danger#rsErase", { type: "button", onclick: function () { d.close(); ui.go("settings"); setTimeout(function () { var k = document.getElementById("eraseKey"); if (k) { k.scrollIntoView({ block: "center" }); k.focus(); } }, 80); } },
+        [ui.emo("🧹"), h("span", null, [h("b", null, t("set.erase")), h("small", null, t("reset.eraseSettings"))])]) : null]),
+      actions: [{ label: t("close"), kind: "primary" }] });
   };
   ui.about = function () {
     var st = B.state() || { settings: { storeName: (E.doorInfo && E.doorInfo.storeName) || "" }, head: null };

@@ -10,8 +10,8 @@ Read this first in a new session. It says where Lakay stands and what comes next
   - `DevGroup2313/Lakay-Apps`: the iPhone and iPad app and the Fire tablet's, and their build kits only.
 - **Making a release:** see "Releasing a build" in `README.md`. In short: raise `build.json`, build, test, run `python3 release/device_repos.py windows`, commit and push Lakay-Windows; then `python3 release/device_repos.py mac <clone of Lakay-Mac>` and `... apps <clone of Lakay-Apps>`, commit and push each. Put `[skip ci]` in a commit message to save work without building.
 - **GitHub commits the apps into `builds/`** after each build (`release/publish.py`, as github-actions, with `[skip ci]`). So pull before pushing: `git pull --rebase origin claude/magical-darwin-ppq4pn`.
-- **Released:** Build 6 (7 November 2026): the owner as administrator, the staff with user IDs and access levels, signing in and out with the time clock, reports by person. Build 5 (the mark in true depth, the downloads set up as the other apps') was confirmed on all three repositories before it.
-- **Tests:** `node tests/t_build3.js` (48 checks) and `node tests/t_build6.js` (42 checks) drive the whole app in Chromium. Build with `python3 build.py`.
+- **Released:** Build 7 (12 November 2026): never locked out (the password is the key whatever the name; the practice store always on the door; Refresh and Reset keys; a short wait after wrong tries). Build 6 (7 November 2026) brought the owner as administrator, the staff with user IDs and access levels, signing in and out with the time clock, and reports by person.
+- **Tests:** `node tests/t_build3.js` (48 checks), `node tests/t_build6.js` (42 checks) and `node tests/t_build7.js` (24 checks) drive the whole app in Chromium. Build with `python3 build.py`.
 
 ## How the app is made
 
@@ -31,7 +31,8 @@ Read this first in a new session. It says where Lakay stands and what comes next
 
 ## What the owner asked for that is still to come
 
-1. **Schedae from Carpe Diem, in exact parity.** The sticky notes, their right-press menu, their side menu and their night dress, as 🗒️ on the rail.
+1. **Schedae from Carpe Diem, in exact parity.** The sticky notes, their ⋯ menu, their notes panel and their night dress, as 🗒️ on the rail. Carpe Diem's finished notes were measured (day and night computed styles, screenshots) in this session; the owner's order is: finish the original list before the search app.
+   After the list: **the search app** (web results through the owner's own SearXNG server on the Mac mini, open sources, a scholarly mode, the owner's own library indexed on the device, no AI), beginning with a Stage 0 plan, names and mark previews.
 2. **Inventory.** Departments, tabs and pages by kind of merchandise; a massive expansion for large inventories.
 3. **Payments.** Card, Apple Pay and Google Pay through any processor (not only Square), and split payments.
 4. **Learning.** Trainings for staff and new hires; a guided interactive tour with live demonstrations; tips throughout.
@@ -42,6 +43,7 @@ Read this first in a new session. It says where Lakay stands and what comes next
 ## Rules the owner has set
 
 - **Delivery:** the ready-made apps download from GitHub the way the other apps' do. No browser page in place of an app; no other way around.
+- **Never locked out:** the owner must always be able to get in with the password alone, reach the practice store from the door, and reset without a password. Keep every new sign-in rule to this (Build 7).
 - **Look:** Always hide scrollbars. Keep parity with Carpe Diem and Ingenium where the owner asks for it. Show designs before committing to them.
 - **Writing:** No dashes in prose; short sentences; truth first; mark uncertainty.
 - **Security:** Never read Android signing keys. The Fire key must be a GitHub secret (`EMPORIUM_ANDROID_KEY`, `EMPORIUM_ANDROID_KEY_PASSWORD`). Lakay-Apps does not yet hold it.

@@ -140,6 +140,8 @@ Encryption protects data at rest and in transit. It cannot protect against every
 - A **weak password** can be guessed from a stolen copy. Choose a long password; Emporium refuses short ones.
 - **People acting together** (two employees covering for each other) cannot be stopped by software, but the ledger makes
   their actions visible after the fact.
+- **The Reset at the door needs no password** (Build 7). It can end the wait after wrong tries, start the practice store again, or take the store off this device after the store's name is typed. Nothing in the books can be read this way: they stay sealed, and a backup saved first opens only with the password or the Master Key. The risk is loss, not disclosure: anyone at an unattended counter could erase that device's books. Keep a sealed backup off the device, every day.
+- **The wait after wrong tries is short** (at most a minute) and the Reset ends it, so the owner is never shut out. The real protection against guessing is the password's length and the slow key derivation (PBKDF2, 600,000 rounds), not the wait.
 - **A person's key opens the same sealed books as the owner's.** The limits on what each person sees (costs, profit,
   reports) are kept by Lakay itself, not by a separate lock on that data. Someone who copied the books and also knew a
   staff password, and who wrote their own program, could read everything. Give keys only to people you trust with the

@@ -161,6 +161,7 @@
       });
     }).then(function (st) {
       var u = st.users[userId || "owner"];
+      if (!u && (userId || "owner") === "owner") throw err("damaged");
       if (!u || (u.role !== "owner" && u.active === false)) throw err("wrong");
       KEY = key; state = st; B.isOpen = true;
       B.user = u;
@@ -517,23 +518,28 @@
   };
 
   /* ---------- signing in: the owner, or one of the people, each with their own password ---------- */
-  /* Who is signing in: a person, by name or staff number; or the owner, by the name kept at the door or by 1001. */
+  /* Whose envelopes a typed name may open, in order: the person it names (by name or staff number), then the owner.
+     The owner's envelope is always tried, whatever name was typed or none: the password is the key, never the name,
+     so the owner is never shut out by a name remembered differently. */
   function whoIs(d, typed) {
-    var n = cleanName(typed), num = /^\d{3,6}$/.test(n) ? parseInt(n, 10) : null, people = (d && d.people) || [];
-    for (var i = 0; i < people.length; i++) { var x = people[i]; if (num ? x.no === num : B.sameName(x.name, n)) return x.id; }
-    if (num === 1001 || !d || !d.user || B.sameName(d.user, n)) return "owner";
-    return null;
+    var n = cleanName(typed), num = /^\d{3,6}$/.test(n) ? parseInt(n, 10) : null, people = (d && d.people) || [], out = [];
+    for (var i = 0; i < people.length; i++) { var x = people[i]; if (num ? x.no === num : B.sameName(x.name, n)) out.push(x.id); }
+    out.push("owner");
+    return out;
   }
   B.signIn = function (name, password) {
     return Promise.all([D.get("meta", "vault"), D.get("meta", "door")]).then(function (r) {
-      var v = r[0], d = r[1] || {};
+      var v = r[0], d = r[1] || {}, who = whoIs(d, name), id = null;
       if (!v) throw err("nostore");
-      var id = whoIs(d, name), env = id === "owner" ? v.owner : id && v.people ? v.people[id] : null;
-      /* the password is always worked through the same long derivation, so a wrong name takes as long as a wrong password */
-      return C.passwordKey(String(password), env ? U.b64d(env.salt) : U.rnd(16), iterations(v)).then(function (kek) {
-        if (!env) throw err("wrong");
-        return C.unwrap(env, kek, aadEnv(v.storeId, id === "owner" ? "owner" : "person:" + id), false);
-      }).then(function (key) { return load(v, key, id); }, function (e) { if (e && e.code) throw e; throw err("wrong"); }).then(function (st) {
+      function attempt(i) {
+        if (i >= who.length) throw err("wrong");
+        var cand = who[i], env = cand === "owner" ? v.owner : v.people ? v.people[cand] : null;
+        if (!env) return attempt(i + 1);
+        return C.passwordKey(String(password), U.b64d(env.salt), iterations(v)).then(function (kek) {
+          return C.unwrap(env, kek, aadEnv(v.storeId, cand === "owner" ? "owner" : "person:" + cand), false);
+        }).then(function (key) { id = cand; return key; }, function () { return attempt(i + 1); });
+      }
+      return attempt(0).then(function (key) { return load(v, key, id); }).then(function (st) {
         var nd = clone(d); nd.last = B.user.name;
         if (id === "owner" && !nd.user) nd.user = cleanName(name) || B.user.name;
         doorMeta = nd;
@@ -963,7 +969,7 @@
 
   /* ---------- backups: the sealed books as they are, in one file ---------- */
   B.makeBackup = function () {
-    if (!B.can("owner")) return Promise.reject(err("denied"));
+    if (B.user && !B.can("owner")) return Promise.reject(err("denied"));
     return Promise.all([D.get("meta", "vault"), D.get("meta", "door"), D.entries("rec"), D.entries("journal"), D.get("meta", "custom")]).then(function (r) {
       var body = { format: "emporium-backup", v: 1, build: E.BUILD.number, at: new Date().toISOString(), door: r[1], vault: r[0], custom: r[4] || null,
         rec: r[2].map(function (e) { return [e[0], U.b64e(e[1].iv), U.b64e(e[1].ct)]; }),
@@ -1014,5 +1020,21 @@
     return B.checkPassword(password).then(function () { B.lock("erase"); return D.wipe(); }).then(function () {
       return D.write([{ store: "meta", key: "device", value: B.device }]);
     });
+  };
+  /* The Reset key at the door: the store leaves this device with no password asked. The books are sealed, so nothing
+     in them can be read this way; they are only gone from this device. The door offers a sealed backup first. */
+  B.eraseAtDoor = function () {
+    if (B.isOpen) return Promise.reject(err("denied"));
+    B.useBooks(false);
+    return D.wipe().then(function () { doorMeta = null; return D.write([{ store: "meta", key: "device", value: B.device }]); });
+  };
+  /* The sign-in's memory on this device: the waits after wrong tries, and the last name typed. */
+  B.forgetSignIn = function () {
+    U.prefSet("fails", "0"); U.prefSet("waitUntil", "0");
+    return D.get("meta", "door").then(function (d) {
+      if (!d || !d.last) return false;
+      delete d.last; doorMeta = d;
+      return D.write([{ store: "meta", key: "door", value: d }]).then(function () { return true; });
+    }).catch(function () { return false; });
   };
 })();

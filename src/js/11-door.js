@@ -97,13 +97,14 @@
       h("div.g-rail", null, [h("i"), h("i"), h("i"), h("i"), h("i"), h("i"), h("i")]),
       h("div.g-main", null, [h("i"), h("i"), h("div.g-row", null, [h("i"), h("i"), h("i")])])]);
     var enter = h("button.i-primary#introEnter", { type: "button" }, t("intro.enter"));
+    var practiceKey = h("button.i-secondary#introPractice", { type: "button" }, t("ld.practice"));
     var msg = h("p.intro-tourline.intro-msg", { role: "status" });
     var card;
     function go() {
-      enter.disabled = true; enter.textContent = t("intro.opening");
-      B.openPractice(function (f) { msg.textContent = t("intro.preparing", { n: Math.round(f * 100) }); }).then(function () {
-        E.app.opened(true);
-      }, function (e) { enter.disabled = false; enter.textContent = t("intro.enter"); msg.textContent = t("door.problem"); console.error(e); });
+      enter.disabled = true; practiceKey.disabled = true; var was = enter.textContent; enter.textContent = t("intro.opening");
+      door.openPractice(function (f) { msg.textContent = t("intro.preparing", { n: Math.round(f * 100) }); }).then(function (opened) {
+        if (!opened) { enter.disabled = false; practiceKey.disabled = false; enter.textContent = was; msg.textContent = ""; }
+      });
     }
     /* the little lock on the door, as Ingenium has it: a pill in the card's top-left corner, beside nothing but the
        theme pill across the card. With a store of its own it opens the sign-in in the card's place; on a new device it
@@ -122,10 +123,11 @@
         enter, msg];
     } else {
       enter.addEventListener("click", openSignIn);
+      practiceKey.addEventListener("click", go);
       kids = [d.storeName ? h("p.intro-store", null, d.storeName) : null,
         h("p.intro-lede", null, d.user && !(d.people && d.people.length) ? t("ld.welcomeName", { name: d.user }) : t("ld.welcome")),
         o.why === "idle" ? h("p.intro-tourline", null, t("door.lockedIdle")) : o.why === "signout" ? h("p.intro-tourline#signedOutNote", null, door.outNote || t("door.signedOut")) : null,
-        enter, msg];
+        h("div.intro-keys", null, [enter, practiceKey]), msg];
     }
     card = h("div.intro-card", { role: "dialog", "aria-label": t("intro.aria", { app: E.appName() }) }, [
       h("div.intro-corner.intro-corner-l", null, lockPill),
@@ -170,8 +172,8 @@
     var go = h("button.ild-key#ldGo", { type: "submit" }, t("ld.signIn"));
     function wrong() {
       var n = (+U.prefGet("fails", "0")) + 1; U.prefSet("fails", n);
-      if (n >= 5) { var s2 = Math.min(900, 30 * Math.pow(2, n - 5)); U.prefSet("waitUntil", Date.now() + s2 * 1000); err(card, t("door.tooMany", { s: s2 })); }
-      else err(card, t("ld.wrongPair"));
+      if (n >= 5) { var s2 = Math.min(60, 10 * Math.pow(2, n - 5)); U.prefSet("waitUntil", Date.now() + s2 * 1000); err(card, t("door.tooMany", { s: s2 }) + " " + t("door.resetHint")); }
+      else err(card, t("ld.wrongPair") + (n >= 2 ? " " + t("ld.nameHint") : ""));
       if (E.sound) E.sound.play("nope");
       busy(card, false); try { pw.select(); } catch (e) { }
     }
@@ -224,11 +226,69 @@
   });
   /* the sign-in, wherever the door is asked for it: the introduction, with the fold open */
   var signIn = function (why) { return intro({ store: true, open: true, why: why }); };
+  /* Opens the practice store; if its books will not open (damaged, or from a build that kept them differently), it
+     offers to start the practice store again, so there is always a way in. Resolves true once the store is open. */
+  door.openPractice = function (progress) {
+    return B.openPractice(progress).then(function () { E.app.opened(true); return true; }, function (e) {
+      console.error(e);
+      return ui.confirm(t("practice.brokenQ"), t("practice.brokenP"), t("practice.reset")).then(function (yes) {
+        if (!yes) { B.useBooks(false); return false; }
+        return B.resetPractice(progress).then(function () { return B.openPractice(); }).then(function () { E.app.opened(true); return true; }, function (e2) {
+          console.error(e2); B.useBooks(false); ui.toast(t("door.problem"), "bad"); return false;
+        });
+      });
+    });
+  };
   function openPracticeFromDoor() {
     var d = document.getElementById("lockDoor"), card = d && d.firstChild;
     if (card) busy(card, true);
-    B.openPractice().then(function () { E.app.opened(); }, function (e) { if (card) { busy(card, false); err(card, t("door.problem")); } console.error(e); });
+    door.openPractice().then(function (opened) { if (!opened && card) busy(card, false); });
   }
+
+  /* ---------- the Reset key: a way back in, always ----------
+     Three plain choices: clear the waits and the remembered name; start the practice store again; or take the store
+     off this device, after a sealed backup. None needs a password. The books stay sealed: a reset cannot read them. */
+  door.reset = function () {
+    var dd = (info && info.door) || {}, stored = !!(info && info.hasStore), d;
+    function step1() {
+      var body = [h("p", null, t("reset.p")),
+        h("button.key#rsClear", { type: "button", onclick: function () {
+          B.forgetSignIn().then(function () { d.close(); ui.toast(t("reset.cleared"), "good"); door.show(); });
+        } }, [ui.emo("🔓"), h("span", null, [h("b", null, t("reset.clear")), h("small", null, t("reset.clearP"))])]),
+        h("button.key#rsPractice", { type: "button", onclick: function () {
+          d.close();
+          ui.confirm(t("practice.resetQ"), t("practice.resetP"), t("practice.reset")).then(function (yes) {
+            if (!yes) return;
+            B.resetPractice().then(function () { return B.openPractice(); }).then(function () { E.app.opened(true); ui.toast(t("practice.done"), "good"); }, function (e) { console.error(e); B.useBooks(false); ui.toast(t("door.problem"), "bad"); });
+          });
+        } }, [ui.emo("🧪"), h("span", null, [h("b", null, t("practice.reset")), h("small", null, t("reset.practiceP"))])]),
+        stored ? h("button.key.danger#rsErase", { type: "button", onclick: function () { d.close(); step2(); } }, [ui.emo("🧹"), h("span", null, [h("b", null, t("set.erase")), h("small", null, t("reset.eraseP"))])]) : null];
+      d = ui.dialog({ title: t("reset.h"), emoji: "⟲", body: h("div.reset-keys", null, body), actions: [{ label: t("close"), kind: "primary" }] });
+    }
+    function step2() {
+      var nm = ui.input({ id: "rsName", autocomplete: "off" }), saved = false;
+      var backup = h("button.key.primary#rsBackup", { type: "button", onclick: function () {
+        backup.disabled = true;
+        B.makeBackup().then(function (text) {
+          var name = "Lakay backup " + U.dayKey() + ".json";
+          return ui.saveFile(name, "application/json", text);
+        }).then(function () { saved = true; backup.textContent = t("reset.backupSaved"); }, function (e) { backup.disabled = false; console.error(e); ui.toast(t("door.problem"), "bad"); });
+      } }, [ui.emo("💾"), t("reset.backup")]);
+      ui.dialog({ title: t("set.erase"), emoji: "🧹", alert: true, focus: "#rsName", body: [h("p", null, t("reset.eraseWarn")), h("p.hint", null, t("reset.backupHint")), backup,
+        ui.field(t("set.eraseType", { name: dd.storeName || "" }), nm, { required: true })],
+        actions: [{ label: t("cancel") }, { label: t("set.eraseKey"), kind: "danger", id: "rsGo", onClick: function (close, btn) {
+          if (!B.sameName(nm.value, dd.storeName || "")) { ui.fieldError(nm, t("set.eraseNameWrong")); return false; }
+          btn.disabled = true;
+          var go = saved ? Promise.resolve(true) : ui.confirm(t("reset.noBackupQ"), t("reset.noBackupP"), t("set.eraseKey"), "danger");
+          go.then(function (yes) {
+            if (!yes) { btn.disabled = false; return; }
+            B.eraseAtDoor().then(function () { close(); U.prefSet("fails", "0"); U.prefSet("waitUntil", "0"); ui.toast(t("reset.erased"), "good"); door.show(); }, function (e) { btn.disabled = false; console.error(e); ui.toast(t("door.problem"), "bad"); });
+          });
+          return false;
+        } }] });
+    }
+    step1();
+  };
 
   /* ---------- can't sign in ---------- */
   function way(n, key, id, fn) {
@@ -237,7 +297,7 @@
   var ways = screen(function () {
     var card = lockDoor("door");
     fill(card, [h("h2", null, t("ld.ways.h")), h("p", null, t("ld.ways.p")),
-      h("div.ild-ways", null, [way("1", "ld.way1", "ldWayMaster", masterOpen), way("2", "ld.way2", "ldWayBackup", function () { restore("door"); })]),
+      h("div.ild-ways", null, [way("1", "ld.way1", "ldWayMaster", masterOpen), way("2", "ld.way2", "ldWayBackup", function () { restore("door"); }), way("3", "ld.way3", "ldWayReset", function () { door.reset(); })]),
       h("div.ild-keys", null, [h("button.ild-link#ldBackSign", { type: "button", onclick: function () { door.show(); } }, t("ld.toSignIn"))])]);
   });
   var masterOpen = screen(function () {

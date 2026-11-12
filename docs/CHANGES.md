@@ -4,6 +4,17 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 7 (12 November 2026): never locked out
+
+The owner reported being shut out of Lakay: refused at the door, asked again and again for a key, and unable to reach the practice store. Build 6 had prefilled the sign-in's name with the owner's record name while the door still compared the typed name with the name given at the first sign-in; when the two differed, every try was refused even with the right password, and five refusals started a wait that grew to fifteen minutes. This build removes every such lock.
+
+- **The password is the key, never the name.** The owner's envelope is tried with the owner's password whatever name is typed, or none. A staff name still finds that person's own envelope first.
+- **The practice store is always on the door.** Its own key sits beside Enter when a store exists. If its sample books will not open, the door offers to start the practice store again.
+- **Refresh and Reset,** on the door's bar and in Display. Refresh starts the app again, as a browser's refresh does. Reset needs no password and offers three things: clear the wait and the remembered name; start the practice store again; or take the store off this device after a sealed backup (the store's name must be typed; a backup can be saved first and restored later with the password or the Master Key). "Can't sign in?" offers Reset as a third way.
+- **The wait after wrong tries** is now at most a minute, and the Reset ends it.
+- Dialogs and messages now sit above the sign-in card, so nothing on the door is ever out of reach.
+- tests/t_build7.js: 24 checks, all passing, with the 48 of t_build3.js and the 42 of t_build6.js.
+
 ## Build 6 (7 November 2026): the owner as administrator, the staff, and the time clock
 
 - **The owner is the administrator,** with every room and key, and the user ID 1001. Settings, backups, the Author Studio and the people with their keys are the owner's alone.
