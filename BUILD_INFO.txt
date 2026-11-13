@@ -1,6 +1,6 @@
 Lakay
-Build: 9
+Build: 10
 Date: 13 November 2026
-Stage: Lakay Build 9: the right press's edit menu works inside the sticky notes and every field, to and from each device's clipboard; Schedae's own pastel papers
+Stage: Lakay Build 10: the Home page redesigned, the counter's work first
 Copyright (c) 2026 Yannie D. Forest. All rights reserved.
 NO LICENCE IS GRANTED.

@@ -4,6 +4,19 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 10 (13 November 2026): the Home page, redesigned
+
+The Home page was Ingenium's layout, with seven large room cards that repeated the menu and pushed the day's work to the bottom. It now puts the counter's work first, and reads from action to calm.
+
+- **The hero:** the living mark, the date, the greeting, and a few live facts (the day's sales, the last sale's time, the people on the clock). Beside them are the counter's three keys: New sale, Receive a delivery, and Price check.
+- **One slim strip for what comes next:** the first steps of a new store, with the next one marked and its key; a person's shift, with the break and clock keys; or the practice store's note.
+- **Today at the counter:** the four figures, and the takings of each hour as columns. Each column answers the pointer, a press or the keyboard with its takings and sales. The busiest hour is named above. A table carries the same figures for screen readers. The column colours were checked with the chart checker, by day and by night.
+- **Needs you:** what runs low, each with its Receive key; the reminders due today; and, for the owner, a backup that is missing or more than a week old. When nothing needs you, it says so calmly.
+- **Latest sales:** the last five, each with its time and who served it. A press opens the receipt.
+- **The rooms** as small tiles, and **the day's Haitian proverb** on parchment, in Kreyòl with its meaning.
+- The page fits the iPad and the phone without sideways scrolling, and keeps still in Calm.
+- tests/t_build10.js: 33 checks, all passing, with every earlier suite.
+
 ## Build 9 (13 November 2026): the edit menu everywhere, and Schedae's own papers
 
 - **The right press's edit menu, inside the sticky notes and every field.** Three faults were found and fixed:
