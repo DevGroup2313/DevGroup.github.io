@@ -26,8 +26,8 @@ concurrency:
 
 jobs:
   ipa:
-    # each device has its own repository; this one builds only in Lakay-Apps
-    if: contains(github.repository, 'Lakay-Apps')
+    # Each device's repository holds only its own workflow (release/device_repos.py), so this runs wherever it is,
+    # whatever the repository is called: a renamed repository still builds.
     runs-on: macos-15
     timeout-minutes: 45
     steps:
