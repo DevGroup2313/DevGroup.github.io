@@ -6,33 +6,38 @@
    that the Author Studio's colour sets can change the whole house at once, and keeps its own few things: the receipt
    slip, the parchment of the proverb, and the brass. */
 :root {
-  --bg: #f6f4fa; --bg-wash: #efedf8;
-  --surface: #fffdfb; --surface-2: #fbf9fd; --tray: #f3f1fa; --sunk: rgba(34, 26, 46, .035);
-  --tint: #f4f2fc; --tint-2: #e9e7f8; --parch: #fbf8f1; --parch-2: #f2eadb;
-  --ink: #221f3a; --ink-2: #4b4766; --muted: #706b88; --body-ink: #2b2842;
-  --pri: #6f78d8; --pri-hi: #8f9cec; --pri-lo: #5c63c6; --pri-jhi: #b4a3f0; --pri-jlo: #6779d6; --pri-edge: #4b50ad; --pri-ledge: #393e90; --pri-jledge: #3a4392;
-  --on-pri: #ffffff; --pri-text: #5a5fc4; --pri-soft: rgba(90, 95, 196, .10); --pri-ring: rgba(90, 95, 196, .50); --pri-rgb: 90, 95, 196;
+  /* Dawn, refined (Build 8): white and ivory faces with crisp hairline rims and a firm stepped edge, as Ingenium and
+     Carpe Diem draw theirs; a deeper, matte periwinkle for the keys and the jewels; the dawn's gold kept as a whisper. */
+  --bg: #f5f4f8; --bg-wash: #eeedf4;
+  --surface: #ffffff; --surface-2: #fafafc; --tray: #f2f1f7; --sunk: rgba(34, 30, 58, .035);
+  --tint: #f3f2fa; --tint-2: #e7e6f5; --parch: #fbf8f1; --parch-2: #f2eadb;
+  --ink: #211f33; --ink-2: #48455e; --muted: #6c6981; --body-ink: #2a283d;
+  --pri: #5f67cc; --pri-hi: #6b73d6; --pri-lo: #5057bc; --pri-jhi: #8d93e2; --pri-jlo: #4f56b6; --pri-edge: #434aa6; --pri-ledge: #33398a; --pri-jledge: #363c8e;
+  --on-pri: #ffffff; --pri-text: #4d54b8; --pri-soft: rgba(77, 84, 184, .09); --pri-ring: rgba(77, 84, 184, .45); --pri-rgb: 77, 84, 184;
   --brass: #c08b2f; --brass-hi: #ecd4a2; --brass-ink: #8a6420; --brass-soft: rgba(192, 139, 47, .14);
-  --danger: #b8433f; --danger-soft: rgba(184, 67, 63, .10); --warn: #9a5a12; --warn-soft: rgba(184, 116, 46, .12); --ok: #2f7a55; --ok-soft: rgba(47, 122, 85, .11);
-  --line: rgba(34, 31, 58, .10); --line-2: rgba(34, 31, 58, .16); --line-soft: rgba(34, 31, 58, .06); --rim: rgba(90, 95, 196, .55);
-  --field: #ffffff; --field-line: rgba(75, 80, 173, .28); --wall: #d4d3ec;
-  --face: linear-gradient(180deg, #fffdfb, #f5f3fc); --face-tilt: linear-gradient(175deg, #fffdfb, #f5f3fc); --slab-face: linear-gradient(180deg, #fffdfb, #fbf9fd);
-  --fam: 40, 22, 68;
+  --danger: #a8423d; --danger-soft: rgba(168, 66, 61, .09); --warn: #9a5a12; --warn-soft: rgba(184, 116, 46, .12); --ok: #2f7a55; --ok-soft: rgba(47, 122, 85, .11);
+  --line: rgba(33, 31, 51, .10); --line-2: rgba(33, 31, 51, .16); --line-soft: rgba(33, 31, 51, .06); --rim: rgba(77, 84, 184, .45);
+  --field: #ffffff; --field-line: rgba(67, 74, 166, .24); --wall: #dcdbe8;
+  --face: linear-gradient(180deg, #ffffff, #f7f6fb); --face-tilt: linear-gradient(175deg, #ffffff, #f7f6fb); --slab-face: linear-gradient(180deg, #ffffff, #fcfcfe);
+  --fam: 34, 28, 60;
   /* the raised things: a small key (pill), a large key (a card one presses), a slab (a card one reads), a press */
-  --pill: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 -1px 0 rgba(40, 22, 68, .08), 0 1px 0 rgba(40, 22, 68, .18), 0 2px 4px rgba(40, 22, 68, .10), 0 6px 12px rgba(40, 22, 68, .07);
-  --pill-hi: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 -1px 0 rgba(40, 22, 68, .08), 0 3px 0 rgba(40, 22, 68, .14), 0 6px 9px rgba(40, 22, 68, .10), 0 12px 20px rgba(40, 22, 68, .08);
-  --key3d: 0 0 0 .5px rgba(40, 22, 68, .16), inset 0 -2px 0 rgba(40, 22, 68, .05), 0 1px 0 rgba(40, 22, 68, .13), 0 4px 10px rgba(40, 22, 68, .08), 0 14px 30px rgba(40, 22, 68, .08);
-  --key3d-hi: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 -2px 0 rgba(40, 22, 68, .05), 0 2px 0 rgba(40, 22, 68, .11), 0 10px 18px rgba(40, 22, 68, .11), 0 24px 44px rgba(40, 22, 68, .11);
-  --press: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 2px 6px rgba(40, 22, 68, .16), 0 1px 0 rgba(40, 22, 68, .08);
-  --slab: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -1px 0 rgba(40, 22, 68, .05), 0 1px 0 rgba(40, 22, 68, .10), 0 3px 0 rgba(40, 22, 68, .05), 0 6px 12px rgba(40, 22, 68, .07), 0 18px 36px rgba(40, 22, 68, .08);
-  --sh-card: 0 1px 0 rgba(40, 22, 68, .06), 0 2px 6px rgba(40, 22, 68, .05), 0 12px 30px rgba(40, 22, 68, .07);
-  --psh: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(40, 22, 68, .24), 0 9px 16px rgba(40, 22, 68, .16);
-  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .2), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(40, 22, 68, .26), 0 14px 24px rgba(40, 22, 68, .18);
-  --ppress: inset 0 2px 6px rgba(20, 8, 40, .45), 0 1px 1px rgba(40, 22, 68, .2);
-  --jewel: linear-gradient(150deg, var(--pri-jhi) 0%, #8b95ea 55%, var(--pri-jlo) 100%);
-  --jsh: inset 0 1px 0 rgba(255, 255, 255, .38), inset 0 -2px 0 rgba(30, 10, 60, .28), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(40, 22, 68, .25), 0 9px 16px rgba(40, 22, 68, .12);
-  --inset: inset 0 1px 2.5px rgba(40, 22, 68, .06);
-  --well: inset 0 1px 3px rgba(0, 0, 0, .08);
+  --pill: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -1.5px 0 rgba(34, 28, 60, .10), 0 1px 0 rgba(34, 28, 60, .12), 0 3px 4px rgba(34, 28, 60, .08), 0 7px 10px rgba(34, 28, 60, .05);
+  --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -1.5px 0 rgba(34, 28, 60, .10), 0 2px 0 rgba(34, 28, 60, .12), 0 5px 7px rgba(34, 28, 60, .09), 0 11px 16px rgba(34, 28, 60, .06);
+  --key3d: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -3px 0 rgba(34, 28, 60, .07), 0 1px 0 rgba(34, 28, 60, .12), 0 3px 0 rgba(34, 28, 60, .07), 0 6px 10px rgba(34, 28, 60, .07), 0 14px 26px rgba(34, 28, 60, .07);
+  --key3d-hi: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -3px 0 rgba(34, 28, 60, .07), 0 1px 0 rgba(34, 28, 60, .12), 0 5px 0 rgba(34, 28, 60, .07), 0 10px 16px rgba(34, 28, 60, .09), 0 22px 36px rgba(34, 28, 60, .09);
+  --press: inset 0 2px 5px rgba(34, 28, 60, .14), 0 1px 0 rgba(34, 28, 60, .06);
+  --slab: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -2px 0 rgba(34, 28, 60, .05), 0 1px 0 rgba(34, 28, 60, .11), 0 2px 0 rgba(34, 28, 60, .04), 0 6px 12px rgba(34, 28, 60, .05), 0 16px 30px rgba(34, 28, 60, .06);
+  --sh-card: 0 1px 0 rgba(34, 28, 60, .07), 0 2px 6px rgba(34, 28, 60, .05), 0 12px 28px rgba(34, 28, 60, .06);
+  --psh: inset 0 1px 0 rgba(255, 255, 255, .16), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(34, 28, 60, .22), 0 9px 16px rgba(34, 28, 60, .14);
+  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .18), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(34, 28, 60, .24), 0 14px 24px rgba(34, 28, 60, .16);
+  --ppress: inset 0 2px 6px rgba(14, 8, 40, .42), 0 1px 1px rgba(34, 28, 60, .2);
+  --jewel: linear-gradient(150deg, var(--pri-jhi) 0%, #6870d4 55%, var(--pri-jlo) 100%);
+  --jsh: inset 0 1px 0 rgba(255, 255, 255, .30), inset 0 -2px 0 rgba(20, 14, 50, .26), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(34, 28, 60, .22), 0 9px 16px rgba(34, 28, 60, .10);
+  --inset: inset 0 1px 2.5px rgba(34, 28, 60, .06);
+  --well: inset 0 1px 3px rgba(0, 0, 0, .07);
+  /* the panels that open over the page (dialogs, menus, the rail's panels): Carpe Diem's slab, in Lakay's ink */
+  --slab-top: #ffffff; --slab-bot: #f6f5fa; --slab-hi: rgba(255, 255, 255, .9); --slab-lo: rgba(34, 28, 60, .07); --slab-edge: rgba(34, 28, 60, .10);
+  --slab-sh1: rgba(34, 28, 60, .12); --slab-sh2: rgba(34, 28, 60, .14); --slab-sh3: rgba(34, 28, 60, .16);
   /* the older names, kept so that every room follows the new dress */
   --relief: var(--pill); --relief-hi: var(--pill-hi); --relief-down: var(--press);
   --radius: 14px; --radius-s: 11px; --key-h: 34px;
@@ -41,37 +46,42 @@
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --emoji: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
   --ease: cubic-bezier(.2, .8, .2, 1); --spring: cubic-bezier(.34, 1.35, .64, 1);
-  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(244, 184, 112, .17), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(143, 156, 236, .16), transparent 60%), #f6f4fa;
-  --bar-bg: #fffdfb; --bar-sh: 0 1px 0 rgba(40, 22, 68, .06), 0 6px 18px rgba(40, 22, 68, .05);
+  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(95, 103, 204, .06), transparent 60%), radial-gradient(900px 600px at -6% 108%, rgba(192, 139, 47, .05), transparent 55%), #f5f4f8;
+  --bar-bg: #ffffff; --bar-sh: 0 1px 0 rgba(34, 28, 60, .06), 0 6px 18px rgba(34, 28, 60, .05);
   color-scheme: light;
 }
 :root[data-theme="night"] {
-  --bg: #131430; --bg-wash: #1a1b3a;
-  --surface: #1b1c3c; --surface-2: #17183a; --tray: #141533; --sunk: rgba(8, 6, 20, .32);
-  --tint: #232548; --tint-2: #2b2d55; --parch: #221d27; --parch-2: #2b2530;
-  --ink: #eeeefc; --ink-2: #cbcbe8; --muted: #9d9dc4; --body-ink: #e4e4f6;
-  --pri: #6f78d8; --pri-hi: #8f9cec; --pri-lo: #5c63c6; --pri-jhi: #b4a3f0; --pri-jlo: #6779d6; --pri-edge: #2f3380; --pri-ledge: #1a1c52; --pri-jledge: #1d2058;
-  --on-pri: #ffffff; --pri-text: #b8bdff; --pri-soft: rgba(184, 189, 255, .13); --pri-ring: rgba(184, 189, 255, .55); --pri-rgb: 184, 189, 255;
-  --brass: #f0c472; --brass-hi: #e3cfa2; --brass-ink: #f0c472; --brass-soft: rgba(240, 196, 114, .13);
-  --danger: #f0928a; --danger-soft: rgba(240, 146, 138, .12); --warn: #e6b26a; --warn-soft: rgba(230, 178, 106, .13); --ok: #7fd1a6; --ok-soft: rgba(127, 209, 166, .13);
-  --line: rgba(200, 205, 255, .12); --line-2: rgba(200, 205, 255, .20); --line-soft: rgba(200, 205, 255, .07); --rim: rgba(184, 189, 255, .40);
-  --field: #17183a; --field-line: rgba(184, 189, 255, .30); --wall: #0e0f26;
-  --face: linear-gradient(180deg, #262850, #1f2146); --face-tilt: linear-gradient(175deg, #262850, #1f2146); --slab-face: linear-gradient(180deg, #1b1c3c, #17183a);
+  /* Dawn by night, refined (Build 8): a graphite with a faint periwinkle cast, in place of the saturated indigo; hairline
+     rims and black depth, as Ingenium's night has them; the periwinkle kept for the keys and the words that act. */
+  --bg: #111117; --bg-wash: #16161d;
+  --surface: #1d1d26; --surface-2: #191921; --tray: #15151c; --sunk: rgba(5, 5, 10, .34);
+  --tint: #24242f; --tint-2: #2c2c39; --parch: #221f1b; --parch-2: #2b2722;
+  --ink: #efeef7; --ink-2: #cfcddf; --muted: #9e9cb3; --body-ink: #e5e4f0;
+  --pri: #6a72d4; --pri-hi: #757dde; --pri-lo: #555cc0; --pri-jhi: #8a90e0; --pri-jlo: #4b52b0; --pri-edge: #2a2e6e; --pri-ledge: #16183f; --pri-jledge: #191b46;
+  --on-pri: #ffffff; --pri-text: #b0b5f5; --pri-soft: rgba(176, 181, 245, .12); --pri-ring: rgba(176, 181, 245, .50); --pri-rgb: 176, 181, 245;
+  --brass: #e6c27a; --brass-hi: #e3cfa2; --brass-ink: #e6c27a; --brass-soft: rgba(230, 194, 122, .12);
+  --danger: #ee968e; --danger-soft: rgba(238, 150, 142, .11); --warn: #e5b46e; --warn-soft: rgba(229, 180, 110, .12); --ok: #86d0a8; --ok-soft: rgba(134, 208, 168, .12);
+  --line: rgba(214, 213, 240, .11); --line-2: rgba(214, 213, 240, .18); --line-soft: rgba(214, 213, 240, .06); --rim: rgba(176, 181, 245, .36);
+  --field: #16161d; --field-line: rgba(176, 181, 245, .22); --wall: #0a0a0f;
+  --face: linear-gradient(180deg, #272732, #20202a); --face-tilt: linear-gradient(175deg, #272732, #20202a); --slab-face: linear-gradient(180deg, #1e1e27, #1a1a22);
   --fam: 0, 0, 0;
-  --pill: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 1px 0 rgba(0, 0, 0, .5), 0 3px 5px rgba(0, 0, 0, .4), 0 8px 12px rgba(0, 0, 0, .3);
-  --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .11), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 3px 0 rgba(0, 0, 0, .5), 0 6px 9px rgba(0, 0, 0, .45), 0 12px 20px rgba(0, 0, 0, .34);
-  --key3d: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 3px 0 rgba(0, 0, 0, .45), 0 6px 10px rgba(0, 0, 0, .42), 0 14px 26px rgba(0, 0, 0, .36);
-  --key3d-hi: inset 0 1px 0 rgba(255, 255, 255, .11), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 5px 0 rgba(0, 0, 0, .45), 0 10px 16px rgba(0, 0, 0, .46), 0 24px 38px rgba(0, 0, 0, .4);
+  --pill: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 1px 0 rgba(0, 0, 0, .5), 0 3px 5px rgba(0, 0, 0, .4), 0 8px 12px rgba(0, 0, 0, .3);
+  --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 2px 0 rgba(0, 0, 0, .5), 0 5px 8px rgba(0, 0, 0, .44), 0 11px 18px rgba(0, 0, 0, .32);
+  --key3d: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 3px 0 rgba(0, 0, 0, .45), 0 6px 10px rgba(0, 0, 0, .42), 0 14px 26px rgba(0, 0, 0, .36);
+  --key3d-hi: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 5px 0 rgba(0, 0, 0, .45), 0 10px 16px rgba(0, 0, 0, .46), 0 22px 36px rgba(0, 0, 0, .4);
   --press: inset 0 2px 7px rgba(0, 0, 0, .6), 0 1px 1px rgba(0, 0, 0, .4);
-  --slab: inset 0 1px 0 rgba(255, 255, 255, .06), inset 0 -1px 0 rgba(0, 0, 0, .35), 0 1px 0 rgba(0, 0, 0, .6), 0 3px 0 rgba(0, 0, 0, .28), 0 6px 12px rgba(0, 0, 0, .35), 0 18px 36px rgba(0, 0, 0, .4);
+  --slab: inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 1px 0 rgba(0, 0, 0, .6), 0 2px 0 rgba(0, 0, 0, .3), 0 6px 12px rgba(0, 0, 0, .34), 0 16px 32px rgba(0, 0, 0, .38);
   --sh-card: 0 1px 0 rgba(0, 0, 0, .4), 0 2px 6px rgba(0, 0, 0, .3), 0 12px 30px rgba(0, 0, 0, .34);
-  --psh: inset 0 1px 0 rgba(255, 255, 255, .15), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .36);
-  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .17), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(0, 0, 0, .52), 0 14px 24px rgba(0, 0, 0, .4);
-  --jsh: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .3);
+  --psh: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .36);
+  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .16), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(0, 0, 0, .52), 0 14px 24px rgba(0, 0, 0, .4);
+  --ppress: inset 0 2px 6px rgba(0, 0, 0, .55), 0 1px 1px rgba(0, 0, 0, .3);
+  --jsh: inset 0 1px 0 rgba(255, 255, 255, .24), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .3);
   --inset: inset 0 1px 2.5px rgba(0, 0, 0, .25);
   --well: inset 0 1px 3px rgba(0, 0, 0, .40);
-  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(240, 170, 100, .10), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(143, 156, 236, .12), transparent 60%), #131430;
-  --bar-bg: #232548; --bar-sh: 0 1px 0 rgba(0, 0, 0, .40), 0 6px 18px rgba(0, 0, 0, .28);
+  --slab-top: #23232d; --slab-bot: #1c1c25; --slab-hi: rgba(255, 255, 255, .06); --slab-lo: rgba(0, 0, 0, .35); --slab-edge: rgba(214, 213, 240, .12);
+  --slab-sh1: rgba(0, 0, 0, .4); --slab-sh2: rgba(0, 0, 0, .45); --slab-sh3: rgba(0, 0, 0, .55);
+  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(176, 181, 245, .055), transparent 62%), radial-gradient(900px 620px at 104% 112%, rgba(230, 194, 122, .04), transparent 58%), #111117;
+  --bar-bg: #1f1f28; --bar-sh: 0 1px 0 rgba(0, 0, 0, .40), 0 6px 18px rgba(0, 0, 0, .28);
   color-scheme: dark;
 }
 :root[data-size="l"] { font-size: 18px; }
@@ -177,7 +187,7 @@ a { color: var(--pri-text); }
 .seg button:hover { color: var(--pri-text); }
 .seg button .ico { width: 14px; height: 14px; }
 .seg button[aria-checked="true"] { background: var(--surface); color: var(--pri-text); font-weight: 700; border-color: var(--line); box-shadow: var(--pill); }
-:root[data-theme="night"] .seg button[aria-checked="true"] { background: #29243b; }
+:root[data-theme="night"] .seg button[aria-checked="true"] { background: #2c2c38; }
 .badge { display: inline-block; min-width: 2em; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: .68rem; letter-spacing: .04em; text-align: center; background: var(--pri-soft); color: var(--pri-text); }
 .badge.ok { background: var(--ok-soft); color: var(--ok); }
 .badge.warn { background: var(--warn-soft); color: var(--warn); }
@@ -261,7 +271,7 @@ input[type=file] { position: absolute !important; width: 1px !important; height:
 .cl-fold { order: -1; width: 26px; height: 21px; flex: none; padding: 0 5px; margin: 0 -3px 0 0; border-radius: 7px; border: 1px solid rgba(0, 0, 0, .08); background: rgba(255, 255, 255, .72); color: var(--ink-2);
   font: 700 15px/1 var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
   box-shadow: inset 0 -1.5px 0 rgba(30, 28, 70, .16), 0 1px 0 rgba(30, 28, 70, .32), 0 3px 3px rgba(30, 28, 70, .2), 0 6px 8px rgba(30, 28, 70, .11); transition: transform .12s var(--spring), color .12s; }
-:root[data-theme="night"] .cl-fold { background: rgba(28, 30, 60, .72); border-color: rgba(255, 255, 255, .10); }
+:root[data-theme="night"] .cl-fold { background: rgba(31, 31, 40, .8); border-color: rgba(255, 255, 255, .10); }
 .cl-fold:hover { transform: translateY(-2px); color: var(--pri-text); }
 .cl-fold:active { transform: translateY(2px) scale(.96); }
 /* the one language key shows a flag at the size of an emoji (drawn, so that it shows on every device) */
@@ -378,7 +388,7 @@ p.lede { color: var(--ink-2); max-width: 64ch; margin: 0 0 16px; font-size: .875
 /* ---------- the panel of the right press: copy, cut, paste, select ---------- */
 /* the edit menu of the right press: the Offline Project's (Carpe Diem's #cd-em-menu), in Lakay's Dawn */
 #cd-em-menu { position: fixed; z-index: 4000; min-width: 220px; max-width: 300px; padding: 8px; border-radius: 14px; box-sizing: border-box;
-  background: linear-gradient(180deg, #fffdfb 0%, #f2f0fb 100%); border: 1px solid rgba(60, 50, 120, .13); color: var(--ink);
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line-2); color: var(--ink);
   box-shadow: 0 1px 0 rgba(255, 255, 255, .75) inset, 0 2px 0 rgba(40, 30, 90, .10), 0 6px 14px rgba(40, 30, 90, .12), 0 14px 30px rgba(40, 30, 90, .12), 0 28px 52px rgba(40, 30, 90, .10);
   font-family: inherit; transform-origin: top left; animation: cdEmOpen .14s cubic-bezier(.34, 1.3, .64, 1) both; }
 @keyframes cdEmOpen { from { opacity: 0; transform: scale(.88) translateY(-6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -394,11 +404,11 @@ p.lede { color: var(--ink-2); max-width: 64ch; margin: 0 0 16px; font-size: .875
 #cd-em-menu .cd-em-sep { height: 1px; margin: 5px 8px; background: rgba(40, 30, 90, .10); }
 #cd-em-menu .cd-em-note { font: 11px/1.4 Georgia, serif; color: var(--muted); padding: 0 12px; max-width: 240px; white-space: normal; }
 #cd-em-menu .cd-em-note:not(:empty) { padding: 4px 12px 2px; }
-:root[data-theme="night"] #cd-em-menu { background: linear-gradient(180deg, #2a2b52 0%, #1b1c3c 100%); border-color: rgba(184, 189, 255, .22); color: #eeeefc;
+:root[data-theme="night"] #cd-em-menu { background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border-color: var(--line-2); color: var(--ink);
   box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 2px 4px rgba(0, 0, 0, .3), 0 10px 24px rgba(0, 0, 0, .36), 0 28px 52px rgba(0, 0, 0, .24); }
 :root[data-theme="night"] #cd-em-menu .cd-em-row:hover, :root[data-theme="night"] #cd-em-menu .cd-em-row:focus-visible { background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .04));
   box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 3px 8px rgba(0, 0, 0, .28); }
-:root[data-theme="night"] #cd-em-menu .cd-em-sep { background: rgba(184, 189, 255, .18); }
+:root[data-theme="night"] #cd-em-menu .cd-em-sep { background: var(--line); }
 :root[data-theme="night"] #cd-em-menu .cd-em-danger { color: #e88a83; }
 @media (prefers-reduced-motion: reduce) { #cd-em-menu { animation: none; } }
 :root[data-calm="1"] #cd-em-menu { animation: none; }
@@ -471,7 +481,7 @@ html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
 .hx-key { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-height: 150px; padding: 16px 16px 15px; border-radius: 18px; text-align: left;
   border: 1px solid var(--line); background: var(--face-tilt); color: var(--ink); font: inherit; cursor: pointer; box-shadow: var(--key3d);
   transition: transform .18s var(--spring), box-shadow .18s ease, border-color .18s ease; }
-.hx-key:hover { transform: translateY(-4px); box-shadow: var(--key3d-hi); border-color: var(--pri-ring); }
+.hx-key:hover { transform: translateY(-3px); box-shadow: var(--key3d-hi); border-color: rgba(var(--pri-rgb), .38); }
 .hx-key:active { transform: translateY(2px) scale(.99); box-shadow: var(--press); transition-duration: .07s; }
 .hx-key:focus-visible { outline: 2.5px solid var(--pri-ring); outline-offset: 3px; border-radius: 18px; }
 .hx-jewel { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--jewel); box-shadow: var(--jsh);
@@ -641,16 +651,13 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 
 /* ---------- dialogs and messages: the sign-in's own card, with its walls ---------- */
 .layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 2500; display: flex; align-items: center; justify-content: center; padding: 16px;
-  background: rgba(22, 18, 30, .42); -webkit-backdrop-filter: blur(4px) saturate(120%); backdrop-filter: blur(4px) saturate(120%); animation: fadeIn .18s ease both; }
-:root[data-theme="night"] .layer { background: rgba(5, 3, 10, .62); }
+  background: rgba(24, 22, 34, .34); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: fadeIn .18s ease both; }
+:root[data-theme="night"] .layer { background: rgba(4, 4, 8, .58); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.dialog { --dlg-end: #f7f5fa; width: 100%; max-width: 520px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; color: var(--ink); border-radius: 22px;
-  background: linear-gradient(180deg, var(--surface), var(--surface-2) 62%, var(--dlg-end));
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .45), inset 2px 0 0 rgba(255, 255, 255, .25), inset -2px 0 0 var(--wall), inset 0 -3px 0 var(--wall), 0 0 0 1px rgba(40, 22, 68, .10),
-    0 2px 3px rgba(40, 22, 68, .10), 0 9px 12px -7px rgba(40, 22, 68, .18), 0 22px 40px -14px rgba(40, 22, 68, .26), 0 30px 80px rgba(20, 10, 40, .18);
-  animation: ildIn .42s cubic-bezier(.22, .8, .3, 1) both; }
-:root[data-theme="night"] .dialog { --dlg-end: #1b1525; background: linear-gradient(180deg, #2a2239, #231c31 62%, #201a2d);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .06), inset -2px 0 0 var(--wall), inset 0 -3px 0 var(--wall), 0 0 0 1px rgba(205, 184, 240, .12), 0 22px 40px -14px rgba(0, 0, 0, .6), 0 30px 80px rgba(0, 0, 0, .5); }
+.dialog { width: 100%; max-width: 520px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; color: var(--ink); border-radius: 16px;
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2), 0 30px 70px var(--slab-sh3);
+  animation: ildIn .32s cubic-bezier(.22, .8, .3, 1) both; }
 @keyframes ildIn { 0% { opacity: 0; transform: translateY(12px) scale(.955); } 62% { opacity: 1; transform: translateY(-2px) scale(1.008); } 100% { opacity: 1; transform: none; } }
 .dialog.wide { max-width: 860px; }
 .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 20px 22px 6px; }
@@ -829,5 +836,12 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 .reset-keys .key { justify-content: flex-start; text-align: left; padding: 10px 12px; height: auto; white-space: normal; }
 .reset-keys .key > span { display: flex; flex-direction: column; gap: 2px; }
 .reset-keys .key b { font-size: .98rem; }
-.reset-keys .key small { font-weight: 400; opacity: .78; font-size: .84rem; line-height: 1.35; }
+.reset-keys .key small { font-weight: 400; color: var(--muted); font-size: .84rem; line-height: 1.35; }
+.reset-keys .key { gap: 12px; border-color: var(--line); color: var(--ink); }
+.reset-keys .key > .emo { flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; font-size: 1rem;
+  background: var(--tint); box-shadow: inset 0 0 0 1px var(--line), inset 0 -1.5px 0 rgba(var(--fam), .06); }
+.reset-keys .key.danger { color: var(--ink); border-color: var(--line); }
+.reset-keys .key.danger > .emo { background: var(--danger-soft); box-shadow: inset 0 0 0 1px rgba(168, 66, 61, .24), inset 0 -1.5px 0 rgba(168, 66, 61, .10); }
+.reset-keys .key.danger:hover { border-color: rgba(168, 66, 61, .38); }
+.reset-keys .key.danger b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 8px; border-radius: 50%; background: var(--danger); vertical-align: middle; }
 .display-keys { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

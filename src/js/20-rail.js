@@ -3,7 +3,7 @@
    that lays them down. In Lakay every key serves the store's work: Reminders (orders, deliveries, bills; they ring when
    due), Price check (any item by name, code or barcode: its price and its stock, and a sale or a delivery from there),
    Low stock (what runs low or out, and a delivery received in one press), the calculator, which floats and can be
-   carried anywhere, day or night, and a new sale. The reminders are each person's own, sealed in the books. */
+   carried anywhere, day or night, a new sale, and Schedae (each person's sticky notes, 22-schedae.js). The reminders are each person's own, sealed in the books. */
 "use strict";
 (function () {
   var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
@@ -16,7 +16,7 @@
 
   /* ---------- the rail ---------- */
   var KEYS = [
-    ["sale", "🛒", "rail.sale"], ["theme", null, "top.dayNight"], ["calc", "🧮", "rail.calc"],
+    ["notes", "🗒️", "rail.notes"], ["sale", "🛒", "rail.sale"], ["theme", null, "top.dayNight"], ["calc", "🧮", "rail.calc"],
     ["low", "📦", "rail.low"], ["find", "🔎", "rail.find"], ["bell", "🔔", "rail.bell"]];
   R.build = function () {
     var down = U.prefGet("railDown", "0") === "1", night = document.documentElement.getAttribute("data-theme") === "night";
@@ -50,6 +50,7 @@
     if (k === "theme") { var night = document.documentElement.getAttribute("data-theme") === "night"; U.prefSet("theme", night ? "day" : "night"); ui.applyLook(); R.refresh(); snd("lamp"); return; }
     if (k === "calc") { closePop(); return calc.toggle(); }
     if (k === "sale") { closePop(); return toSale(); }
+    if (k === "notes") { closePop(); return E.schedae && E.schedae.toggle(); }
     if (pop && pop.__k === k) { closePop(); return; }
     openPop(k, b);
   };

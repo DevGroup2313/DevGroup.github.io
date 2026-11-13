@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qobKnUGIoqIeq9NfBITIcQ1ENYk5EprorI4QaqWkoS0='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-NuQb5RM03eLQxVCmkGclc2fDf7Weludxmre8qdZ7I38='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f6f4fa">
@@ -1339,6 +1339,7 @@ var ICONS = {
   info: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.3",
   tip: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z",
   x: "M6 6l12 12M18 6 6 18",
+  image: "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM21 15l-5-5L6 21",
   chevron: "M6 9.5l6 6 6-6",
   trash: "M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13",
   edit: "M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4",
@@ -2450,19 +2451,39 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
 
   /* One atomic write: everything in `ops` is written, or nothing is. Each op is
      {store, key, value, add} (add: refuse to replace an existing key, which keeps the ledger's numbers unique). */
-  D.write = function (ops) {
-    return D.open().then(function (db) {
-      var names = ops.map(function (o) { return o.store; }).filter(function (n, i, a) { return a.indexOf(n) === i; });
-      return new Promise(function (res, rej) {
-        var tx = db.transaction(names, "readwrite");
-        tx.oncomplete = function () { res(true); };
-        tx.onerror = function () { rej(tx.error || new Error("write")); };
-        tx.onabort = function () { rej(tx.error || new Error("aborted")); };
-        ops.forEach(function (o) {
-          var s = tx.objectStore(o.store);
-          if (o.del) s.delete(o.key); else if (o.add) s.add(o.value, o.key); else s.put(o.value, o.key);
-        });
+  function apply(db, ops) {
+    var names = ops.map(function (o) { return o.store; }).filter(function (n, i, a) { return a.indexOf(n) === i; });
+    return new Promise(function (res, rej) {
+      var tx = db.transaction(names, "readwrite");
+      tx.oncomplete = function () { res(true); };
+      tx.onerror = function () { rej(tx.error || new Error("write")); };
+      tx.onabort = function () { rej(tx.error || new Error("aborted")); };
+      ops.forEach(function (o) {
+        var s = tx.objectStore(o.store);
+        if (o.del) s.delete(o.key); else if (o.add) s.add(o.value, o.key); else s.put(o.value, o.key);
       });
+    });
+  }
+  D.write = function (ops) { return D.open().then(function (db) { return apply(db, ops); }); };
+  /* The same write into a database named outright, whichever is in use now: a person's notes, sealed a moment after
+     the books moved to the other database (the practice store, or back), still land in their own books. */
+  D.writeTo = function (name, ops) {
+    if (name === D.NAME) return D.write(ops);
+    return new Promise(function (resolve, reject) {
+      var r;
+      try { r = indexedDB.open(name, D.VERSION); } catch (e) { reject(e); return; }
+      r.onupgradeneeded = function () {
+        var db = r.result;
+        ["meta", "rec", "journal"].forEach(function (n) { if (!db.objectStoreNames.contains(n)) db.createObjectStore(n); });
+      };
+      r.onsuccess = function () {
+        var db = r.result, close = function () { try { db.close(); } catch (e) { } };
+        var done;
+        try { done = apply(db, ops); } catch (e) { close(); reject(e); return; }
+        done.then(function (v) { close(); resolve(v); }, function (e) { close(); reject(e); });
+      };
+      r.onerror = function () { reject(r.error || new Error("IndexedDB")); };
+      r.onblocked = function () { reject(new Error("blocked")); };
     });
   };
   /* Empties every shelf (used only when the owner erases the store from this device, or restores a backup). */
@@ -2645,7 +2666,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   function load(vault, key, userId) {
     ID = vault.storeId;
     return D.entries("rec").then(function (entries) {
-      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, head: null, unreadable: [] };
+      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, notes: {}, head: null, unreadable: [] };
       return Promise.all(entries.map(function (e) {
         return C.open(key, e[1], aadRec(ID, e[0])).then(function (val) { return [e[0], val]; }, function () { st.unreadable.push(e[0]); return null; });
       })).then(function (rows) {
@@ -2684,11 +2705,14 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
     else if (kind === "shift") { var q = st.shifts.findIndex(function (x) { return x.id === v.id; }); if (q >= 0) st.shifts[q] = v; else st.shifts.push(v); }
     else if (kind === "counter") st.counters[id] = v;
     else if (kind === "pad") st.pad[id] = v;
+    else if (kind === "notes") st.notes[id] = (v && Array.isArray(v.notes)) ? v.notes : [];
   }
 
   B.lock = function (why) {
+    var flushed = writeNotes();
     KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null;
     emit("lock", why || "hand");
+    return flushed;
   };
   B.state = function () { return state; };
 
@@ -2698,7 +2722,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
      it cannot be copied out of the browser; nothing in the practice store is real, and it never touches the store's
      own books, which stay sealed with the owner's password and the Master Key. */
   B.PRACTICE_DB = "emporium-practice";
-  function quietLock() { KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null; }
+  function quietLock() { writeNotes(); KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null; }
   B.useBooks = function (practice) {
     quietLock();
     D.use(practice ? B.PRACTICE_DB : "emporium");
@@ -2719,7 +2743,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   };
   B.resetPractice = function (progress) {
     B.useBooks(true);
-    return D.wipe().then(function () { return createPractice(progress); });
+    return notesSettled().then(function () { return D.wipe(); }).then(function () { return createPractice(progress); });
   };
   function createPractice(progress) {
     var id = U.hex(U.rnd(16)), now = new Date(), storeKey, kek, env;
@@ -3108,6 +3132,47 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   function recordShift(sh) {
     return B.change(function () { return { type: "shift.recorded", data: { shift: sh.id, user: sh.user, in: sh.in, out: sh.out, practice: true }, recs: [{ kind: "shift", id: sh.id, value: sh }] }; });
   }
+
+  /* ---------- Schedae: each person's sticky notes (Carpe Diem's, in exact parity) ----------
+     Sealed with the Store Key like everything in the books, kept per person, and carried in backups. They are a
+     person's own scribbles, not the store's books, so a keystroke is not a ledger line: the notes are written quietly
+     half a second after typing stops, and at once when the books lock (with the key that was in hand). */
+  var notesWait = null, notesDue = null, notesWriting = Promise.resolve(true);
+  function noteOwner() { return (B.user && B.user.id) || "owner"; }
+  /* the live list of the signed-in person's notes: the screen changes these objects, then calls B.saveNotes() */
+  B.notes = function () {
+    if (!state) return [];
+    var u = noteOwner();
+    if (!state.notes) state.notes = {};
+    if (!Array.isArray(state.notes[u])) state.notes[u] = [];
+    return state.notes[u];
+  };
+  B.saveNotes = function (now) {
+    if (!state || !KEY) return Promise.resolve(false);
+    var u = noteOwner();
+    notesDue = { key: KEY, id: ID, db: D.NAME, u: u, list: B.notes() };
+    clearTimeout(notesWait); notesWait = null;
+    if (now) return writeNotes();
+    notesWait = setTimeout(writeNotes, 500);
+    return Promise.resolve(true);
+  };
+  /* One write at a time, in order, each into the books it was made in (the practice store's or the store's own),
+     so an older copy never lands after a newer one, and a switch of books never loses the last words typed. */
+  function writeNotes() {
+    var p = notesDue; notesDue = null; clearTimeout(notesWait); notesWait = null;
+    if (!p) return notesWriting;
+    var value = { v: 1, notes: clone(p.list) };
+    notesWriting = notesWriting.then(function () {
+      return C.seal(p.key, value, aadRec(p.id, "notes:" + p.u));
+    }).then(function (sealed) {
+      return D.writeTo(p.db, [{ store: "rec", key: "notes:" + p.u, value: sealed }]);
+    }).then(function () { return true; }, function (e) { console.error(e); return false; });
+    return notesWriting;
+  }
+  B.flushNotes = writeNotes;
+  /* Wiping or replacing the books waits for this, so no note sealed with the old key lands in the new books. */
+  function notesSettled() { return notesWriting.then(function () { return true; }, function () { return true; }); }
+  B.notesSettled = notesSettled;
 
   /* ---------- writing: one change at a time, each worked out from the books as they stand at that moment ---------- */
   var queue = Promise.resolve();
@@ -3508,8 +3573,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
           return U.sha256hex(U.canon(line)).then(function (h) { prev = h; return next(); });
         });
       }
-      return next().then(function () {
-        B.lock("restore");
+      return next().then(function () { return B.lock("restore"); }).then(function () {
         var meta = [["vault", v], ["door", body.door], ["device", B.device]];
         if (body.custom) meta.push(["custom", E.cleanCustom ? E.cleanCustom(body.custom) : body.custom]);
         return D.replaceAll(meta, rec, journal);
@@ -3519,7 +3583,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
 
   /* ---------- erasing the store from this device (the owner only, with the password) ---------- */
   B.erase = function (password) {
-    return B.checkPassword(password).then(function () { B.lock("erase"); return D.wipe(); }).then(function () {
+    return B.checkPassword(password).then(function () { return B.lock("erase"); }).then(function () { return D.wipe(); }).then(function () {
       return D.write([{ store: "meta", key: "device", value: B.device }]);
     });
   };
@@ -3528,7 +3592,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   B.eraseAtDoor = function () {
     if (B.isOpen) return Promise.reject(err("denied"));
     B.useBooks(false);
-    return D.wipe().then(function () { doorMeta = null; return D.write([{ store: "meta", key: "device", value: B.device }]); });
+    return notesSettled().then(function () { return D.wipe(); }).then(function () { doorMeta = null; return D.write([{ store: "meta", key: "device", value: B.device }]); });
   };
   /* The sign-in's memory on this device: the waits after wrong tries, and the last name typed. */
   B.forgetSignIn = function () {
@@ -6260,7 +6324,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
    that lays them down. In Lakay every key serves the store's work: Reminders (orders, deliveries, bills; they ring when
    due), Price check (any item by name, code or barcode: its price and its stock, and a sale or a delivery from there),
    Low stock (what runs low or out, and a delivery received in one press), the calculator, which floats and can be
-   carried anywhere, day or night, and a new sale. The reminders are each person's own, sealed in the books. */
+   carried anywhere, day or night, a new sale, and Schedae (each person's sticky notes, 22-schedae.js). The reminders are each person's own, sealed in the books. */
 "use strict";
 (function () {
   var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
@@ -6273,7 +6337,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
 
   /* ---------- the rail ---------- */
   var KEYS = [
-    ["sale", "🛒", "rail.sale"], ["theme", null, "top.dayNight"], ["calc", "🧮", "rail.calc"],
+    ["notes", "🗒️", "rail.notes"], ["sale", "🛒", "rail.sale"], ["theme", null, "top.dayNight"], ["calc", "🧮", "rail.calc"],
     ["low", "📦", "rail.low"], ["find", "🔎", "rail.find"], ["bell", "🔔", "rail.bell"]];
   R.build = function () {
     var down = U.prefGet("railDown", "0") === "1", night = document.documentElement.getAttribute("data-theme") === "night";
@@ -6307,6 +6371,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
     if (k === "theme") { var night = document.documentElement.getAttribute("data-theme") === "night"; U.prefSet("theme", night ? "day" : "night"); ui.applyLook(); R.refresh(); snd("lamp"); return; }
     if (k === "calc") { closePop(); return calc.toggle(); }
     if (k === "sale") { closePop(); return toSale(); }
+    if (k === "notes") { closePop(); return E.schedae && E.schedae.toggle(); }
     if (pop && pop.__k === k) { closePop(); return; }
     openPop(k, b);
   };
@@ -6712,6 +6777,408 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
         return false;
       } }] });
   };
+})();
+
+/* LAKAY | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
+   Schedae: Carpe Diem's sticky notes, in exact parity, behind the 🗒️ key on the rail. Each person keeps their own
+   notes, sealed in the books with everything else (B.notes and B.saveNotes in 04-books.js), and carried in backups.
+   A note floats over every page until it is unpinned. It takes bold, italic, underline, strikethrough, a bulleted list
+   and pictures; it moves by its top, grows from any edge or its corner, folds to its top, and changes its paper: six
+   colours, each with its own night paper, as Carpe Diem has them. The notes list finds, pins, unpins, copies and
+   deletes them. Carpe Diem's "Send to Tabula" becomes "Copy the note", since Lakay has no Tabula.
+   The words and marks of a note are kept as a small model of allowed marks, never as markup, so a note can never carry
+   a script, a link or a picture from outside the page. */
+"use strict";
+(function () {
+  var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
+  var S = E.schedae = {};
+  /* Carpe Diem's six papers (STICKY_COLORS), their names, and their night papers (cd-sn-night-paper) */
+  var COLORS = [
+    { id: "ivory", name: "Foolscap" }, { id: "gold", name: "Primrose" }, { id: "sky", name: "Inkwell" },
+    { id: "rose", name: "Claret" }, { id: "sage", name: "Laurel" }, { id: "violet", name: "Vespers" }];
+  function col(id) { for (var i = 0; i < COLORS.length; i++) if (COLORS[i].id === id) return COLORS[i]; return COLORS[0]; }
+  function still() { return document.documentElement.getAttribute("data-calm") === "1" || !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  function snd(n) { if (E.sound) E.sound.play(n); }
+  function notes() { return B.isOpen ? B.notes() : []; }
+  function save(now) { return B.isOpen ? B.saveNotes(now) : Promise.resolve(false); }
+  function byId(id) { var l = notes(); for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
+  function uid() { return "sn-" + Date.now() + "-" + Math.floor(Math.random() * 1e6); }
+  try { document.execCommand("styleWithCSS", false, false); } catch (e) { }
+
+  /* ---------- the words of a note: a small model of allowed marks ----------
+     A string is text; ["br"] a line break; ["img", "data:image/..."] a picture kept in the note itself; [mark, [...]]
+     a mark around its contents, where the mark is one of b, i, u, s, ul, ol, li, div. Anything else that arrives in a
+     note (a paste from elsewhere, say) keeps its words and loses its markup. */
+  var KEEP = { B: "b", STRONG: "b", I: "i", EM: "i", U: "u", INS: "u", S: "s", STRIKE: "s", DEL: "s", UL: "ul", OL: "ol", LI: "li",
+    DIV: "div", P: "div", H1: "div", H2: "div", H3: "div", H4: "div", H5: "div", H6: "div", BLOCKQUOTE: "div", PRE: "div", SECTION: "div", ARTICLE: "div" };
+  var SKIP = { SCRIPT: 1, STYLE: 1, TEMPLATE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, NOSCRIPT: 1, SVG: 1, MATH: 1, LINK: 1, META: 1, HEAD: 1, TITLE: 1,
+    INPUT: 1, BUTTON: 1, SELECT: 1, TEXTAREA: 1, VIDEO: 1, AUDIO: 1, CANVAS: 1, PICTURE: 1, SOURCE: 1 };
+  var MAKE = { b: 1, i: 1, u: 1, s: 1, ul: 1, ol: 1, li: 1, div: 1 };
+  var PIC = /^data:image\/(png|jpeg|gif|webp|bmp|avif);base64,[A-Za-z0-9+\/=]+$/;
+  function put(out, x) { if (typeof x === "string") { if (!x) return; if (typeof out[out.length - 1] === "string") out[out.length - 1] += x; else out.push(x); } else out.push(x); }
+  function toModel(node, depth) {
+    var out = [];
+    if (depth > 24) { put(out, node.textContent || ""); return out; }
+    for (var c = node.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) { put(out, c.nodeValue || ""); continue; }
+      if (c.nodeType !== 1) continue;
+      var tag = String(c.tagName).toUpperCase();
+      if (SKIP[tag]) continue;
+      if (tag === "BR") { out.push(["br"]); continue; }
+      if (tag === "IMG") { var src = c.getAttribute("src") || ""; if (PIC.test(src)) out.push(["img", src]); continue; }
+      var kids = toModel(c, depth + 1), k = KEEP[tag];
+      if (k) { out.push([k, kids]); continue; }
+      /* a span or a font: its look, carried in the marks we keep */
+      var st = c.style || {}, fw = String(st.fontWeight || ""), deco = String(st.textDecorationLine || st.textDecoration || ""), wrap = kids;
+      if (deco.indexOf("line-through") >= 0) wrap = [["s", wrap]];
+      if (deco.indexOf("underline") >= 0) wrap = [["u", wrap]];
+      if (st.fontStyle === "italic") wrap = [["i", wrap]];
+      if (fw === "bold" || fw === "bolder" || parseInt(fw, 10) >= 600) wrap = [["b", wrap]];
+      wrap.forEach(function (x) { put(out, x); });
+    }
+    return out;
+  }
+  function fromModel(model, into, depth) {
+    if (!Array.isArray(model) || depth > 24) return into;
+    model.forEach(function (x) {
+      if (typeof x === "string") into.appendChild(document.createTextNode(x));
+      else if (Array.isArray(x)) {
+        if (x[0] === "br") into.appendChild(document.createElement("br"));
+        else if (x[0] === "img") { if (typeof x[1] === "string" && PIC.test(x[1])) { var im = document.createElement("img"); im.alt = ""; im.src = x[1]; into.appendChild(im); } }
+        else if (MAKE[x[0]]) into.appendChild(fromModel(x[1], document.createElement(x[0]), depth + 1));
+      }
+    });
+    return into;
+  }
+  /* the plain words of a note, line by line */
+  function plain(model) {
+    var s = "";
+    (function walk(m, depth) {
+      if (!Array.isArray(m) || depth > 24) return;
+      m.forEach(function (x) {
+        if (typeof x === "string") s += x;
+        else if (Array.isArray(x)) {
+          if (x[0] === "br") s += "\n";
+          else if (x[0] !== "img") {
+            var block = x[0] === "div" || x[0] === "li";
+            if (block && s && s.slice(-1) !== "\n") s += "\n";
+            if (x[0] === "li") s += "• ";
+            walk(x[1], depth + 1);
+          }
+        }
+      });
+    })(model, 0);
+    return s.replace(/\n{3,}/g, "\n\n").trim();
+  }
+  S.plain = plain;
+  function preview(n) { var p = plain(n && n.doc).replace(/\s+/g, " ").trim(); return p ? p.slice(0, 64) : t("sn.emptyOne"); }
+
+  /* ---------- the notes ---------- */
+  var Z = 9250;
+  S.create = function () {
+    if (!B.isOpen) return null;
+    var list = notes(), e = list.length % 5;
+    var n = { id: uid(), doc: [], ts: Date.now(), pinned: true, color: COLORS[0].id, x: 90 + e * 20, y: 100 + e * 20 };
+    list.unshift(n); save(); render(); snd("page");
+    var el = cardOf(n.id), body = el && el.querySelector(".sn-body");
+    if (body) setTimeout(function () { try { body.focus({ preventScroll: true }); } catch (x) { } }, 40);
+    return n;
+  };
+  function remove(id) {
+    var list = notes();
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) { list.splice(i, 1); break; }
+    save(); render(); if (panelOpen()) openPanel();
+  }
+  S.remove = function (id) {
+    var el = cardOf(id);
+    if (el && !still()) { el.classList.add("cd-ripping"); snd("soft"); setTimeout(function () { remove(id); }, 430); }
+    else remove(id);
+  };
+  S.togglePin = function (id) {
+    var n = byId(id); if (!n) return;
+    n.pinned = !n.pinned; save(); render(); if (panelOpen()) openPanel();
+  };
+  S.copy = function (id) {
+    var n = byId(id); if (!n) return Promise.resolve(false);
+    return E.clip.write(plain(n.doc)).then(function () { ui.toast(t("sn.copied"), "good"); return true; }, function () { ui.toast(t("sn.copyFailed"), "bad"); return false; });
+  };
+  function cardOf(id) {
+    if (!pins) return null;
+    for (var c = pins.firstChild; c; c = c.nextSibling) if (c.getAttribute && c.getAttribute("data-sn-id") === id) return c;
+    return null;
+  }
+
+  /* a picture, made small enough to keep in a note (as Carpe Diem does: at most 600 points a side, as a JPEG) */
+  function picture(file, done) {
+    if (!file || !/^image\//.test(file.type || "")) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 600, w = img.width, hh = img.height;
+        if (w > max || hh > max) { var k = Math.min(max / w, max / hh); w = Math.round(w * k); hh = Math.round(hh * k); }
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = hh;
+        var src;
+        try { cv.getContext("2d").drawImage(img, 0, 0, w, hh); src = cv.toDataURL("image/jpeg", 0.82); } catch (e) { src = rd.result; }
+        if (PIC.test(src)) done(src);
+      };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  }
+
+  /* one note on the page */
+  function card(n) {
+    var el = h("div.sticky-note", { "data-sn-id": n.id, "data-sn-col": col(n.color).id });
+    if (n.min) el.setAttribute("data-sn-min", "1");
+    var body = h("div.sn-body", { contenteditable: "true", role: "textbox", "aria-multiline": "true", "aria-label": t("sn.note"), "data-ph": t("sn.phWrite"), spellcheck: "true" });
+    fromModel(n.doc, body, 0);
+    function keep() { n.doc = toModel(body, 0); save(); }
+    body.addEventListener("input", keep);
+    /* what arrives from elsewhere comes in as words (or as a picture), never as foreign markup */
+    body.addEventListener("paste", function (e) {
+      var cd = e.clipboardData; if (!cd) return;
+      e.preventDefault();
+      var file = null; try { for (var i = 0; i < cd.items.length; i++) if (cd.items[i].kind === "file" && /^image\//.test(cd.items[i].type)) { file = cd.items[i].getAsFile(); break; } } catch (x) { }
+      if (file) { picture(file, function (src) { body.focus(); try { document.execCommand("insertImage", false, src); } catch (x) { } keep(); }); return; }
+      var text = cd.getData("text/plain"); if (!text) return;
+      try { document.execCommand("insertText", false, text); } catch (x) { }
+      keep();
+    });
+    body.addEventListener("drop", function (e) {
+      var dt = e.dataTransfer; if (!dt) return;
+      e.preventDefault();
+      var file = dt.files && dt.files[0];
+      if (file) { picture(file, function (src) { body.focus(); try { document.execCommand("insertImage", false, src); } catch (x) { } keep(); }); return; }
+      var text = dt.getData("text/plain"); if (!text) return;
+      body.focus(); try { document.execCommand("insertText", false, text); } catch (x) { } keep();
+    });
+    function iconKey(sym, title, fn) {
+      var b = h("button.sn-iconbtn", { type: "button", title: title, "aria-label": title }, sym);
+      b.addEventListener("click", function (e) { e.stopPropagation(); fn(b); });
+      return b;
+    }
+    var grip = h("div.sn-grip", { title: t("sn.drag") });
+    var head = h("div.sn-head", null, [
+      iconKey("+", t("sn.new"), function () { S.create(); }),
+      grip,
+      iconKey("↶", t("sn.undo"), function () { try { body.focus(); document.execCommand("undo"); } catch (x) { } }),
+      iconKey("↷", t("sn.redo"), function () { try { body.focus(); document.execCommand("redo"); } catch (x) { } }),
+      iconKey("⋯", t("sn.menu"), function (b) { openMenu(n, b); }),
+      iconKey("✕", t("sn.close"), function () { S.togglePin(n.id); })]);
+    el.appendChild(head); el.appendChild(body);
+
+    /* the tools: bold, italic, underline, strikethrough, a list, a picture, and Save (which Carpe Diem puts first) */
+    var tools = h("div.sn-tools");
+    function tool(label, cmd, title, cls) {
+      var b = h("button.sn-tool" + (cls ? "." + cls : ""), { type: "button", title: title, "aria-label": title }, label);
+      b.addEventListener("mousedown", function (e) { e.preventDefault(); });
+      b.addEventListener("click", function (e) { e.preventDefault(); body.focus(); try { document.execCommand(cmd, false, null); } catch (x) { } keep(); });
+      return b;
+    }
+    tools.appendChild(tool("B", "bold", t("sn.bold"), "snb"));
+    tools.appendChild(tool("I", "italic", t("sn.italic"), "sni"));
+    tools.appendChild(tool("U", "underline", t("sn.underline"), "snu"));
+    tools.appendChild(tool("ab", "strikeThrough", t("sn.strike"), "sns"));
+    tools.appendChild(tool("•", "insertUnorderedList", t("sn.list")));
+    var file = h("input.sn-file", { type: "file", accept: "image/*", hidden: true, tabindex: "-1", "aria-hidden": "true" });
+    file.addEventListener("change", function () {
+      var f = file.files && file.files[0]; file.value = "";
+      picture(f, function (src) { body.focus(); try { document.execCommand("insertImage", false, src); } catch (x) { } keep(); });
+    });
+    var pic = h("button.sn-tool.sn-pic", { type: "button", title: t("sn.image"), "aria-label": t("sn.image") }, U.icon("image", "sn-ico"));
+    pic.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    pic.addEventListener("click", function (e) { e.preventDefault(); file.click(); });
+    tools.appendChild(pic);
+    var saveKey = h("button.sn-tool.sn-save", { type: "button", title: t("sn.saveTip"), "aria-label": t("sn.saveTip") }, t("sn.save"));
+    saveKey.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    saveKey.addEventListener("click", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      n.doc = toModel(body, 0); save(true);
+      saveKey.textContent = t("sn.saved"); setTimeout(function () { saveKey.textContent = t("sn.save"); }, 1200);
+    });
+    tools.appendChild(saveKey);
+    el.appendChild(tools); el.appendChild(file);
+
+    if (n.w) el.style.width = n.w + "px";
+    if (n.h) el.style.height = n.h + "px";
+
+    /* the corner: grows the note */
+    var corner = h("div.sn-resize", { title: t("sn.resize") }), rz = null;
+    corner.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); rz = { sx: e.clientX, sy: e.clientY, ow: el.offsetWidth, oh: el.offsetHeight };
+      try { corner.setPointerCapture(e.pointerId); } catch (x) { }
+    });
+    corner.addEventListener("pointermove", function (e) {
+      if (!rz) return;
+      n.w = Math.max(150, rz.ow + (e.clientX - rz.sx)); n.h = Math.max(120, rz.oh + (e.clientY - rz.sy));
+      el.style.width = n.w + "px"; el.style.height = n.h + "px";
+    });
+    corner.addEventListener("pointerup", function () { if (rz) { rz = null; save(); } });
+    corner.addEventListener("pointercancel", function () { rz = null; });
+    el.appendChild(corner);
+
+    /* every edge grows it too (Carpe Diem's edges: four sides and three corners) */
+    [["n", "ns-resize"], ["s", "ns-resize"], ["e", "ew-resize"], ["w", "ew-resize"], ["ne", "nesw-resize"], ["sw", "nesw-resize"], ["nw", "nwse-resize"]].forEach(function (g) {
+      var k = g[0], edge = h("div.cd-sn-edge.cd-sn-edge-" + k, { "aria-hidden": "true" }), on = null;
+      edge.style.cursor = g[1];
+      edge.addEventListener("pointerdown", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var r = el.getBoundingClientRect();
+        on = { sx: e.clientX, sy: e.clientY, x: n.x, y: n.y, w: r.width, h: r.height };
+        try { edge.setPointerCapture(e.pointerId); } catch (x) { }
+      });
+      edge.addEventListener("pointermove", function (e) {
+        if (!on) return;
+        var dx = e.clientX - on.sx, dy = e.clientY - on.sy, x = on.x, y = on.y, w = on.w, hh = on.h;
+        if (k.indexOf("e") >= 0) w = on.w + dx;
+        if (k.indexOf("w") >= 0) { w = on.w - dx; x = on.x + dx; }
+        if (k.indexOf("s") >= 0) hh = on.h + dy;
+        if (k.indexOf("n") >= 0) { hh = on.h - dy; y = on.y + dy; }
+        if (w < 150) { if (k.indexOf("w") >= 0) x -= 150 - w; w = 150; }
+        if (hh < 120) { if (k.indexOf("n") >= 0) y -= 120 - hh; hh = 120; }
+        n.w = Math.round(w); n.h = Math.round(hh); n.x = Math.max(0, Math.round(x)); n.y = Math.max(0, Math.round(y));
+        el.style.width = n.w + "px"; el.style.height = n.h + "px"; el.style.left = n.x + "px"; el.style.top = n.y + "px";
+      });
+      function up() { if (on) { on = null; save(); } }
+      edge.addEventListener("pointerup", up); edge.addEventListener("pointercancel", up);
+      el.appendChild(edge);
+    });
+
+    /* the top: carries the note anywhere on the page */
+    var drag = null, frame = 0;
+    grip.addEventListener("pointerdown", function (e) {
+      drag = { sx: e.clientX, sy: e.clientY, ox: n.x || 90, oy: n.y || 100 };
+      try { grip.setPointerCapture(e.pointerId); } catch (x) { }
+      grip.style.cursor = "grabbing";
+    });
+    grip.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      if (!(e.buttons & 1) && e.pointerType === "mouse") { drag = null; grip.style.cursor = ""; return; }
+      n.x = Math.max(0, Math.min(drag.ox + (e.clientX - drag.sx), innerWidth - 214));
+      n.y = Math.max(0, Math.min(drag.oy + (e.clientY - drag.sy), innerHeight - 164));
+      if (frame) return;
+      frame = requestAnimationFrame(function () { frame = 0; el.style.left = n.x + "px"; el.style.top = n.y + "px"; });
+    });
+    grip.addEventListener("pointerup", function () { if (drag) { drag = null; grip.style.cursor = ""; save(); } });
+    grip.addEventListener("pointercancel", function () { drag = null; grip.style.cursor = ""; });
+
+    /* where it stands: on the page, never off it */
+    var x = Math.max(0, Math.min(n.x || 90, innerWidth - 214)), y = Math.max(0, Math.min(n.y || 100, innerHeight - 164));
+    if ((n.x || 0) > innerWidth - 60 || (n.y || 0) > innerHeight - 60) { var i = notes().indexOf(n); if (i < 0) i = 0; x = 90 + (i % 5) * 20; y = 100 + (i % 5) * 20; }
+    n.x = x; n.y = y;
+    el.style.left = x + "px"; el.style.top = y + "px";
+    el.style.zIndex = String(++Z);
+    el.addEventListener("pointerdown", function () { el.style.zIndex = String(++Z); }, true);
+    if (!still()) el.classList.add("sn-pop");
+    setTimeout(function () { el.classList.remove("sn-pop"); }, 320);
+    return el;
+  }
+
+  /* ---------- the notes on the page ---------- */
+  var pins = null;
+  function render() {
+    closeMenu();
+    if (!B.isOpen) { if (pins) { pins.remove(); pins = null; } return; }
+    if (!pins || !pins.isConnected) { pins = h("div#sticky-pins", { role: "region", "aria-label": t("sn.title") }); document.body.appendChild(pins); }
+    U.clear(pins);
+    notes().filter(function (n) { return n.pinned; }).forEach(function (n) { pins.appendChild(card(n)); });
+  }
+  S.render = render;
+  var resizeWait = 0;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeWait);
+    resizeWait = setTimeout(function () {
+      if (!B.isOpen || !pins) return;
+      var moved = false;
+      notes().forEach(function (n) {
+        var x = Math.max(0, Math.min(n.x || 90, innerWidth - 214)), y = Math.max(0, Math.min(n.y || 100, innerHeight - 164));
+        if (x !== n.x || y !== n.y) { n.x = x; n.y = y; moved = true; var el = cardOf(n.id); if (el) { el.style.left = x + "px"; el.style.top = y + "px"; } }
+      });
+      if (moved) save();
+    }, 180);
+  });
+
+  /* ---------- a note's ⋯ menu: its paper, fold, unpin, the list, copy, delete ---------- */
+  function closeMenu() { var m = document.querySelector(".sticky-card-menu-back"); if (m) m.remove(); }
+  function openMenu(n, btn) {
+    closeMenu();
+    var back = h("div.sticky-card-menu-back");
+    back.addEventListener("click", function (e) { if (e.target === back) back.remove(); });
+    var r = btn.getBoundingClientRect(), left = Math.min(Math.round(r.left), (innerWidth || 360) - 200);
+    var box = h("div.sn-menu", { role: "menu", "aria-label": t("sn.menu") });
+    box.style.left = Math.max(8, left) + "px"; box.style.top = Math.round(r.bottom + 4) + "px";
+    var dots = h("div.sn-dots", { role: "group", "aria-label": t("sn.paper") });
+    COLORS.forEach(function (c) {
+      var d = h("button.sn-dot", { type: "button", "data-sn-col": c.id, title: c.name, "aria-label": t("sn.col." + c.id), "aria-pressed": String(col(n.color).id === c.id) });
+      d.addEventListener("click", function () {
+        n.color = c.id; save(); render(); document.body.appendChild(back);
+        Array.prototype.forEach.call(dots.children, function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-sn-col") === c.id)); });
+      });
+      dots.appendChild(d);
+    });
+    box.appendChild(dots);
+    function item(label, fn) { var b = h("button.sn-mbtn", { type: "button", role: "menuitem" }, label); b.addEventListener("click", fn); box.appendChild(b); return b; }
+    item(n.min ? t("sn.unfold") : t("sn.minimise"), function () { n.min = !n.min; save(); render(); });
+    item(t("sn.unpin"), function () { back.remove(); S.togglePin(n.id); });
+    item(t("sn.notesList"), function () { back.remove(); openPanel(); });
+    item(t("sn.copyNote"), function () { back.remove(); S.copy(n.id); });
+    item(t("sn.delNote"), function () { back.remove(); S.remove(n.id); });
+    back.appendChild(box); document.body.appendChild(back);
+    var first = box.querySelector(".sn-mbtn"); if (first) try { first.focus({ preventScroll: true }); } catch (x) { }
+  }
+
+  /* ---------- the notes list (the 🗒️ key) ---------- */
+  function panelOpen() { return !!document.querySelector(".sticky-panel-back"); }
+  function closePanel() { var p = document.querySelector(".sticky-panel-back"); if (p) p.remove(); }
+  function openPanel() {
+    closePanel(); closeMenu();
+    if (!B.isOpen) return;
+    var back = h("div.sticky-panel-back");
+    back.addEventListener("click", function (e) { if (e.target === back) back.remove(); });
+    var box = h("div.sn-panel", { role: "dialog", "aria-label": t("sn.title") });
+    var newKey = h("button.sn-b.sn-b-primary#snNew", { type: "button" }, t("sn.new"));
+    newKey.addEventListener("click", function () { S.create(); openPanel(); });
+    box.appendChild(h("div.sn-panel-head", null, [h("h3.sn-panel-title", null, t("sn.title")), newKey]));
+    var list = notes(), rows = h("div.sn-rows"), q = null;
+    if (list.length) {
+      q = h("input.sn-search#snSearch", { type: "search", placeholder: t("sn.search"), "aria-label": t("sn.search"), autocomplete: "off", spellcheck: "false" });
+      q.addEventListener("input", function () {
+        var v = q.value.toLowerCase();
+        Array.prototype.forEach.call(rows.children, function (r) { r.hidden = (r.__pv || "").indexOf(v) < 0; });
+      });
+      box.appendChild(q);
+    } else box.appendChild(h("p.sn-empty", null, t("sn.empty")));
+    list.forEach(function (n) {
+      var row = h("div.sn-row", { "data-sn-row": n.id });
+      row.__pv = plain(n.doc).toLowerCase();
+      row.appendChild(h("div.sn-row-top", null, [h("span.sn-rowdot", { "data-sn-col": col(n.color).id, title: col(n.color).name }), h("span.sn-rowtext", null, preview(n))]));
+      var pin = h("button.sn-b.sn-b-soft", { type: "button" }, n.pinned ? t("sn.unpinShort") : t("sn.pin"));
+      pin.addEventListener("click", function () { S.togglePin(n.id); });
+      var copy = h("button.sn-b.sn-b-soft", { type: "button" }, t("sn.copy"));
+      copy.addEventListener("click", function () { S.copy(n.id).then(function (ok) { if (!ok) return; copy.textContent = t("sn.copiedShort"); setTimeout(function () { copy.textContent = t("sn.copy"); }, 1200); }); });
+      var del = h("button.sn-b.sn-b-ghost.sn-del", { type: "button" }, t("delete"));
+      del.addEventListener("click", function () { S.remove(n.id); });
+      row.appendChild(h("div.sn-row-keys", null, [pin, copy, del]));
+      rows.appendChild(row);
+    });
+    box.appendChild(rows);
+    back.appendChild(box); document.body.appendChild(back);
+    setTimeout(function () { try { (q || newKey).focus({ preventScroll: true }); } catch (x) { } }, 30);
+  }
+  S.panel = openPanel;
+  S.toggle = function () { if (panelOpen()) closePanel(); else { openPanel(); snd("page"); } };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (document.querySelector(".sticky-card-menu-back")) { e.preventDefault(); closeMenu(); return; }
+    if (panelOpen() && !document.getElementById("cd-em-menu")) { e.preventDefault(); closePanel(); }
+  }, true);
+
+  /* the notes follow the person: shown when the books open, put away when they lock */
+  B.on("open", function () { setTimeout(render, 0); });
+  B.on("user", function () { closePanel(); setTimeout(render, 0); });
+  B.on("lock", function () { closePanel(); closeMenu(); if (pins) { pins.remove(); pins = null; } });
 })();
 
 /* EMPORIUM | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.

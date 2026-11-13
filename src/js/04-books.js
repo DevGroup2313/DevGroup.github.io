@@ -143,7 +143,7 @@
   function load(vault, key, userId) {
     ID = vault.storeId;
     return D.entries("rec").then(function (entries) {
-      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, head: null, unreadable: [] };
+      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, notes: {}, head: null, unreadable: [] };
       return Promise.all(entries.map(function (e) {
         return C.open(key, e[1], aadRec(ID, e[0])).then(function (val) { return [e[0], val]; }, function () { st.unreadable.push(e[0]); return null; });
       })).then(function (rows) {
@@ -182,11 +182,14 @@
     else if (kind === "shift") { var q = st.shifts.findIndex(function (x) { return x.id === v.id; }); if (q >= 0) st.shifts[q] = v; else st.shifts.push(v); }
     else if (kind === "counter") st.counters[id] = v;
     else if (kind === "pad") st.pad[id] = v;
+    else if (kind === "notes") st.notes[id] = (v && Array.isArray(v.notes)) ? v.notes : [];
   }
 
   B.lock = function (why) {
+    var flushed = writeNotes();
     KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null;
     emit("lock", why || "hand");
+    return flushed;
   };
   B.state = function () { return state; };
 
@@ -196,7 +199,7 @@
      it cannot be copied out of the browser; nothing in the practice store is real, and it never touches the store's
      own books, which stay sealed with the owner's password and the Master Key. */
   B.PRACTICE_DB = "emporium-practice";
-  function quietLock() { KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null; }
+  function quietLock() { writeNotes(); KEY = null; state = null; B.isOpen = false; B.user = null; E.settings = null; ID = null; }
   B.useBooks = function (practice) {
     quietLock();
     D.use(practice ? B.PRACTICE_DB : "emporium");
@@ -217,7 +220,7 @@
   };
   B.resetPractice = function (progress) {
     B.useBooks(true);
-    return D.wipe().then(function () { return createPractice(progress); });
+    return notesSettled().then(function () { return D.wipe(); }).then(function () { return createPractice(progress); });
   };
   function createPractice(progress) {
     var id = U.hex(U.rnd(16)), now = new Date(), storeKey, kek, env;
@@ -606,6 +609,47 @@
   function recordShift(sh) {
     return B.change(function () { return { type: "shift.recorded", data: { shift: sh.id, user: sh.user, in: sh.in, out: sh.out, practice: true }, recs: [{ kind: "shift", id: sh.id, value: sh }] }; });
   }
+
+  /* ---------- Schedae: each person's sticky notes (Carpe Diem's, in exact parity) ----------
+     Sealed with the Store Key like everything in the books, kept per person, and carried in backups. They are a
+     person's own scribbles, not the store's books, so a keystroke is not a ledger line: the notes are written quietly
+     half a second after typing stops, and at once when the books lock (with the key that was in hand). */
+  var notesWait = null, notesDue = null, notesWriting = Promise.resolve(true);
+  function noteOwner() { return (B.user && B.user.id) || "owner"; }
+  /* the live list of the signed-in person's notes: the screen changes these objects, then calls B.saveNotes() */
+  B.notes = function () {
+    if (!state) return [];
+    var u = noteOwner();
+    if (!state.notes) state.notes = {};
+    if (!Array.isArray(state.notes[u])) state.notes[u] = [];
+    return state.notes[u];
+  };
+  B.saveNotes = function (now) {
+    if (!state || !KEY) return Promise.resolve(false);
+    var u = noteOwner();
+    notesDue = { key: KEY, id: ID, db: D.NAME, u: u, list: B.notes() };
+    clearTimeout(notesWait); notesWait = null;
+    if (now) return writeNotes();
+    notesWait = setTimeout(writeNotes, 500);
+    return Promise.resolve(true);
+  };
+  /* One write at a time, in order, each into the books it was made in (the practice store's or the store's own),
+     so an older copy never lands after a newer one, and a switch of books never loses the last words typed. */
+  function writeNotes() {
+    var p = notesDue; notesDue = null; clearTimeout(notesWait); notesWait = null;
+    if (!p) return notesWriting;
+    var value = { v: 1, notes: clone(p.list) };
+    notesWriting = notesWriting.then(function () {
+      return C.seal(p.key, value, aadRec(p.id, "notes:" + p.u));
+    }).then(function (sealed) {
+      return D.writeTo(p.db, [{ store: "rec", key: "notes:" + p.u, value: sealed }]);
+    }).then(function () { return true; }, function (e) { console.error(e); return false; });
+    return notesWriting;
+  }
+  B.flushNotes = writeNotes;
+  /* Wiping or replacing the books waits for this, so no note sealed with the old key lands in the new books. */
+  function notesSettled() { return notesWriting.then(function () { return true; }, function () { return true; }); }
+  B.notesSettled = notesSettled;
 
   /* ---------- writing: one change at a time, each worked out from the books as they stand at that moment ---------- */
   var queue = Promise.resolve();
@@ -1006,8 +1050,7 @@
           return U.sha256hex(U.canon(line)).then(function (h) { prev = h; return next(); });
         });
       }
-      return next().then(function () {
-        B.lock("restore");
+      return next().then(function () { return B.lock("restore"); }).then(function () {
         var meta = [["vault", v], ["door", body.door], ["device", B.device]];
         if (body.custom) meta.push(["custom", E.cleanCustom ? E.cleanCustom(body.custom) : body.custom]);
         return D.replaceAll(meta, rec, journal);
@@ -1017,7 +1060,7 @@
 
   /* ---------- erasing the store from this device (the owner only, with the password) ---------- */
   B.erase = function (password) {
-    return B.checkPassword(password).then(function () { B.lock("erase"); return D.wipe(); }).then(function () {
+    return B.checkPassword(password).then(function () { return B.lock("erase"); }).then(function () { return D.wipe(); }).then(function () {
       return D.write([{ store: "meta", key: "device", value: B.device }]);
     });
   };
@@ -1026,7 +1069,7 @@
   B.eraseAtDoor = function () {
     if (B.isOpen) return Promise.reject(err("denied"));
     B.useBooks(false);
-    return D.wipe().then(function () { doorMeta = null; return D.write([{ store: "meta", key: "device", value: B.device }]); });
+    return notesSettled().then(function () { return D.wipe(); }).then(function () { doorMeta = null; return D.write([{ store: "meta", key: "device", value: B.device }]); });
   };
   /* The sign-in's memory on this device: the waits after wrong tries, and the last name typed. */
   B.forgetSignIn = function () {

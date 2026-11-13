@@ -55,19 +55,39 @@
 
   /* One atomic write: everything in `ops` is written, or nothing is. Each op is
      {store, key, value, add} (add: refuse to replace an existing key, which keeps the ledger's numbers unique). */
-  D.write = function (ops) {
-    return D.open().then(function (db) {
-      var names = ops.map(function (o) { return o.store; }).filter(function (n, i, a) { return a.indexOf(n) === i; });
-      return new Promise(function (res, rej) {
-        var tx = db.transaction(names, "readwrite");
-        tx.oncomplete = function () { res(true); };
-        tx.onerror = function () { rej(tx.error || new Error("write")); };
-        tx.onabort = function () { rej(tx.error || new Error("aborted")); };
-        ops.forEach(function (o) {
-          var s = tx.objectStore(o.store);
-          if (o.del) s.delete(o.key); else if (o.add) s.add(o.value, o.key); else s.put(o.value, o.key);
-        });
+  function apply(db, ops) {
+    var names = ops.map(function (o) { return o.store; }).filter(function (n, i, a) { return a.indexOf(n) === i; });
+    return new Promise(function (res, rej) {
+      var tx = db.transaction(names, "readwrite");
+      tx.oncomplete = function () { res(true); };
+      tx.onerror = function () { rej(tx.error || new Error("write")); };
+      tx.onabort = function () { rej(tx.error || new Error("aborted")); };
+      ops.forEach(function (o) {
+        var s = tx.objectStore(o.store);
+        if (o.del) s.delete(o.key); else if (o.add) s.add(o.value, o.key); else s.put(o.value, o.key);
       });
+    });
+  }
+  D.write = function (ops) { return D.open().then(function (db) { return apply(db, ops); }); };
+  /* The same write into a database named outright, whichever is in use now: a person's notes, sealed a moment after
+     the books moved to the other database (the practice store, or back), still land in their own books. */
+  D.writeTo = function (name, ops) {
+    if (name === D.NAME) return D.write(ops);
+    return new Promise(function (resolve, reject) {
+      var r;
+      try { r = indexedDB.open(name, D.VERSION); } catch (e) { reject(e); return; }
+      r.onupgradeneeded = function () {
+        var db = r.result;
+        ["meta", "rec", "journal"].forEach(function (n) { if (!db.objectStoreNames.contains(n)) db.createObjectStore(n); });
+      };
+      r.onsuccess = function () {
+        var db = r.result, close = function () { try { db.close(); } catch (e) { } };
+        var done;
+        try { done = apply(db, ops); } catch (e) { close(); reject(e); return; }
+        done.then(function (v) { close(); resolve(v); }, function (e) { close(); reject(e); });
+      };
+      r.onerror = function () { reject(r.error || new Error("IndexedDB")); };
+      r.onblocked = function () { reject(new Error("blocked")); };
     });
   };
   /* Empties every shelf (used only when the owner erases the store from this device, or restores a backup). */
