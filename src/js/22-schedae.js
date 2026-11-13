@@ -1,21 +1,24 @@
 /* LAKAY | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
-   Schedae: Carpe Diem's sticky notes, in exact parity, behind the 🗒️ key on the rail. Each person keeps their own
+   Schedae: Carpe Diem's sticky notes, behind the 🗒️ key on the rail. Each person keeps their own
    notes, sealed in the books with everything else (B.notes and B.saveNotes in 04-books.js), and carried in backups.
    A note floats over every page until it is unpinned. It takes bold, italic, underline, strikethrough, a bulleted list
-   and pictures; it moves by its top, grows from any edge or its corner, folds to its top, and changes its paper: six
-   colours, each with its own night paper, as Carpe Diem has them. The notes list finds, pins, unpins, copies and
-   deletes them. Carpe Diem's "Send to Tabula" becomes "Copy the note", since Lakay has no Tabula.
+   and pictures; it moves by its top, grows from any edge or its corner, folds to its top, and changes its paper: Lakay's
+   own six (Build 9), each with its own night paper. The notes list finds, pins, unpins, copies and deletes them.
+   Carpe Diem's "Send to Tabula" becomes "Copy the note", since Lakay has no Tabula.
    The words and marks of a note are kept as a small model of allowed marks, never as markup, so a note can never carry
    a script, a link or a picture from outside the page. */
 "use strict";
 (function () {
   var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
   var S = E.schedae = {};
-  /* Carpe Diem's six papers (STICKY_COLORS), their names, and their night papers (cd-sn-night-paper) */
+  /* Lakay's own six papers (Build 9), named in Kreyòl: Mango, Lanmè (the sea), Flanbwayan (the flame tree's flower),
+     Zaboka (avocado), Douvanjou (dawn: Lakay's own periwinkle) and Kokoye (coconut). A note made in Build 8 kept one of
+     Carpe Diem's papers; it takes the Lakay paper nearest to it. */
   var COLORS = [
-    { id: "ivory", name: "Foolscap" }, { id: "gold", name: "Primrose" }, { id: "sky", name: "Inkwell" },
-    { id: "rose", name: "Claret" }, { id: "sage", name: "Laurel" }, { id: "violet", name: "Vespers" }];
-  function col(id) { for (var i = 0; i < COLORS.length; i++) if (COLORS[i].id === id) return COLORS[i]; return COLORS[0]; }
+    { id: "mango", name: "Mango" }, { id: "lanme", name: "Lanmè" }, { id: "flanbwayan", name: "Flanbwayan" },
+    { id: "zaboka", name: "Zaboka" }, { id: "douvanjou", name: "Douvanjou" }, { id: "kokoye", name: "Kokoye" }];
+  var BEFORE = { gold: "mango", sky: "lanme", rose: "flanbwayan", sage: "zaboka", violet: "douvanjou", ivory: "kokoye" };
+  function col(id) { id = BEFORE[id] || id; for (var i = 0; i < COLORS.length; i++) if (COLORS[i].id === id) return COLORS[i]; return COLORS[0]; }
   function still() { return document.documentElement.getAttribute("data-calm") === "1" || !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
   function snd(n) { if (E.sound) E.sound.play(n); }
   function notes() { return B.isOpen ? B.notes() : []; }
@@ -148,7 +151,8 @@
 
   /* one note on the page */
   function card(n) {
-    var el = h("div.sticky-note", { "data-sn-id": n.id, "data-sn-col": col(n.color).id });
+    if (n.color !== col(n.color).id) n.color = col(n.color).id;
+    var el = h("div.sticky-note", { "data-sn-id": n.id, "data-sn-col": n.color });
     if (n.min) el.setAttribute("data-sn-min", "1");
     var body = h("div.sn-body", { contenteditable: "true", role: "textbox", "aria-multiline": "true", "aria-label": t("sn.note"), "data-ph": t("sn.phWrite"), spellcheck: "true" });
     fromModel(n.doc, body, 0);
@@ -329,7 +333,7 @@
     box.style.left = Math.max(8, left) + "px"; box.style.top = Math.round(r.bottom + 4) + "px";
     var dots = h("div.sn-dots", { role: "group", "aria-label": t("sn.paper") });
     COLORS.forEach(function (c) {
-      var d = h("button.sn-dot", { type: "button", "data-sn-col": c.id, title: c.name, "aria-label": t("sn.col." + c.id), "aria-pressed": String(col(n.color).id === c.id) });
+      var d = h("button.sn-dot", { type: "button", "data-sn-col": c.id, title: t("sn.col." + c.id), "aria-label": t("sn.col." + c.id), "aria-pressed": String(col(n.color).id === c.id) });
       d.addEventListener("click", function () {
         n.color = c.id; save(); render(); document.body.appendChild(back);
         Array.prototype.forEach.call(dots.children, function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-sn-col") === c.id)); });
@@ -372,7 +376,7 @@
     list.forEach(function (n) {
       var row = h("div.sn-row", { "data-sn-row": n.id });
       row.__pv = plain(n.doc).toLowerCase();
-      row.appendChild(h("div.sn-row-top", null, [h("span.sn-rowdot", { "data-sn-col": col(n.color).id, title: col(n.color).name }), h("span.sn-rowtext", null, preview(n))]));
+      row.appendChild(h("div.sn-row-top", null, [h("span.sn-rowdot", { "data-sn-col": col(n.color).id, title: t("sn.col." + col(n.color).id) }), h("span.sn-rowtext", null, preview(n))]));
       var pin = h("button.sn-b.sn-b-soft", { type: "button" }, n.pinned ? t("sn.unpinShort") : t("sn.pin"));
       pin.addEventListener("click", function () { S.togglePin(n.id); });
       var copy = h("button.sn-b.sn-b-soft", { type: "button" }, t("sn.copy"));

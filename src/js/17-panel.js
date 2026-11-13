@@ -30,7 +30,15 @@
     var api = desk();
     if (api && typeof api.read_clipboard === "function") return api.read_clipboard().then(function (r) { if (r && r.ok) return r.text || ""; throw new Error((r && r.error) || "no clipboard"); });
     if (window.EmporiumHost && typeof window.EmporiumHost.readClipboard === "function") {
-      try { var s = window.EmporiumHost.readClipboard(); if (s !== null && s !== undefined) return Promise.resolve(String(s)); } catch (e) { }
+      /* the Fire tablet's shell answers with {"text": ..., "html": ...}; an older shell answered with the words alone */
+      try {
+        var s = window.EmporiumHost.readClipboard();
+        if (s !== null && s !== undefined) {
+          s = String(s);
+          try { var j = JSON.parse(s); if (j && typeof j === "object" && typeof j.text === "string") s = j.text; } catch (x) { }
+          return Promise.resolve(s);
+        }
+      } catch (e) { }
     }
     var ios = hands();
     if (ios) return ios.postMessage({ op: "read" }).then(function (r) { return typeof r === "string" ? r : (r && r.text) || ""; });
@@ -51,15 +59,37 @@
     return Promise.resolve(false);
   };
   function legacy(text) {
-    try { var ta = h("textarea", { readonly: "" }); ta.value = text; ta.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0"; document.body.appendChild(ta); ta.select();
-      var ok = document.execCommand("copy"); ta.remove(); return ok; } catch (e) { return false; }
+    /* the browser's own copy needs a field of its own for a moment; the focus and the selection go straight back */
+    var act = document.activeElement, sel = window.getSelection(), ranges = [], span = null, ok = false;
+    try { for (var i = 0; i < sel.rangeCount; i++) ranges.push(sel.getRangeAt(i).cloneRange()); } catch (e) { }
+    try { if (act && (act.tagName === "INPUT" || act.tagName === "TEXTAREA")) span = [act.selectionStart, act.selectionEnd]; } catch (e) { }
+    try {
+      var ta = h("textarea", { readonly: "" }); ta.value = text; ta.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+      document.body.appendChild(ta); ta.select(); ok = document.execCommand("copy"); ta.remove();
+    } catch (e) { ok = false; }
+    try {
+      if (act && act !== document.body && act.focus) act.focus({ preventScroll: true });
+      if (span && typeof span[0] === "number") act.setSelectionRange(span[0], span[1]);
+      else if (ranges.length) { sel.removeAllRanges(); ranges.forEach(function (r) { sel.addRange(r); }); }
+    } catch (e) { }
+    return ok;
   }
 
   /* ---------- the edit menu of the Offline Project (Carpe Diem's, as Ingenium carries it), built into Lakay ----------
      It opens only where there is something to edit or copy: in a field, or on chosen text. A right press anywhere else
      opens nothing, so nothing covers the page for no reason. */
   function isField(n) { return n && n.nodeType === 1 && (n.tagName === "TEXTAREA" || (n.tagName === "INPUT" && !/^(checkbox|radio|button|submit|reset|file|range|color|hidden|image)$/i.test(n.type || "text")) || n.isContentEditable === true); }
-  function fieldOf(n) { while (n && n !== document.body && n !== document.documentElement) { if (isField(n)) return n; n = n.parentNode; } return null; }
+  function fieldOf(n) {
+    while (n && n !== document.body && n !== document.documentElement) {
+      if (isField(n)) {
+        /* inside rich text (a sticky note's bold words, its list) the field is the whole editable area, not one mark of it */
+        if (n.isContentEditable === true) while (n.parentNode && n.parentNode.nodeType === 1 && n.parentNode.isContentEditable === true) n = n.parentNode;
+        return n;
+      }
+      n = n.parentNode;
+    }
+    return null;
+  }
   function hasSel() { try { var s = window.getSelection(); return !!(s && !s.isCollapsed && String(s).length); } catch (e) { return false; } }
   function selectionIn(t) {
     if (t.tagName === "TEXTAREA" || t.tagName === "INPUT") { try { var a = t.selectionStart, b = t.selectionEnd; return (typeof a === "number" && b > a) ? t.value.substring(a, b) : ""; } catch (e) { return ""; } }
@@ -119,10 +149,18 @@
   }
   function copy(text, cut) {
     if (!text) return;
+    var rg = null;
+    if (cut && target && target.tagName !== "TEXTAREA" && target.tagName !== "INPUT") { try { var sl = window.getSelection(); if (sl && sl.rangeCount) rg = sl.getRangeAt(0).cloneRange(); } catch (e) { } }
     CB.write(text);
     if (cut && target) {
       if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") { var a = target.selectionStart, b = target.selectionEnd; if (b > a) { target.setRangeText("", a, b, "end"); tell(target); } }
-      else { try { document.execCommand("delete", false, null); tell(target); } catch (e) { } }
+      else {
+        try {
+          target.focus({ preventScroll: true });
+          if (rg) { var s2 = window.getSelection(); s2.removeAllRanges(); s2.addRange(rg); }
+          document.execCommand("delete", false, null); tell(target);
+        } catch (e) { }
+      }
     }
   }
   function openField(x, y, f) {

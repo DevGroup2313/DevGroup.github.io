@@ -1,6 +1,6 @@
 Lakay
-Build: 8
+Build: 9
 Date: 13 November 2026
-Stage: Lakay Build 8: Schedae, Carpe Diem's sticky notes, each person's own and sealed; Lakay's Dawn dress refined by day and by night
+Stage: Lakay Build 9: the right press's edit menu works inside the sticky notes and every field, to and from each device's clipboard; Schedae's own pastel papers
 Copyright (c) 2026 Yannie D. Forest. All rights reserved.
 NO LICENCE IS GRANTED.

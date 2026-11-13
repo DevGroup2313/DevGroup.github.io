@@ -21,7 +21,7 @@ The other devices have their own repositories, set up the same way:
 - `READ ME FIRST (Windows).txt`: installing, updating, and where the books are kept.
 - Lakay's source, for every device:
   - `src/`: the app (`src/js`, `src/css`, the mark's pictures in `src/brand`). `build.py` makes `app/Lakay.html` from it.
-  - `tests/t_build3.js`, `tests/t_build6.js`, `tests/t_build7.js` and `tests/t_build8.js`: the whole app driven in Chromium.
+  - `tests/t_build3.js`, `tests/t_build6.js`, `tests/t_build7.js`, `tests/t_build8.js` and `tests/t_build9.js`: the whole app driven in Chromium.
   - `desktop/`: the window program for Windows and the Mac, with their recipes. `packages/`: the iPhone and iPad shell and the Fire tablet's.
   - `.github/workflows/windows.yml`: builds the Windows program, opens it once, installs and uninstalls it, scans it with Microsoft Defender, and puts it here and on the Releases page.
   - `release/`: `publish.py` (the Releases page and `builds/`), `device_repos.py` (makes Lakay-Mac and Lakay-Apps from this source), the other devices' workflows, and the READ ME FIRST files.
@@ -35,6 +35,7 @@ The other devices have their own repositories, set up the same way:
     node tests/t_build6.js        # the people, access and the time clock
     node tests/t_build7.js        # never locked out: sign-in, Refresh and Reset
     node tests/t_build8.js        # Schedae, the sticky notes, and the refined dress
+    node tests/t_build9.js        # the edit menu in every field, to and from the clipboard
 
 The build stops if the code uses `eval`, `innerHTML`, `document.write` or an address outside the page. The page's Content Security Policy allows only its own script, named by its SHA-256.
 

@@ -1,5 +1,5 @@
 /* LAKAY | Build 8 test: Schedae, Carpe Diem's sticky notes, and the refined Dawn dress. A note is made from the 🗒️ key,
-   written in, made bold, given another paper (checked by day and by night against Carpe Diem's measured papers),
+   written in, made bold, given another paper (checked by day and by night against Lakay's own papers, Build 9),
    folded, carried, unpinned and pinned, found, copied as words, and deleted. Notes are sealed in the books, each
    person's own, kept through a lock, carried in backups, and never hold foreign markup. The right press opens the
    edit menu inside a note. The Reset's erase choice is a quiet card, and the night is Lakay's calm periwinkle ink.
@@ -51,21 +51,21 @@ const wait = (p, ms) => p.waitForTimeout(ms);
   ok(await p.locator(".sticky-note .sn-body b").count() >= 1, "B makes the words bold");
   ok(await p.evaluate(() => JSON.stringify(E.books.notes()[0].doc).indexOf('["b",') >= 0), "the bold is kept as a mark in the note's model, not as markup");
 
-  console.log("Paper by day and by night, as Carpe Diem measures it");
+  console.log("Lakay's own papers by day and by night (Build 9)");
   const bg = () => p.evaluate(() => { const n = document.querySelector(".sticky-note"); const s = getComputedStyle(n); return { bg: s.backgroundColor, sh: s.boxShadow }; });
   let look = await bg();
-  ok(look.bg === "rgb(253, 250, 240)" && look.sh.indexOf("rgb(167, 165, 158)") >= 0, "a new note is Foolscap (ivory), with its edge at two thirds of its light (" + look.bg + ")");
+  ok(look.bg === "rgb(253, 244, 217)" && look.sh.indexOf("rgb(167, 161, 143)") >= 0, "a new note is Mango, a light pastel, with its edge at two thirds of its light (" + look.bg + ")");
   await p.click('.sticky-note .sn-iconbtn[aria-label="Menu"]'); await p.waitForSelector(".sn-menu");
-  ok(await p.locator(".sn-menu .sn-dot").count() === 6, "the ⋯ menu offers Carpe Diem's six papers");
-  await p.click('.sn-menu .sn-dot[data-sn-col="sky"]'); await wait(p, 250);
+  ok(await p.locator(".sn-menu .sn-dot").count() === 6, "the ⋯ menu offers Lakay's six papers");
+  await p.click('.sn-menu .sn-dot[data-sn-col="lanme"]'); await wait(p, 250);
   look = await bg();
-  ok(look.bg === "rgb(220, 239, 255)" && look.sh.indexOf("rgb(145, 158, 168)") >= 0, "Inkwell (sky) by day: #dcefff with its edge (" + look.bg + ")");
+  ok(look.bg === "rgb(226, 244, 241)" && look.sh.indexOf("rgb(149, 161, 159)") >= 0, "Lanmè by day: the pastel sea glass #e2f4f1 with its edge (" + look.bg + ")");
   await p.keyboard.press("Escape");
   await p.evaluate(() => { E.util.prefSet("theme", "night"); E.ui.applyLook(); }); await wait(p, 250);
   look = await bg();
-  ok(look.bg === "rgb(31, 42, 61)" && look.sh.indexOf("rgb(19, 26, 38)") >= 0, "Inkwell by night: Carpe Diem's night paper #1f2a3d, edge #131a26 (" + look.bg + ")");
+  ok(look.bg === "rgb(21, 51, 47)" && look.sh.indexOf("rgb(11, 30, 28)") >= 0, "Lanmè by night: its own night paper #15332f, edge #0b1e1c (" + look.bg + ")");
   const ink = await p.evaluate(() => getComputedStyle(document.querySelector(".sticky-note .sn-body")).color);
-  ok(ink === "rgb(232, 220, 192)", "the night ink is Carpe Diem's warm #e8dcc0 (" + ink + ")");
+  ok(ink === "rgb(236, 229, 211)", "the night ink is Lakay's warm ivory #ece5d3 (" + ink + ")");
   ok(await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()) === "#12121c", "the night is Lakay's calm periwinkle ink, not the old saturated indigo");
   await p.evaluate(() => { E.util.prefSet("theme", "day"); E.ui.applyLook(); }); await wait(p, 200);
 
@@ -124,7 +124,7 @@ const wait = (p, ms) => p.waitForTimeout(ms);
   await p.fill("#ldPw", OWNER_PW); await p.click("#ldGo"); await p.waitForSelector(".shell", { timeout: 60000 });
   await p.waitForSelector(".sticky-note", { timeout: 5000 });
   const back = await p.evaluate(() => { const n = document.querySelector(".sticky-note"); return { col: n.getAttribute("data-sn-col"), text: n.querySelector(".sn-body").textContent, bold: n.querySelectorAll(".sn-body b").length, left: parseInt(n.style.left, 10) }; });
-  ok(back.col === "sky" && /Order Florida water/.test(back.text) && back.bold >= 1 && back.left === after.x, "after the lock the note is back as it was: its paper, its words, its bold, its place");
+  ok(back.col === "lanme" && /Order Florida water/.test(back.text) && back.bold >= 1 && back.left === after.x, "after the lock the note is back as it was: its paper, its words, its bold, its place");
   const bk = await p.evaluate(() => E.books.makeBackup().then(t => { const b = JSON.parse(t); return { keys: b.rec.map(r => r[0]), plain: /Florida/.test(t) }; }));
   ok(bk.keys.indexOf("notes:owner") >= 0 && !bk.plain, "a backup carries the notes, sealed");
   await p.click("#rail-notes"); await p.waitForSelector(".sn-panel");

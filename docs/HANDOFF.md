@@ -10,8 +10,8 @@ Read this first in a new session. It says where Lakay stands and what comes next
   - `DevGroup2313/Lakay-Apps`: the iPhone and iPad app and the Fire tablet's, and their build kits only.
 - **Making a release:** see "Releasing a build" in `README.md`. In short: raise `build.json`, build, test, run `python3 release/device_repos.py windows`, commit and push Lakay-Windows; then `python3 release/device_repos.py mac <clone of Lakay-Mac>` and `... apps <clone of Lakay-Apps>`, commit and push each. Put `[skip ci]` in a commit message to save work without building.
 - **GitHub commits the apps into `builds/`** after each build (`release/publish.py`, as github-actions, with `[skip ci]`). So pull before pushing: `git pull --rebase origin claude/magical-darwin-ppq4pn`.
-- **Released:** Build 8 (13 November 2026): Schedae, Carpe Diem's sticky notes (each person's own, sealed), and the Dawn dress refined by day and by night at the owner's request. Build 7 (12 November 2026): never locked out (the password is the key whatever the name; the practice store always on the door; Refresh and Reset keys; a short wait after wrong tries). Build 6 (7 November 2026) brought the owner as administrator, the staff with user IDs and access levels, signing in and out with the time clock, and reports by person.
-- **Tests:** `node tests/t_build3.js` (48 checks), `node tests/t_build6.js` (42 checks), `node tests/t_build7.js` (24 checks) and `node tests/t_build8.js` (36 checks) drive the whole app in Chromium. Build with `python3 build.py`.
+- **Released:** Build 9 (13 November 2026): the right press's edit menu works inside the sticky notes and every field, to and from each device's clipboard (three faults fixed); Schedae's own pastel papers (Mango, Lanmè, Flanbwayan, Zaboka, Douvanjou, Kokoye). Build 8 (13 November 2026): Schedae, Carpe Diem's sticky notes (each person's own, sealed), and the Dawn dress refined by day and by night at the owner's request. Build 7 (12 November 2026): never locked out (the password is the key whatever the name; the practice store always on the door; Refresh and Reset keys; a short wait after wrong tries). Build 6 (7 November 2026) brought the owner as administrator, the staff with user IDs and access levels, signing in and out with the time clock, and reports by person.
+- **Tests:** `node tests/t_build3.js` (48 checks), `node tests/t_build6.js` (42 checks), `node tests/t_build7.js` (24 checks), `node tests/t_build8.js` (36 checks) and `node tests/t_build9.js` (21 checks: the edit menu on every road to the clipboard, served from 127.0.0.1) drive the whole app in Chromium. Build with `python3 build.py`.
 
 ## How the app is made
 
@@ -33,6 +33,8 @@ Read this first in a new session. It says where Lakay stands and what comes next
 ## What the owner asked for that is still to come
 
 The owner's order: finish this list before starting the search app.
+
+0. **The Home page, redesigned** (asked on 13 November 2026; Build 10 in progress): the counter's work first (New sale, Receive, Price check), the day's figures with sales by the hour, a "Needs you" list, the latest sales, compact room tiles, and the day's proverb on parchment. The bar colour was validated with the chart skill's checker: #5f67cc by day, #7c83e2 by night.
 
 1. **Inventory.** Departments, tabs and pages by kind of merchandise; a massive expansion for large inventories.
 2. **Payments.** Card, Apple Pay and Google Pay through any processor (not only Square), and split payments.

@@ -4,6 +4,16 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 9 (13 November 2026): the edit menu everywhere, and Schedae's own papers
+
+- **The right press's edit menu, inside the sticky notes and every field.** Three faults were found and fixed:
+  - A right press on bold or listed words inside a note took only those words as the field, so Select all, Copy the whole field and Clear the field acted on part of the note. The menu now always takes the whole note (the whole editable area).
+  - On the Fire tablet, Paste put the tablet program's whole answer into the field, braces and all, instead of the words. The page now takes the words from it.
+  - In a browser and the standalone page, Copy borrowed the focus for a moment, so Cut inside a note copied the words but did not remove them. The focus and the selection now go straight back, and Cut removes what it copied.
+- **Checked on every road the words travel:** the browser's own clipboard, the Fire tablet's program, the iPhone and iPad program, and the Mac and Windows program, in a sticky note, a search field, a text area in a dialog, and words chosen on the page.
+- **Schedae's own papers.** The notes no longer use Carpe Diem's colours. Lakay has six papers of its own, light pastels by day, each with its own night paper, named in Kreyòl: Mango, Lanmè, Flanbwayan, Zaboka, Douvanjou and Kokoye. The inks are Lakay's too. A note made in Build 8 takes the Lakay paper nearest to its old one.
+- tests/t_build9.js: 21 checks, served from this computer so the test reaches a real clipboard. All the earlier suites pass.
+
 ## Build 8 (13 November 2026): Schedae, and the Dawn dress refined
 
 - **Schedae, Carpe Diem's sticky notes, in parity,** behind the 🗒️ key at the foot of the side keys. The list makes a new note, finds notes by their words, pins and unpins them, copies their words, and deletes them. A note floats over every room until its ✕ unpins it. It moves by its top and grows from any edge or its corner. Its ⋯ menu changes its paper (Carpe Diem's six: Foolscap, Primrose, Inkwell, Claret, Laurel, Vespers), folds it, opens the list, copies it, or deletes it. Its keys make words bold, italic, underlined or struck through, start a list, add a picture, and save. Undo and redo are on its top. The paper, edges, night papers, ink, head, tools and corner carry the values measured from Carpe Diem by day and by night.

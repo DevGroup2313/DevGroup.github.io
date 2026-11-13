@@ -1,6 +1,7 @@
-/* LAKAY | Schedae (22-schedae.js): Carpe Diem's sticky notes, in exact parity. The paper, its edges, its night paper,
-   the head, the tools and the corner carry the values measured from Carpe Diem as it draws them (day and night,
-   computed styles). The menu and the notes list wear Lakay's own slab, as Carpe Diem's wear Carpe Diem's. */
+/* LAKAY | Schedae (22-schedae.js): Carpe Diem's sticky notes, made Lakay's own. The shapes keep Carpe Diem's measured
+   values (the size, the head, the tools, the corner, the edges, the tilt and the lift). The colours are Lakay's: six
+   papers named in Kreyòl for things of Haiti and the Caribbean (Build 9), each with its own night paper, and Lakay's
+   inks. The menu and the notes list wear Lakay's own slab. */
 
 /* ---------- the 🗒️ key on the rail: it turns once in a while, as Carpe Diem's does; it steps aside while the list is open ---------- */
 @keyframes cdHourTurn { 0%, 89% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -10,19 +11,20 @@ body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events
 /* ---------- the notes on the page ---------- */
 #sticky-pins { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 880; }
 .sticky-note { position: fixed; width: 202px; min-height: 152px; display: flex; flex-direction: column; box-sizing: border-box; border: 0; border-radius: 3px;
-  pointer-events: auto; touch-action: none; color: #4a3f1e; font: 400 16px/normal -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --sn-paper: #fdfaf0; --sn-edge: rgb(167, 165, 158); --sn-night: #33363a; --sn-nedge: #1f2124;
+  pointer-events: auto; touch-action: none; color: #3b3226; font: 400 16px/normal -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --sn-paper: #fdf4d9; --sn-edge: rgb(167, 161, 143); --sn-night: #3b3216; --sn-nedge: #231d0c;
   background: var(--sn-paper);
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, .72), inset 2px 0 0 rgba(255, 255, 255, .42), inset -2px 0 0 var(--sn-edge), inset 0 -3px 0 var(--sn-edge),
     0 2px 3px -1px rgba(40, 34, 26, .18), 0 12px 18px -9px rgba(40, 34, 26, .40), 0 24px 30px -18px rgba(40, 34, 26, .22);
   will-change: transform; transition: transform .08s ease-out, box-shadow .08s ease; }
-/* the six papers (Carpe Diem's STICKY_COLORS: the first stop of each, with its edge at two thirds of its light) and their night papers */
-.sticky-note[data-sn-col="ivory"] { --sn-paper: #fdfaf0; --sn-edge: rgb(167, 165, 158); --sn-night: #33363a; --sn-nedge: #1f2124; }
-.sticky-note[data-sn-col="gold"] { --sn-paper: #fbf3cf; --sn-edge: rgb(166, 160, 137); --sn-night: #3a3a1e; --sn-nedge: #232312; }
-.sticky-note[data-sn-col="sky"] { --sn-paper: #dcefff; --sn-edge: rgb(145, 158, 168); --sn-night: #1f2a3d; --sn-nedge: #131a26; }
-.sticky-note[data-sn-col="rose"] { --sn-paper: #ffe0ea; --sn-edge: rgb(168, 148, 154); --sn-night: #38181f; --sn-nedge: #240f14; }
-.sticky-note[data-sn-col="sage"] { --sn-paper: #e6f4de; --sn-edge: rgb(152, 161, 147); --sn-night: #1c2c1b; --sn-nedge: #111b10; }
-.sticky-note[data-sn-col="violet"] { --sn-paper: #ece2fb; --sn-edge: rgb(156, 149, 166); --sn-night: #271c33; --sn-nedge: #181020; }
+/* Lakay's six papers, light pastels by day: each paper's own light, its edge at two thirds of that light (as Carpe Diem shades its paper),
+   and its night paper with a deeper edge, made to sit on Lakay's periwinkle ink */
+.sticky-note[data-sn-col="mango"] { --sn-paper: #fdf4d9; --sn-edge: rgb(167, 161, 143); --sn-night: #3b3216; --sn-nedge: #231d0c; }
+.sticky-note[data-sn-col="lanme"] { --sn-paper: #e2f4f1; --sn-edge: rgb(149, 161, 159); --sn-night: #15332f; --sn-nedge: #0b1e1c; }
+.sticky-note[data-sn-col="flanbwayan"] { --sn-paper: #fde9e3; --sn-edge: rgb(167, 154, 150); --sn-night: #3f201a; --sn-nedge: #25120e; }
+.sticky-note[data-sn-col="zaboka"] { --sn-paper: #ebf3dc; --sn-edge: rgb(155, 160, 145); --sn-night: #283117; --sn-nedge: #171d0c; }
+.sticky-note[data-sn-col="douvanjou"] { --sn-paper: #eaebfb; --sn-edge: rgb(154, 155, 166); --sn-night: #26274a; --sn-nedge: #15162c; }
+.sticky-note[data-sn-col="kokoye"] { --sn-paper: #faf5ec; --sn-edge: rgb(165, 162, 156); --sn-night: #332e26; --sn-nedge: #1e1b16; }
 /* a slight tilt, as paper sits; it lifts when the hand comes near, and more when it is carried */
 .sticky-note:nth-child(odd) { transform: rotate(-0.25deg); }
 .sticky-note:nth-child(even) { transform: rotate(0.3deg); }
@@ -30,21 +32,21 @@ body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events
 .sticky-note:active { transform: translateY(-3px) scale(1.012); }
 
 .sticky-note .sn-head { height: 22px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 5px; cursor: default; border-radius: 3px 3px 0 0;
-  background: rgba(16, 42, 58, .07); color: #6b5d2e; }
-.sticky-note .sn-iconbtn { position: relative; z-index: 6; border: none; background: transparent; cursor: pointer; color: #6b5d2e; font-family: inherit; font-weight: 400; font-size: 12px; line-height: 1;
+  background: rgba(34, 28, 60, .06); color: #6b5e45; }
+.sticky-note .sn-iconbtn { position: relative; z-index: 6; border: none; background: transparent; cursor: pointer; color: #6b5e45; font-family: inherit; font-weight: 400; font-size: 12px; line-height: 1;
   padding: 2px 5px; border-radius: 4px; }
-.sticky-note .sn-iconbtn:hover { color: #2c2410; background: rgba(0, 0, 0, .10); }
+.sticky-note .sn-iconbtn:hover { color: #2a2318; background: rgba(34, 28, 20, .10); }
 .sticky-note .sn-iconbtn:focus-visible, .sticky-note .sn-tool:focus-visible { outline: 2px solid rgba(var(--pri-rgb), .7); outline-offset: 1px; }
 .sticky-note .sn-grip { flex: 1; align-self: stretch; cursor: grab; touch-action: none; }
 .sticky-note .sn-body { flex: 1; min-height: 0; overflow-y: auto; max-height: none; border: none; background: transparent; outline: none; padding: 8px 10px 4px;
-  font: 400 13px/1.45 Georgia, "Iowan Old Style", "Times New Roman", serif; color: #4a3f1e; word-wrap: break-word; overflow-wrap: anywhere; cursor: text; touch-action: auto; }
-.sticky-note .sn-body:empty::before { content: attr(data-ph); color: rgba(74, 63, 30, .45); pointer-events: none; }
+  font: 400 13px/1.45 Georgia, "Iowan Old Style", "Times New Roman", serif; color: #3b3226; word-wrap: break-word; overflow-wrap: anywhere; cursor: text; touch-action: auto; }
+.sticky-note .sn-body:empty::before { content: attr(data-ph); color: rgba(59, 50, 38, .45); pointer-events: none; }
 .sticky-note .sn-body img { max-width: 100%; height: auto; border-radius: 3px; margin: 4px 0; display: block; }
 .sticky-note .sn-body ul, .sticky-note .sn-body ol { margin: 2px 0; padding-left: 18px; }
 .sticky-note .sn-tools { flex: none; display: flex; flex-wrap: wrap; gap: 2px 1px; align-items: center; padding: 3px 20px 5px 6px; border-top: 1px solid rgba(0, 0, 0, .10); }
-.sticky-note .sn-tool { border: none; background: transparent; cursor: pointer; color: #6b5d2e; width: 26px; height: 22px; border-radius: 4px; padding: 0;
+.sticky-note .sn-tool { border: none; background: transparent; cursor: pointer; color: #6b5e45; width: 26px; height: 22px; border-radius: 4px; padding: 0;
   font: 400 12px/1 Georgia, "Iowan Old Style", "Times New Roman", serif; display: inline-grid; place-items: center; }
-.sticky-note .sn-tool:hover { background: rgba(0, 0, 0, .12); color: #2c2410; }
+.sticky-note .sn-tool:hover { background: rgba(34, 28, 20, .12); color: #2a2318; }
 .sticky-note .sn-tool.snb { font-weight: 800; }
 .sticky-note .sn-tool.sni { font-style: italic; }
 .sticky-note .sn-tool.snu { text-decoration: underline; }
@@ -77,17 +79,17 @@ body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events
 .sticky-note[data-sn-min="1"] { min-height: 0; height: auto !important; }
 .sticky-note[data-sn-min="1"] .sn-body { display: none; }
 
-/* the note's night paper (Carpe Diem's cd-sn-night-paper): each colour its own dark paper, warm ink, the edge a shade deeper */
-:root[data-theme="night"] .sticky-note { background: var(--sn-night); color: #e8dcc0;
-  box-shadow: inset 0 2px 0 rgba(255, 246, 228, .10), inset 2px 0 0 rgba(255, 246, 228, .05), inset -2px 0 0 var(--sn-nedge), inset 0 -3px 0 var(--sn-nedge),
+/* the note by night: each paper its own night paper, Lakay's warm ivory ink, the edge a shade deeper (as Carpe Diem does) */
+:root[data-theme="night"] .sticky-note { background: var(--sn-night); color: #ece5d3;
+  box-shadow: inset 0 2px 0 rgba(255, 250, 236, .10), inset 2px 0 0 rgba(255, 250, 236, .05), inset -2px 0 0 var(--sn-nedge), inset 0 -3px 0 var(--sn-nedge),
     0 2px 0 rgba(0, 0, 0, .55), 0 9px 14px rgba(0, 0, 0, .46), 0 20px 32px rgba(0, 0, 0, .34), 0 36px 58px rgba(0, 0, 0, .24); }
-:root[data-theme="night"] .sticky-note .sn-body, :root[data-theme="night"] .sticky-note .sn-body * { color: #e8dcc0; -webkit-text-fill-color: #e8dcc0; background: transparent; }
-:root[data-theme="night"] .sticky-note .sn-body:empty::before { color: rgba(232, 220, 192, .42); -webkit-text-fill-color: rgba(232, 220, 192, .42); }
-:root[data-theme="night"] .sticky-note .sn-head { background: rgba(255, 246, 228, .06); color: #c4b795; }
-:root[data-theme="night"] .sticky-note .sn-iconbtn, :root[data-theme="night"] .sticky-note .sn-tool { color: #c4b795; }
-:root[data-theme="night"] .sticky-note .sn-iconbtn:hover, :root[data-theme="night"] .sticky-note .sn-tool:hover { background: rgba(255, 246, 228, .13); color: #f5eeda; }
+:root[data-theme="night"] .sticky-note .sn-body, :root[data-theme="night"] .sticky-note .sn-body * { color: #ece5d3; -webkit-text-fill-color: #ece5d3; background: transparent; }
+:root[data-theme="night"] .sticky-note .sn-body:empty::before { color: rgba(236, 229, 211, .42); -webkit-text-fill-color: rgba(236, 229, 211, .42); }
+:root[data-theme="night"] .sticky-note .sn-head { background: rgba(255, 250, 236, .06); color: #c8bfa8; }
+:root[data-theme="night"] .sticky-note .sn-iconbtn, :root[data-theme="night"] .sticky-note .sn-tool { color: #c8bfa8; }
+:root[data-theme="night"] .sticky-note .sn-iconbtn:hover, :root[data-theme="night"] .sticky-note .sn-tool:hover { background: rgba(255, 250, 236, .13); color: #f7f1e1; }
 :root[data-theme="night"] .sticky-note .sn-tools { border-top: 1px solid rgba(0, 0, 0, .36); }
-:root[data-theme="night"] .sticky-note .sn-resize { background: linear-gradient(135deg, transparent 50%, rgba(255, 246, 228, .26) 50%); }
+:root[data-theme="night"] .sticky-note .sn-resize { background: linear-gradient(135deg, transparent 50%, rgba(255, 250, 236, .26) 50%); }
 
 /* a note arrives with a small pop, and leaves torn off; still in Calm and when the device asks for less motion */
 @keyframes cdFwPop { 0% { transform: scale(.93) translateY(20px); opacity: .45; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
@@ -101,13 +103,13 @@ body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events
 }
 
 /* ---------- the paper dots (the menu, the list): the day paper by day, the night paper by night ---------- */
-.sn-dot, .sn-rowdot { --dot: linear-gradient(180deg, #fdfaf0, #f1e9d4); --dot-n: #33363a; background: var(--dot); }
-.sn-dot[data-sn-col="gold"], .sn-rowdot[data-sn-col="gold"] { --dot: linear-gradient(180deg, #fbf3cf, #f2e6a8); --dot-n: #3a3a1e; }
-.sn-dot[data-sn-col="sky"], .sn-rowdot[data-sn-col="sky"] { --dot: linear-gradient(180deg, #dcefff, #b6e0ff); --dot-n: #1f2a3d; }
-.sn-dot[data-sn-col="rose"], .sn-rowdot[data-sn-col="rose"] { --dot: linear-gradient(180deg, #ffe0ea, #ffc6d8); --dot-n: #38181f; }
-.sn-dot[data-sn-col="sage"], .sn-rowdot[data-sn-col="sage"] { --dot: linear-gradient(180deg, #e6f4de, #c8edc1); --dot-n: #1c2c1b; }
-.sn-dot[data-sn-col="violet"], .sn-rowdot[data-sn-col="violet"] { --dot: linear-gradient(180deg, #ece2fb, #d5c4f4); --dot-n: #271c33; }
-:root[data-theme="night"] .sn-dot, :root[data-theme="night"] .sn-rowdot { background: var(--dot-n); box-shadow: inset 0 0 0 1px rgba(255, 246, 228, .30); }
+.sn-dot, .sn-rowdot { --dot: linear-gradient(180deg, #fdf4d9, #f7e7b8); --dot-n: #3b3216; background: var(--dot); }
+.sn-dot[data-sn-col="lanme"], .sn-rowdot[data-sn-col="lanme"] { --dot: linear-gradient(180deg, #e2f4f1, #c9e9e4); --dot-n: #15332f; }
+.sn-dot[data-sn-col="flanbwayan"], .sn-rowdot[data-sn-col="flanbwayan"] { --dot: linear-gradient(180deg, #fde9e3, #f8d4c9); --dot-n: #3f201a; }
+.sn-dot[data-sn-col="zaboka"], .sn-rowdot[data-sn-col="zaboka"] { --dot: linear-gradient(180deg, #ebf3dc, #d9e8c2); --dot-n: #283117; }
+.sn-dot[data-sn-col="douvanjou"], .sn-rowdot[data-sn-col="douvanjou"] { --dot: linear-gradient(180deg, #eaebfb, #d7d9f5); --dot-n: #26274a; }
+.sn-dot[data-sn-col="kokoye"], .sn-rowdot[data-sn-col="kokoye"] { --dot: linear-gradient(180deg, #faf5ec, #efe5d2); --dot-n: #332e26; }
+:root[data-theme="night"] .sn-dot, :root[data-theme="night"] .sn-rowdot { background: var(--dot-n); box-shadow: inset 0 0 0 1px rgba(255, 250, 236, .30); }
 
 /* ---------- a note's ⋯ menu ---------- */
 .sticky-card-menu-back { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1300; }
