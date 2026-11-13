@@ -33,7 +33,7 @@
     root.setAttribute("data-palette", look && look.palette ? look.palette : "dawn");
     root.setAttribute("data-density", look && look.density === "comfortable" ? "comfortable" : "compact");
     try { document.title = E.appName ? E.appName() : "Lakay"; } catch (e) { }
-    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#131430" : "#f6f4fa");
+    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#12121c" : "#f5f4f8");
   };
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ui.applyLook); } catch (e) { }
 

@@ -8,7 +8,7 @@
   var S = E.studio = { room: "start" };
   var LANGS = ["en", "fr", "ht"];
   var PALETTES = ["dawn", "amethyst", "indigo", "royal", "burgundy", "graphite"];
-  var SWATCH = { dawn: ["#6f78d8", "#e9e7f8", "#c08b2f", "#131430"], indigo: ["#3F4797", "#E6E3F5", "#A8864E", "#101119"], royal: ["#1B5E8C", "#DDE9F2", "#A8864E", "#0E1318"],
+  var SWATCH = { dawn: ["#5f67cc", "#e7e6f5", "#c08b2f", "#12121c"], indigo: ["#3F4797", "#E6E3F5", "#A8864E", "#101119"], royal: ["#1B5E8C", "#DDE9F2", "#A8864E", "#0E1318"],
     amethyst: ["#5B3FA8", "#E8E0F6", "#A8864E", "#120F18"], burgundy: ["#7A2E3B", "#EEDFDD", "#A8864E", "#141011"], graphite: ["#3A4150", "#E3E4E8", "#A8864E", "#111214"] };
   var LIMIT = { app: 40, tagline: 70, word: 2000, lines: 300, thanks: 80 };
 

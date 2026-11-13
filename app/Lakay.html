@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-NuQb5RM03eLQxVCmkGclc2fDf7Weludxmre8qdZ7I38='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-A5ehrNdoDijC8kPZSXxXKWJkxIioq1SiFWM1qzBcDeA='; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f6f4fa">
+<meta name="theme-color" content="#f5f4f8">
 <meta name="application-name" content="Lakay">
 <meta name="lakay-build" content="7">
 <!-- LAKAY | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt. Build 7 (2026-11-12). -->
@@ -82,33 +82,38 @@
    that the Author Studio's colour sets can change the whole house at once, and keeps its own few things: the receipt
    slip, the parchment of the proverb, and the brass. */
 :root {
-  --bg: #f6f4fa; --bg-wash: #efedf8;
-  --surface: #fffdfb; --surface-2: #fbf9fd; --tray: #f3f1fa; --sunk: rgba(34, 26, 46, .035);
-  --tint: #f4f2fc; --tint-2: #e9e7f8; --parch: #fbf8f1; --parch-2: #f2eadb;
-  --ink: #221f3a; --ink-2: #4b4766; --muted: #706b88; --body-ink: #2b2842;
-  --pri: #6f78d8; --pri-hi: #8f9cec; --pri-lo: #5c63c6; --pri-jhi: #b4a3f0; --pri-jlo: #6779d6; --pri-edge: #4b50ad; --pri-ledge: #393e90; --pri-jledge: #3a4392;
-  --on-pri: #ffffff; --pri-text: #5a5fc4; --pri-soft: rgba(90, 95, 196, .10); --pri-ring: rgba(90, 95, 196, .50); --pri-rgb: 90, 95, 196;
+  /* Dawn, refined (Build 8): white and ivory faces with crisp hairline rims and a firm stepped edge, as Ingenium and
+     Carpe Diem draw theirs; a deeper, matte periwinkle for the keys and the jewels; the sunrise kept, but quieter. */
+  --bg: #f5f4f8; --bg-wash: #eeedf4;
+  --surface: #ffffff; --surface-2: #fafafc; --tray: #f2f1f7; --sunk: rgba(34, 30, 58, .035);
+  --tint: #f3f2fa; --tint-2: #e7e6f5; --parch: #fbf8f1; --parch-2: #f2eadb;
+  --ink: #211f33; --ink-2: #48455e; --muted: #6c6981; --body-ink: #2a283d;
+  --pri: #5f67cc; --pri-hi: #6b73d6; --pri-lo: #5057bc; --pri-jhi: #8d93e2; --pri-jlo: #4f56b6; --pri-edge: #434aa6; --pri-ledge: #33398a; --pri-jledge: #363c8e;
+  --on-pri: #ffffff; --pri-text: #4d54b8; --pri-soft: rgba(77, 84, 184, .09); --pri-ring: rgba(77, 84, 184, .45); --pri-rgb: 77, 84, 184;
   --brass: #c08b2f; --brass-hi: #ecd4a2; --brass-ink: #8a6420; --brass-soft: rgba(192, 139, 47, .14);
-  --danger: #b8433f; --danger-soft: rgba(184, 67, 63, .10); --warn: #9a5a12; --warn-soft: rgba(184, 116, 46, .12); --ok: #2f7a55; --ok-soft: rgba(47, 122, 85, .11);
-  --line: rgba(34, 31, 58, .10); --line-2: rgba(34, 31, 58, .16); --line-soft: rgba(34, 31, 58, .06); --rim: rgba(90, 95, 196, .55);
-  --field: #ffffff; --field-line: rgba(75, 80, 173, .28); --wall: #d4d3ec;
-  --face: linear-gradient(180deg, #fffdfb, #f5f3fc); --face-tilt: linear-gradient(175deg, #fffdfb, #f5f3fc); --slab-face: linear-gradient(180deg, #fffdfb, #fbf9fd);
-  --fam: 40, 22, 68;
+  --danger: #a8423d; --danger-soft: rgba(168, 66, 61, .09); --warn: #9a5a12; --warn-soft: rgba(184, 116, 46, .12); --ok: #2f7a55; --ok-soft: rgba(47, 122, 85, .11);
+  --line: rgba(33, 31, 51, .10); --line-2: rgba(33, 31, 51, .16); --line-soft: rgba(33, 31, 51, .06); --rim: rgba(77, 84, 184, .45);
+  --field: #ffffff; --field-line: rgba(67, 74, 166, .24); --wall: #dcdbe8;
+  --face: linear-gradient(180deg, #ffffff, #f7f6fb); --face-tilt: linear-gradient(175deg, #ffffff, #f7f6fb); --slab-face: linear-gradient(180deg, #ffffff, #fcfcfe);
+  --fam: 34, 28, 60;
   /* the raised things: a small key (pill), a large key (a card one presses), a slab (a card one reads), a press */
-  --pill: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 -1px 0 rgba(40, 22, 68, .08), 0 1px 0 rgba(40, 22, 68, .18), 0 2px 4px rgba(40, 22, 68, .10), 0 6px 12px rgba(40, 22, 68, .07);
-  --pill-hi: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 -1px 0 rgba(40, 22, 68, .08), 0 3px 0 rgba(40, 22, 68, .14), 0 6px 9px rgba(40, 22, 68, .10), 0 12px 20px rgba(40, 22, 68, .08);
-  --key3d: 0 0 0 .5px rgba(40, 22, 68, .16), inset 0 -2px 0 rgba(40, 22, 68, .05), 0 1px 0 rgba(40, 22, 68, .13), 0 4px 10px rgba(40, 22, 68, .08), 0 14px 30px rgba(40, 22, 68, .08);
-  --key3d-hi: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 -2px 0 rgba(40, 22, 68, .05), 0 2px 0 rgba(40, 22, 68, .11), 0 10px 18px rgba(40, 22, 68, .11), 0 24px 44px rgba(40, 22, 68, .11);
-  --press: 0 0 0 .5px rgba(40, 22, 68, .18), inset 0 2px 6px rgba(40, 22, 68, .16), 0 1px 0 rgba(40, 22, 68, .08);
-  --slab: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -1px 0 rgba(40, 22, 68, .05), 0 1px 0 rgba(40, 22, 68, .10), 0 3px 0 rgba(40, 22, 68, .05), 0 6px 12px rgba(40, 22, 68, .07), 0 18px 36px rgba(40, 22, 68, .08);
-  --sh-card: 0 1px 0 rgba(40, 22, 68, .06), 0 2px 6px rgba(40, 22, 68, .05), 0 12px 30px rgba(40, 22, 68, .07);
-  --psh: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(40, 22, 68, .24), 0 9px 16px rgba(40, 22, 68, .16);
-  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .2), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(40, 22, 68, .26), 0 14px 24px rgba(40, 22, 68, .18);
-  --ppress: inset 0 2px 6px rgba(20, 8, 40, .45), 0 1px 1px rgba(40, 22, 68, .2);
-  --jewel: linear-gradient(150deg, var(--pri-jhi) 0%, #8b95ea 55%, var(--pri-jlo) 100%);
-  --jsh: inset 0 1px 0 rgba(255, 255, 255, .38), inset 0 -2px 0 rgba(30, 10, 60, .28), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(40, 22, 68, .25), 0 9px 16px rgba(40, 22, 68, .12);
-  --inset: inset 0 1px 2.5px rgba(40, 22, 68, .06);
-  --well: inset 0 1px 3px rgba(0, 0, 0, .08);
+  --pill: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -1.5px 0 rgba(34, 28, 60, .10), 0 1px 0 rgba(34, 28, 60, .12), 0 3px 4px rgba(34, 28, 60, .08), 0 7px 10px rgba(34, 28, 60, .05);
+  --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -1.5px 0 rgba(34, 28, 60, .10), 0 2px 0 rgba(34, 28, 60, .12), 0 5px 7px rgba(34, 28, 60, .09), 0 11px 16px rgba(34, 28, 60, .06);
+  --key3d: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -3px 0 rgba(34, 28, 60, .07), 0 1px 0 rgba(34, 28, 60, .12), 0 3px 0 rgba(34, 28, 60, .07), 0 6px 10px rgba(34, 28, 60, .07), 0 14px 26px rgba(34, 28, 60, .07);
+  --key3d-hi: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -3px 0 rgba(34, 28, 60, .07), 0 1px 0 rgba(34, 28, 60, .12), 0 5px 0 rgba(34, 28, 60, .07), 0 10px 16px rgba(34, 28, 60, .09), 0 22px 36px rgba(34, 28, 60, .09);
+  --press: inset 0 2px 5px rgba(34, 28, 60, .14), 0 1px 0 rgba(34, 28, 60, .06);
+  --slab: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -2px 0 rgba(34, 28, 60, .05), 0 1px 0 rgba(34, 28, 60, .11), 0 2px 0 rgba(34, 28, 60, .04), 0 6px 12px rgba(34, 28, 60, .05), 0 16px 30px rgba(34, 28, 60, .06);
+  --sh-card: 0 1px 0 rgba(34, 28, 60, .07), 0 2px 6px rgba(34, 28, 60, .05), 0 12px 28px rgba(34, 28, 60, .06);
+  --psh: inset 0 1px 0 rgba(255, 255, 255, .16), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(34, 28, 60, .22), 0 9px 16px rgba(34, 28, 60, .14);
+  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .18), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(34, 28, 60, .24), 0 14px 24px rgba(34, 28, 60, .16);
+  --ppress: inset 0 2px 6px rgba(14, 8, 40, .42), 0 1px 1px rgba(34, 28, 60, .2);
+  --jewel: linear-gradient(150deg, var(--pri-jhi) 0%, #6870d4 55%, var(--pri-jlo) 100%);
+  --jsh: inset 0 1px 0 rgba(255, 255, 255, .30), inset 0 -2px 0 rgba(20, 14, 50, .26), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(34, 28, 60, .22), 0 9px 16px rgba(34, 28, 60, .10);
+  --inset: inset 0 1px 2.5px rgba(34, 28, 60, .06);
+  --well: inset 0 1px 3px rgba(0, 0, 0, .07);
+  /* the panels that open over the page (dialogs, menus, the rail's panels): Carpe Diem's slab, in Lakay's ink */
+  --slab-top: #ffffff; --slab-bot: #f6f5fa; --slab-hi: rgba(255, 255, 255, .9); --slab-lo: rgba(34, 28, 60, .07); --slab-edge: rgba(34, 28, 60, .10);
+  --slab-sh1: rgba(34, 28, 60, .12); --slab-sh2: rgba(34, 28, 60, .14); --slab-sh3: rgba(34, 28, 60, .16);
   /* the older names, kept so that every room follows the new dress */
   --relief: var(--pill); --relief-hi: var(--pill-hi); --relief-down: var(--press);
   --radius: 14px; --radius-s: 11px; --key-h: 34px;
@@ -117,37 +122,42 @@
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --emoji: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
   --ease: cubic-bezier(.2, .8, .2, 1); --spring: cubic-bezier(.34, 1.35, .64, 1);
-  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(244, 184, 112, .17), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(143, 156, 236, .16), transparent 60%), #f6f4fa;
-  --bar-bg: #fffdfb; --bar-sh: 0 1px 0 rgba(40, 22, 68, .06), 0 6px 18px rgba(40, 22, 68, .05);
+  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(244, 184, 112, .09), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(120, 128, 220, .08), transparent 60%), #f5f4f8;
+  --bar-bg: #ffffff; --bar-sh: 0 1px 0 rgba(34, 28, 60, .06), 0 6px 18px rgba(34, 28, 60, .05);
   color-scheme: light;
 }
 :root[data-theme="night"] {
-  --bg: #131430; --bg-wash: #1a1b3a;
-  --surface: #1b1c3c; --surface-2: #17183a; --tray: #141533; --sunk: rgba(8, 6, 20, .32);
-  --tint: #232548; --tint-2: #2b2d55; --parch: #221d27; --parch-2: #2b2530;
-  --ink: #eeeefc; --ink-2: #cbcbe8; --muted: #9d9dc4; --body-ink: #e4e4f6;
-  --pri: #6f78d8; --pri-hi: #8f9cec; --pri-lo: #5c63c6; --pri-jhi: #b4a3f0; --pri-jlo: #6779d6; --pri-edge: #2f3380; --pri-ledge: #1a1c52; --pri-jledge: #1d2058;
-  --on-pri: #ffffff; --pri-text: #b8bdff; --pri-soft: rgba(184, 189, 255, .13); --pri-ring: rgba(184, 189, 255, .55); --pri-rgb: 184, 189, 255;
-  --brass: #f0c472; --brass-hi: #e3cfa2; --brass-ink: #f0c472; --brass-soft: rgba(240, 196, 114, .13);
-  --danger: #f0928a; --danger-soft: rgba(240, 146, 138, .12); --warn: #e6b26a; --warn-soft: rgba(230, 178, 106, .13); --ok: #7fd1a6; --ok-soft: rgba(127, 209, 166, .13);
-  --line: rgba(200, 205, 255, .12); --line-2: rgba(200, 205, 255, .20); --line-soft: rgba(200, 205, 255, .07); --rim: rgba(184, 189, 255, .40);
-  --field: #17183a; --field-line: rgba(184, 189, 255, .30); --wall: #0e0f26;
-  --face: linear-gradient(180deg, #262850, #1f2146); --face-tilt: linear-gradient(175deg, #262850, #1f2146); --slab-face: linear-gradient(180deg, #1b1c3c, #17183a);
+  /* Dawn by night, refined (Build 8): Lakay's periwinkle ink, calmer and deeper than the saturated indigo it replaces;
+     hairline rims and black depth, as Ingenium's night has them; the periwinkle kept for the keys and the words that act. */
+  --bg: #12121c; --bg-wash: #171723;
+  --surface: #1d1d2b; --surface-2: #191926; --tray: #151520; --sunk: rgba(5, 5, 12, .34);
+  --tint: #252536; --tint-2: #2d2d41; --parch: #221f1b; --parch-2: #2b2722;
+  --ink: #efeef7; --ink-2: #cfcddf; --muted: #9e9cb3; --body-ink: #e5e4f0;
+  --pri: #6a72d4; --pri-hi: #757dde; --pri-lo: #555cc0; --pri-jhi: #8a90e0; --pri-jlo: #4b52b0; --pri-edge: #2a2e6e; --pri-ledge: #16183f; --pri-jledge: #191b46;
+  --on-pri: #ffffff; --pri-text: #b0b5f5; --pri-soft: rgba(176, 181, 245, .12); --pri-ring: rgba(176, 181, 245, .50); --pri-rgb: 176, 181, 245;
+  --brass: #e6c27a; --brass-hi: #e3cfa2; --brass-ink: #e6c27a; --brass-soft: rgba(230, 194, 122, .12);
+  --danger: #ee968e; --danger-soft: rgba(238, 150, 142, .11); --warn: #e5b46e; --warn-soft: rgba(229, 180, 110, .12); --ok: #86d0a8; --ok-soft: rgba(134, 208, 168, .12);
+  --line: rgba(214, 213, 240, .11); --line-2: rgba(214, 213, 240, .18); --line-soft: rgba(214, 213, 240, .06); --rim: rgba(176, 181, 245, .36);
+  --field: #161622; --field-line: rgba(176, 181, 245, .22); --wall: #0a0a12;
+  --face: linear-gradient(180deg, #282839, #21212f); --face-tilt: linear-gradient(175deg, #282839, #21212f); --slab-face: linear-gradient(180deg, #1f1f2d, #1b1b27);
   --fam: 0, 0, 0;
-  --pill: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 1px 0 rgba(0, 0, 0, .5), 0 3px 5px rgba(0, 0, 0, .4), 0 8px 12px rgba(0, 0, 0, .3);
-  --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .11), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 3px 0 rgba(0, 0, 0, .5), 0 6px 9px rgba(0, 0, 0, .45), 0 12px 20px rgba(0, 0, 0, .34);
-  --key3d: inset 0 1px 0 rgba(255, 255, 255, .09), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 3px 0 rgba(0, 0, 0, .45), 0 6px 10px rgba(0, 0, 0, .42), 0 14px 26px rgba(0, 0, 0, .36);
-  --key3d-hi: inset 0 1px 0 rgba(255, 255, 255, .11), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 5px 0 rgba(0, 0, 0, .45), 0 10px 16px rgba(0, 0, 0, .46), 0 24px 38px rgba(0, 0, 0, .4);
+  --pill: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 1px 0 rgba(0, 0, 0, .5), 0 3px 5px rgba(0, 0, 0, .4), 0 8px 12px rgba(0, 0, 0, .3);
+  --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 2px 0 rgba(0, 0, 0, .5), 0 5px 8px rgba(0, 0, 0, .44), 0 11px 18px rgba(0, 0, 0, .32);
+  --key3d: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 3px 0 rgba(0, 0, 0, .45), 0 6px 10px rgba(0, 0, 0, .42), 0 14px 26px rgba(0, 0, 0, .36);
+  --key3d-hi: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 -3px 0 rgba(0, 0, 0, .42), 0 1px 0 rgba(0, 0, 0, .7), 0 5px 0 rgba(0, 0, 0, .45), 0 10px 16px rgba(0, 0, 0, .46), 0 22px 36px rgba(0, 0, 0, .4);
   --press: inset 0 2px 7px rgba(0, 0, 0, .6), 0 1px 1px rgba(0, 0, 0, .4);
-  --slab: inset 0 1px 0 rgba(255, 255, 255, .06), inset 0 -1px 0 rgba(0, 0, 0, .35), 0 1px 0 rgba(0, 0, 0, .6), 0 3px 0 rgba(0, 0, 0, .28), 0 6px 12px rgba(0, 0, 0, .35), 0 18px 36px rgba(0, 0, 0, .4);
+  --slab: inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 1px 0 rgba(0, 0, 0, .6), 0 2px 0 rgba(0, 0, 0, .3), 0 6px 12px rgba(0, 0, 0, .34), 0 16px 32px rgba(0, 0, 0, .38);
   --sh-card: 0 1px 0 rgba(0, 0, 0, .4), 0 2px 6px rgba(0, 0, 0, .3), 0 12px 30px rgba(0, 0, 0, .34);
-  --psh: inset 0 1px 0 rgba(255, 255, 255, .15), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .36);
-  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .17), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(0, 0, 0, .52), 0 14px 24px rgba(0, 0, 0, .4);
-  --jsh: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .3);
+  --psh: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 0 var(--pri-ledge), 0 4px 6px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .36);
+  --pshhi: inset 0 1px 0 rgba(255, 255, 255, .16), 0 3px 0 var(--pri-ledge), 0 7px 10px rgba(0, 0, 0, .52), 0 14px 24px rgba(0, 0, 0, .4);
+  --ppress: inset 0 2px 6px rgba(0, 0, 0, .55), 0 1px 1px rgba(0, 0, 0, .3);
+  --jsh: inset 0 1px 0 rgba(255, 255, 255, .24), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .3);
   --inset: inset 0 1px 2.5px rgba(0, 0, 0, .25);
   --well: inset 0 1px 3px rgba(0, 0, 0, .40);
-  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(240, 170, 100, .10), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(143, 156, 236, .12), transparent 60%), #131430;
-  --bar-bg: #232548; --bar-sh: 0 1px 0 rgba(0, 0, 0, .40), 0 6px 18px rgba(0, 0, 0, .28);
+  --slab-top: #242434; --slab-bot: #1d1d2a; --slab-hi: rgba(255, 255, 255, .06); --slab-lo: rgba(0, 0, 0, .35); --slab-edge: rgba(214, 213, 240, .12);
+  --slab-sh1: rgba(0, 0, 0, .4); --slab-sh2: rgba(0, 0, 0, .45); --slab-sh3: rgba(0, 0, 0, .55);
+  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(240, 170, 100, .05), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(150, 158, 236, .07), transparent 60%), #12121c;
+  --bar-bg: #20202e; --bar-sh: 0 1px 0 rgba(0, 0, 0, .40), 0 6px 18px rgba(0, 0, 0, .28);
   color-scheme: dark;
 }
 :root[data-size="l"] { font-size: 18px; }
@@ -253,7 +263,7 @@ a { color: var(--pri-text); }
 .seg button:hover { color: var(--pri-text); }
 .seg button .ico { width: 14px; height: 14px; }
 .seg button[aria-checked="true"] { background: var(--surface); color: var(--pri-text); font-weight: 700; border-color: var(--line); box-shadow: var(--pill); }
-:root[data-theme="night"] .seg button[aria-checked="true"] { background: #29243b; }
+:root[data-theme="night"] .seg button[aria-checked="true"] { background: #2d2d40; }
 .badge { display: inline-block; min-width: 2em; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: .68rem; letter-spacing: .04em; text-align: center; background: var(--pri-soft); color: var(--pri-text); }
 .badge.ok { background: var(--ok-soft); color: var(--ok); }
 .badge.warn { background: var(--warn-soft); color: var(--warn); }
@@ -337,7 +347,7 @@ input[type=file] { position: absolute !important; width: 1px !important; height:
 .cl-fold { order: -1; width: 26px; height: 21px; flex: none; padding: 0 5px; margin: 0 -3px 0 0; border-radius: 7px; border: 1px solid rgba(0, 0, 0, .08); background: rgba(255, 255, 255, .72); color: var(--ink-2);
   font: 700 15px/1 var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
   box-shadow: inset 0 -1.5px 0 rgba(30, 28, 70, .16), 0 1px 0 rgba(30, 28, 70, .32), 0 3px 3px rgba(30, 28, 70, .2), 0 6px 8px rgba(30, 28, 70, .11); transition: transform .12s var(--spring), color .12s; }
-:root[data-theme="night"] .cl-fold { background: rgba(28, 30, 60, .72); border-color: rgba(255, 255, 255, .10); }
+:root[data-theme="night"] .cl-fold { background: rgba(32, 32, 46, .8); border-color: rgba(255, 255, 255, .10); }
 .cl-fold:hover { transform: translateY(-2px); color: var(--pri-text); }
 .cl-fold:active { transform: translateY(2px) scale(.96); }
 /* the one language key shows a flag at the size of an emoji (drawn, so that it shows on every device) */
@@ -454,7 +464,7 @@ p.lede { color: var(--ink-2); max-width: 64ch; margin: 0 0 16px; font-size: .875
 /* ---------- the panel of the right press: copy, cut, paste, select ---------- */
 /* the edit menu of the right press: the Offline Project's (Carpe Diem's #cd-em-menu), in Lakay's Dawn */
 #cd-em-menu { position: fixed; z-index: 4000; min-width: 220px; max-width: 300px; padding: 8px; border-radius: 14px; box-sizing: border-box;
-  background: linear-gradient(180deg, #fffdfb 0%, #f2f0fb 100%); border: 1px solid rgba(60, 50, 120, .13); color: var(--ink);
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line-2); color: var(--ink);
   box-shadow: 0 1px 0 rgba(255, 255, 255, .75) inset, 0 2px 0 rgba(40, 30, 90, .10), 0 6px 14px rgba(40, 30, 90, .12), 0 14px 30px rgba(40, 30, 90, .12), 0 28px 52px rgba(40, 30, 90, .10);
   font-family: inherit; transform-origin: top left; animation: cdEmOpen .14s cubic-bezier(.34, 1.3, .64, 1) both; }
 @keyframes cdEmOpen { from { opacity: 0; transform: scale(.88) translateY(-6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -470,11 +480,11 @@ p.lede { color: var(--ink-2); max-width: 64ch; margin: 0 0 16px; font-size: .875
 #cd-em-menu .cd-em-sep { height: 1px; margin: 5px 8px; background: rgba(40, 30, 90, .10); }
 #cd-em-menu .cd-em-note { font: 11px/1.4 Georgia, serif; color: var(--muted); padding: 0 12px; max-width: 240px; white-space: normal; }
 #cd-em-menu .cd-em-note:not(:empty) { padding: 4px 12px 2px; }
-:root[data-theme="night"] #cd-em-menu { background: linear-gradient(180deg, #2a2b52 0%, #1b1c3c 100%); border-color: rgba(184, 189, 255, .22); color: #eeeefc;
+:root[data-theme="night"] #cd-em-menu { background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border-color: var(--line-2); color: var(--ink);
   box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 2px 4px rgba(0, 0, 0, .3), 0 10px 24px rgba(0, 0, 0, .36), 0 28px 52px rgba(0, 0, 0, .24); }
 :root[data-theme="night"] #cd-em-menu .cd-em-row:hover, :root[data-theme="night"] #cd-em-menu .cd-em-row:focus-visible { background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .04));
   box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 3px 8px rgba(0, 0, 0, .28); }
-:root[data-theme="night"] #cd-em-menu .cd-em-sep { background: rgba(184, 189, 255, .18); }
+:root[data-theme="night"] #cd-em-menu .cd-em-sep { background: var(--line); }
 :root[data-theme="night"] #cd-em-menu .cd-em-danger { color: #e88a83; }
 @media (prefers-reduced-motion: reduce) { #cd-em-menu { animation: none; } }
 :root[data-calm="1"] #cd-em-menu { animation: none; }
@@ -547,7 +557,7 @@ html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
 .hx-key { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-height: 150px; padding: 16px 16px 15px; border-radius: 18px; text-align: left;
   border: 1px solid var(--line); background: var(--face-tilt); color: var(--ink); font: inherit; cursor: pointer; box-shadow: var(--key3d);
   transition: transform .18s var(--spring), box-shadow .18s ease, border-color .18s ease; }
-.hx-key:hover { transform: translateY(-4px); box-shadow: var(--key3d-hi); border-color: var(--pri-ring); }
+.hx-key:hover { transform: translateY(-3px); box-shadow: var(--key3d-hi); border-color: rgba(var(--pri-rgb), .38); }
 .hx-key:active { transform: translateY(2px) scale(.99); box-shadow: var(--press); transition-duration: .07s; }
 .hx-key:focus-visible { outline: 2.5px solid var(--pri-ring); outline-offset: 3px; border-radius: 18px; }
 .hx-jewel { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--jewel); box-shadow: var(--jsh);
@@ -717,16 +727,13 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 
 /* ---------- dialogs and messages: the sign-in's own card, with its walls ---------- */
 .layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 2500; display: flex; align-items: center; justify-content: center; padding: 16px;
-  background: rgba(22, 18, 30, .42); -webkit-backdrop-filter: blur(4px) saturate(120%); backdrop-filter: blur(4px) saturate(120%); animation: fadeIn .18s ease both; }
-:root[data-theme="night"] .layer { background: rgba(5, 3, 10, .62); }
+  background: rgba(24, 22, 34, .34); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: fadeIn .18s ease both; }
+:root[data-theme="night"] .layer { background: rgba(4, 4, 8, .58); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.dialog { --dlg-end: #f7f5fa; width: 100%; max-width: 520px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; color: var(--ink); border-radius: 22px;
-  background: linear-gradient(180deg, var(--surface), var(--surface-2) 62%, var(--dlg-end));
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .45), inset 2px 0 0 rgba(255, 255, 255, .25), inset -2px 0 0 var(--wall), inset 0 -3px 0 var(--wall), 0 0 0 1px rgba(40, 22, 68, .10),
-    0 2px 3px rgba(40, 22, 68, .10), 0 9px 12px -7px rgba(40, 22, 68, .18), 0 22px 40px -14px rgba(40, 22, 68, .26), 0 30px 80px rgba(20, 10, 40, .18);
-  animation: ildIn .42s cubic-bezier(.22, .8, .3, 1) both; }
-:root[data-theme="night"] .dialog { --dlg-end: #1b1525; background: linear-gradient(180deg, #2a2239, #231c31 62%, #201a2d);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .06), inset -2px 0 0 var(--wall), inset 0 -3px 0 var(--wall), 0 0 0 1px rgba(205, 184, 240, .12), 0 22px 40px -14px rgba(0, 0, 0, .6), 0 30px 80px rgba(0, 0, 0, .5); }
+.dialog { width: 100%; max-width: 520px; max-height: calc(100vh - 32px); display: flex; flex-direction: column; color: var(--ink); border-radius: 16px;
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2), 0 30px 70px var(--slab-sh3);
+  animation: ildIn .32s cubic-bezier(.22, .8, .3, 1) both; }
 @keyframes ildIn { 0% { opacity: 0; transform: translateY(12px) scale(.955); } 62% { opacity: 1; transform: translateY(-2px) scale(1.008); } 100% { opacity: 1; transform: none; } }
 .dialog.wide { max-width: 860px; }
 .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 20px 22px 6px; }
@@ -905,7 +912,14 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 .reset-keys .key { justify-content: flex-start; text-align: left; padding: 10px 12px; height: auto; white-space: normal; }
 .reset-keys .key > span { display: flex; flex-direction: column; gap: 2px; }
 .reset-keys .key b { font-size: .98rem; }
-.reset-keys .key small { font-weight: 400; opacity: .78; font-size: .84rem; line-height: 1.35; }
+.reset-keys .key small { font-weight: 400; color: var(--muted); font-size: .84rem; line-height: 1.35; }
+.reset-keys .key { gap: 12px; border-color: var(--line); color: var(--ink); }
+.reset-keys .key > .emo { flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; font-size: 1rem;
+  background: var(--tint); box-shadow: inset 0 0 0 1px var(--line), inset 0 -1.5px 0 rgba(var(--fam), .06); }
+.reset-keys .key.danger { color: var(--ink); border-color: var(--line); }
+.reset-keys .key.danger > .emo { background: var(--danger-soft); box-shadow: inset 0 0 0 1px rgba(168, 66, 61, .24), inset 0 -1.5px 0 rgba(168, 66, 61, .10); }
+.reset-keys .key.danger:hover { border-color: rgba(168, 66, 61, .38); }
+.reset-keys .key.danger b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 8px; border-radius: 50%; background: var(--danger); vertical-align: middle; }
 .display-keys { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
 /* LAKAY | the side rail (20-rail.js), as Ingenium has it: bare emoji keys down the right edge, a small key above them */
@@ -932,10 +946,9 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 
 /* the panels beside the keys */
 .rail-pop { position: fixed; right: calc(78px + env(safe-area-inset-right, 0px)); z-index: 950; width: min(330px, calc(100vw - 100px)); max-height: 72vh; overflow-y: auto;
-  padding: 14px; border-radius: 16px; box-sizing: border-box; background: linear-gradient(180deg, #fffdfb 0%, #f4f2fc 100%); border: 1px solid rgba(60, 50, 120, .13); color: var(--ink);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .75) inset, 0 2px 0 rgba(40, 30, 90, .08), 0 8px 18px rgba(40, 30, 90, .12), 0 22px 44px rgba(40, 30, 90, .14);
+  padding: 14px; border-radius: 16px; box-sizing: border-box; background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line); color: var(--ink);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2), 0 26px 56px var(--slab-sh3);
   transform-origin: right bottom; animation: railPop .18s cubic-bezier(.34, 1.3, .64, 1) both; }
-:root[data-theme="night"] .rail-pop { background: linear-gradient(180deg, #2a2b52 0%, #1b1c3c 100%); border-color: rgba(184, 189, 255, .22); box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 10px 24px rgba(0, 0, 0, .4), 0 28px 52px rgba(0, 0, 0, .3); }
 @keyframes railPop { from { opacity: 0; transform: scale(.9) translateX(8px); } to { opacity: 1; transform: none; } }
 .rp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .rp-head h3 { margin: 0; font: 600 17px/1.2 var(--serif); }
@@ -969,11 +982,11 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 
 /* 🧮 the calculator: a small brass-and-enamel machine that floats */
 .calc { position: fixed; z-index: 1200; width: 292px; border-radius: 20px; padding: 0 12px 12px; box-sizing: border-box; user-select: none;
-  background: linear-gradient(180deg, #fffdfb 0%, #eeecf9 100%); border: 1px solid rgba(60, 50, 120, .14);
+  background: linear-gradient(180deg, #ffffff 0%, #f0eff7 100%); border: 1px solid var(--line-2);
   box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 2px 0 rgba(40, 30, 90, .08), 0 10px 22px rgba(40, 30, 90, .14), 0 26px 50px rgba(40, 30, 90, .16);
   animation: railPop .2s cubic-bezier(.34, 1.3, .64, 1) both; transition: box-shadow .15s ease, transform .15s ease; }
 .calc.lifted { transform: scale(1.02); box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 16px 34px rgba(40, 30, 90, .2), 0 36px 70px rgba(40, 30, 90, .2); }
-:root[data-theme="night"] .calc { background: linear-gradient(180deg, #2a2b52 0%, #17183a 100%); border-color: rgba(184, 189, 255, .2); box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 12px 28px rgba(0, 0, 0, .45), 0 30px 60px rgba(0, 0, 0, .35); }
+:root[data-theme="night"] .calc { background: linear-gradient(180deg, #252536 0%, #1a1a27 100%); border-color: rgba(214, 213, 240, .14); box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 12px 28px rgba(0, 0, 0, .45), 0 30px 60px rgba(0, 0, 0, .35); }
 .calc-grip { display: flex; align-items: center; justify-content: space-between; height: 40px; cursor: grab; font: 600 13.5px/1 var(--sans); color: var(--muted); touch-action: none; }
 .calc.lifted .calc-grip { cursor: grabbing; }
 .calc-x { width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
@@ -991,12 +1004,182 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 .calc-k.fn { color: var(--muted); }
 .calc-k.clr { color: #b8433f; }
 .calc-k.eq { color: #fff; border-color: transparent; background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 3px 0 var(--pri-ledge), 0 6px 12px rgba(var(--pri-rgb), .3); }
-:root[data-theme="night"] .calc-k { color: var(--ink); border-color: rgba(184, 189, 255, .16); background: linear-gradient(180deg, #34366a, #262857); box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 3px 0 rgba(0, 0, 0, .35), 0 5px 10px rgba(0, 0, 0, .25); }
-:root[data-theme="night"] .calc-k.op { color: var(--pri-text); background: linear-gradient(180deg, #3b3e7c, #2b2e66); }
+:root[data-theme="night"] .calc-k { color: var(--ink); border-color: rgba(214, 213, 240, .12); background: linear-gradient(180deg, #2e2e43, #252536); box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 3px 0 rgba(0, 0, 0, .35), 0 5px 10px rgba(0, 0, 0, .25); }
+:root[data-theme="night"] .calc-k.op { color: var(--pri-text); background: linear-gradient(180deg, #35385e, #2b2d4d); }
 .calc-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-top: 10px; }
 .calc-tape { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .calc-line { border: 0; background: transparent; padding: 1px 0; text-align: left; font: 11.5px/1.3 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); cursor: pointer; overflow-wrap: anywhere; }
 .calc-line:hover { color: var(--pri-text); }
+
+/* LAKAY | Schedae (22-schedae.js): Carpe Diem's sticky notes, in exact parity. The paper, its edges, its night paper,
+   the head, the tools and the corner carry the values measured from Carpe Diem as it draws them (day and night,
+   computed styles). The menu and the notes list wear Lakay's own slab, as Carpe Diem's wear Carpe Diem's. */
+
+/* ---------- the 🗒️ key on the rail: it turns once in a while, as Carpe Diem's does; it steps aside while the list is open ---------- */
+@keyframes cdHourTurn { 0%, 89% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+#rail-notes > span { display: inline-block; animation: cdHourTurn 12s ease-in-out infinite; }
+body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events: none !important; }
+
+/* ---------- the notes on the page ---------- */
+#sticky-pins { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 880; }
+.sticky-note { position: fixed; width: 202px; min-height: 152px; display: flex; flex-direction: column; box-sizing: border-box; border: 0; border-radius: 3px;
+  pointer-events: auto; touch-action: none; color: #4a3f1e; font: 400 16px/normal -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --sn-paper: #fdfaf0; --sn-edge: rgb(167, 165, 158); --sn-night: #33363a; --sn-nedge: #1f2124;
+  background: var(--sn-paper);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .72), inset 2px 0 0 rgba(255, 255, 255, .42), inset -2px 0 0 var(--sn-edge), inset 0 -3px 0 var(--sn-edge),
+    0 2px 3px -1px rgba(40, 34, 26, .18), 0 12px 18px -9px rgba(40, 34, 26, .40), 0 24px 30px -18px rgba(40, 34, 26, .22);
+  will-change: transform; transition: transform .08s ease-out, box-shadow .08s ease; }
+/* the six papers (Carpe Diem's STICKY_COLORS: the first stop of each, with its edge at two thirds of its light) and their night papers */
+.sticky-note[data-sn-col="ivory"] { --sn-paper: #fdfaf0; --sn-edge: rgb(167, 165, 158); --sn-night: #33363a; --sn-nedge: #1f2124; }
+.sticky-note[data-sn-col="gold"] { --sn-paper: #fbf3cf; --sn-edge: rgb(166, 160, 137); --sn-night: #3a3a1e; --sn-nedge: #232312; }
+.sticky-note[data-sn-col="sky"] { --sn-paper: #dcefff; --sn-edge: rgb(145, 158, 168); --sn-night: #1f2a3d; --sn-nedge: #131a26; }
+.sticky-note[data-sn-col="rose"] { --sn-paper: #ffe0ea; --sn-edge: rgb(168, 148, 154); --sn-night: #38181f; --sn-nedge: #240f14; }
+.sticky-note[data-sn-col="sage"] { --sn-paper: #e6f4de; --sn-edge: rgb(152, 161, 147); --sn-night: #1c2c1b; --sn-nedge: #111b10; }
+.sticky-note[data-sn-col="violet"] { --sn-paper: #ece2fb; --sn-edge: rgb(156, 149, 166); --sn-night: #271c33; --sn-nedge: #181020; }
+/* a slight tilt, as paper sits; it lifts when the hand comes near, and more when it is carried */
+.sticky-note:nth-child(odd) { transform: rotate(-0.25deg); }
+.sticky-note:nth-child(even) { transform: rotate(0.3deg); }
+.sticky-note:hover { transform: translateY(-2px); }
+.sticky-note:active { transform: translateY(-3px) scale(1.012); }
+
+.sticky-note .sn-head { height: 22px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 5px; cursor: default; border-radius: 3px 3px 0 0;
+  background: rgba(16, 42, 58, .07); color: #6b5d2e; }
+.sticky-note .sn-iconbtn { position: relative; z-index: 6; border: none; background: transparent; cursor: pointer; color: #6b5d2e; font-family: inherit; font-weight: 400; font-size: 12px; line-height: 1;
+  padding: 2px 5px; border-radius: 4px; }
+.sticky-note .sn-iconbtn:hover { color: #2c2410; background: rgba(0, 0, 0, .10); }
+.sticky-note .sn-iconbtn:focus-visible, .sticky-note .sn-tool:focus-visible { outline: 2px solid rgba(var(--pri-rgb), .7); outline-offset: 1px; }
+.sticky-note .sn-grip { flex: 1; align-self: stretch; cursor: grab; touch-action: none; }
+.sticky-note .sn-body { flex: 1; min-height: 0; overflow-y: auto; max-height: none; border: none; background: transparent; outline: none; padding: 8px 10px 4px;
+  font: 400 13px/1.45 Georgia, "Iowan Old Style", "Times New Roman", serif; color: #4a3f1e; word-wrap: break-word; overflow-wrap: anywhere; cursor: text; touch-action: auto; }
+.sticky-note .sn-body:empty::before { content: attr(data-ph); color: rgba(74, 63, 30, .45); pointer-events: none; }
+.sticky-note .sn-body img { max-width: 100%; height: auto; border-radius: 3px; margin: 4px 0; display: block; }
+.sticky-note .sn-body ul, .sticky-note .sn-body ol { margin: 2px 0; padding-left: 18px; }
+.sticky-note .sn-tools { flex: none; display: flex; flex-wrap: wrap; gap: 2px 1px; align-items: center; padding: 3px 20px 5px 6px; border-top: 1px solid rgba(0, 0, 0, .10); }
+.sticky-note .sn-tool { border: none; background: transparent; cursor: pointer; color: #6b5d2e; width: 26px; height: 22px; border-radius: 4px; padding: 0;
+  font: 400 12px/1 Georgia, "Iowan Old Style", "Times New Roman", serif; display: inline-grid; place-items: center; }
+.sticky-note .sn-tool:hover { background: rgba(0, 0, 0, .12); color: #2c2410; }
+.sticky-note .sn-tool.snb { font-weight: 800; }
+.sticky-note .sn-tool.sni { font-style: italic; }
+.sticky-note .sn-tool.snu { text-decoration: underline; }
+.sticky-note .sn-tool.sns { text-decoration: line-through; }
+.sticky-note .sn-tool .ico { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* Save comes first, as in Carpe Diem; it grows to fit the longer French and Kreyòl words */
+.sticky-note .sn-tools > button:last-child { order: -1; margin-left: 0; margin-right: auto; width: auto; min-width: 26px; padding: 0 3px; }
+.sticky-note .sn-resize { position: absolute; right: 1px; bottom: 1px; width: 20px; height: 20px; cursor: nwse-resize; touch-action: none; border-radius: 0 0 3px 0;
+  background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, .20) 50%); }
+.cd-sn-edge { position: absolute; z-index: 5; background: transparent; touch-action: none; }
+.cd-sn-edge-n { top: -4px; left: 10px; right: 10px; height: 8px; }
+.cd-sn-edge-s { bottom: -4px; left: 10px; right: 24px; height: 8px; }
+.cd-sn-edge-e { right: -4px; top: 10px; bottom: 24px; width: 8px; }
+.cd-sn-edge-w { left: -4px; top: 10px; bottom: 10px; width: 8px; }
+.cd-sn-edge-ne { top: -5px; right: -5px; width: 14px; height: 14px; }
+.cd-sn-edge-nw { top: -5px; left: -5px; width: 14px; height: 14px; }
+.cd-sn-edge-sw { bottom: -5px; left: -5px; width: 14px; height: 14px; }
+@media (pointer: coarse) {
+  .cd-sn-edge-n { top: -14px; height: 16px; }
+  .cd-sn-edge-s { height: 18px; bottom: -9px; }
+  .cd-sn-edge-e { width: 18px; right: -9px; }
+  .cd-sn-edge-w { width: 18px; left: -9px; }
+  .cd-sn-edge-ne, .cd-sn-edge-nw, .cd-sn-edge-sw { width: 26px; height: 26px; }
+  .cd-sn-edge-ne, .cd-sn-edge-nw { top: -14px; }
+  .sticky-note .sn-resize { min-width: 26px; min-height: 26px; }
+  .sticky-note .sn-grip { min-height: 30px; }
+  .sticky-note .sn-iconbtn { padding: 6px 9px; font-size: 14px; }
+}
+/* folded: the head and the tools stay; the words wait inside */
+.sticky-note[data-sn-min="1"] { min-height: 0; height: auto !important; }
+.sticky-note[data-sn-min="1"] .sn-body { display: none; }
+
+/* the note's night paper (Carpe Diem's cd-sn-night-paper): each colour its own dark paper, warm ink, the edge a shade deeper */
+:root[data-theme="night"] .sticky-note { background: var(--sn-night); color: #e8dcc0;
+  box-shadow: inset 0 2px 0 rgba(255, 246, 228, .10), inset 2px 0 0 rgba(255, 246, 228, .05), inset -2px 0 0 var(--sn-nedge), inset 0 -3px 0 var(--sn-nedge),
+    0 2px 0 rgba(0, 0, 0, .55), 0 9px 14px rgba(0, 0, 0, .46), 0 20px 32px rgba(0, 0, 0, .34), 0 36px 58px rgba(0, 0, 0, .24); }
+:root[data-theme="night"] .sticky-note .sn-body, :root[data-theme="night"] .sticky-note .sn-body * { color: #e8dcc0; -webkit-text-fill-color: #e8dcc0; background: transparent; }
+:root[data-theme="night"] .sticky-note .sn-body:empty::before { color: rgba(232, 220, 192, .42); -webkit-text-fill-color: rgba(232, 220, 192, .42); }
+:root[data-theme="night"] .sticky-note .sn-head { background: rgba(255, 246, 228, .06); color: #c4b795; }
+:root[data-theme="night"] .sticky-note .sn-iconbtn, :root[data-theme="night"] .sticky-note .sn-tool { color: #c4b795; }
+:root[data-theme="night"] .sticky-note .sn-iconbtn:hover, :root[data-theme="night"] .sticky-note .sn-tool:hover { background: rgba(255, 246, 228, .13); color: #f5eeda; }
+:root[data-theme="night"] .sticky-note .sn-tools { border-top: 1px solid rgba(0, 0, 0, .36); }
+:root[data-theme="night"] .sticky-note .sn-resize { background: linear-gradient(135deg, transparent 50%, rgba(255, 246, 228, .26) 50%); }
+
+/* a note arrives with a small pop, and leaves torn off; still in Calm and when the device asks for less motion */
+@keyframes cdFwPop { 0% { transform: scale(.93) translateY(20px); opacity: .45; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+@keyframes cdSnRip { 0% { transform: rotate(0) translateY(0); opacity: 1; } 25% { transform: rotate(-4deg) translateY(-8px) scale(1.02); } 100% { transform: rotate(14deg) translateY(160px) scale(.92); opacity: 0; } }
+.sticky-note.sn-pop { animation: cdFwPop .28s cubic-bezier(.34, 1.35, .64, 1) both; }
+.sticky-note.cd-ripping { animation: cdSnRip .42s cubic-bezier(.4, 0, .7, .4) both; pointer-events: none; }
+:root[data-calm="1"] .sticky-note:hover, :root[data-calm="1"] .sticky-note:active { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sticky-note:hover, .sticky-note:active { transform: none; }
+  .sticky-note.sn-pop, .sticky-note.cd-ripping, #rail-notes > span { animation: none !important; }
+}
+
+/* ---------- the paper dots (the menu, the list): the day paper by day, the night paper by night ---------- */
+.sn-dot, .sn-rowdot { --dot: linear-gradient(180deg, #fdfaf0, #f1e9d4); --dot-n: #33363a; background: var(--dot); }
+.sn-dot[data-sn-col="gold"], .sn-rowdot[data-sn-col="gold"] { --dot: linear-gradient(180deg, #fbf3cf, #f2e6a8); --dot-n: #3a3a1e; }
+.sn-dot[data-sn-col="sky"], .sn-rowdot[data-sn-col="sky"] { --dot: linear-gradient(180deg, #dcefff, #b6e0ff); --dot-n: #1f2a3d; }
+.sn-dot[data-sn-col="rose"], .sn-rowdot[data-sn-col="rose"] { --dot: linear-gradient(180deg, #ffe0ea, #ffc6d8); --dot-n: #38181f; }
+.sn-dot[data-sn-col="sage"], .sn-rowdot[data-sn-col="sage"] { --dot: linear-gradient(180deg, #e6f4de, #c8edc1); --dot-n: #1c2c1b; }
+.sn-dot[data-sn-col="violet"], .sn-rowdot[data-sn-col="violet"] { --dot: linear-gradient(180deg, #ece2fb, #d5c4f4); --dot-n: #271c33; }
+:root[data-theme="night"] .sn-dot, :root[data-theme="night"] .sn-rowdot { background: var(--dot-n); box-shadow: inset 0 0 0 1px rgba(255, 246, 228, .30); }
+
+/* ---------- a note's ⋯ menu ---------- */
+.sticky-card-menu-back { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1300; }
+.sn-menu { position: fixed; min-width: 182px; box-sizing: border-box; padding: 8px; border-radius: 12px; color: var(--ink); font-family: var(--sans);
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2);
+  animation: snMenuIn .16s cubic-bezier(.34, 1.3, .64, 1) both; transform-origin: top left; }
+@keyframes snMenuIn { from { opacity: 0; transform: scale(.94) translateY(-4px); } to { opacity: 1; transform: none; } }
+.sn-dots { display: flex; gap: 7px; padding: 2px 4px 8px; }
+.sn-dot { width: 20px; height: 20px; padding: 0; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, .22); transition: transform .12s cubic-bezier(.34, 1.35, .64, 1); }
+.sn-dot:hover { transform: scale(1.12); }
+.sn-dot[aria-pressed="true"] { border: 2px solid var(--pri); }
+:root[data-theme="night"] .sn-dot[aria-pressed="true"] { border-color: var(--pri-text); }
+.sn-dot:focus-visible { outline: 2px solid var(--pri-ring); outline-offset: 2px; }
+/* the menu's keys: Carpe Diem's soft keys (a tint of the house colour, a firm bottom edge), in Lakay's periwinkle */
+.sn-mbtn, .sn-b { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; cursor: pointer; font: 500 12px/1.25 var(--sans); white-space: nowrap;
+  border: 1px solid rgba(var(--pri-rgb), .16); background: rgba(var(--pri-rgb), .10); color: var(--pri-text);
+  box-shadow: inset 0 -1.5px 0 rgba(var(--fam), .14), 0 2px 0 rgba(var(--fam), .20), 0 4px 5px rgba(var(--fam), .12), 0 9px 14px rgba(var(--fam), .08);
+  transition: transform .1s cubic-bezier(.34, 1.35, .64, 1), box-shadow .12s ease, background .14s ease; }
+.sn-mbtn { display: flex; width: 100%; margin-top: 4px; padding: 5px 10px; min-height: 27px; box-sizing: border-box; text-align: left; }
+.sn-mbtn:hover, .sn-b:hover { transform: translateY(-1.5px); background: rgba(var(--pri-rgb), .15);
+  box-shadow: inset 0 -1.5px 0 rgba(var(--fam), .14), 0 3px 0 rgba(var(--fam), .20), 0 7px 11px rgba(var(--fam), .14), 0 14px 22px rgba(var(--fam), .09); }
+.sn-mbtn:active, .sn-b:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(var(--fam), .25); }
+.sn-mbtn:focus-visible, .sn-b:focus-visible { outline: 2px solid var(--pri-ring); outline-offset: 2px; }
+:root[data-theme="night"] .sn-mbtn, :root[data-theme="night"] .sn-b { border-color: rgba(var(--pri-rgb), .26); background: rgba(var(--pri-rgb), .12);
+  box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, .44), 0 2px 0 rgba(0, 0, 0, .60), 0 4px 6px rgba(0, 0, 0, .42), 0 9px 14px rgba(0, 0, 0, .28); }
+:root[data-theme="night"] .sn-mbtn:hover, :root[data-theme="night"] .sn-b:hover {
+  box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, .44), 0 3px 0 rgba(0, 0, 0, .62), 0 7px 11px rgba(0, 0, 0, .46), 0 14px 22px rgba(0, 0, 0, .30); }
+:root[data-theme="night"] .sn-mbtn:active, :root[data-theme="night"] .sn-b:active { box-shadow: inset 0 2px 5px rgba(0, 0, 0, .55); }
+
+/* ---------- the notes list (the 🗒️ key) ---------- */
+.sticky-panel-back { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1300; background: rgba(0, 0, 0, .18); animation: fadeIn .16s ease both; }
+.sn-panel { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(108px + env(safe-area-inset-bottom, 0px)); width: min(300px, calc(100vw - 32px));
+  max-height: 70vh; overflow-y: auto; box-sizing: border-box; padding: 12px; border-radius: 14px; color: var(--ink); font-family: var(--sans);
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2), 0 30px 70px var(--slab-sh3);
+  transform-origin: right bottom; animation: snPanelIn .2s cubic-bezier(.34, 1.3, .64, 1) both; }
+@keyframes snPanelIn { from { opacity: 0; transform: scale(.94) translateY(8px); } to { opacity: 1; transform: none; } }
+.sn-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.sn-panel-title { margin: 0; font: 700 13px/1.2 var(--sans); letter-spacing: .01em; }
+.sn-b { padding: 4px 8px; min-height: 24px; font-size: 11px; }
+.sn-b-primary { padding: 5px 10px; min-height: 25px; font-size: 12px; color: var(--on-pri); border-color: var(--pri-edge); background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo));
+  box-shadow: var(--psh); text-shadow: 0 1px 1px rgba(20, 10, 60, .3); }
+.sn-b-primary:hover { background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo)); box-shadow: var(--pshhi); }
+:root[data-theme="night"] .sn-b-primary { color: #fff; border-color: var(--pri-edge); background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo)); box-shadow: var(--psh); }
+.sn-b-ghost { background: transparent; color: var(--muted); border-color: var(--line-2); }
+.sn-b-ghost:hover { background: var(--danger-soft); color: var(--danger); }
+:root[data-theme="night"] .sn-b-ghost { background: transparent; color: var(--muted); border-color: var(--line-2); }
+.sn-search { display: block; width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 6px 8px; border-radius: 8px; font: 12px/1.3 var(--sans);
+  border: 1px solid var(--line-2); background: var(--field); color: var(--ink); box-shadow: var(--inset); outline: none; }
+.sn-panel input.sn-search { height: 29px; min-height: 0; padding: 6px 8px; font-size: 12px; line-height: 1.3; border-radius: 8px; }
+.sn-search:focus { border-color: var(--rim); box-shadow: var(--inset), 0 0 0 3px var(--pri-soft); }
+.sn-empty { margin: 0; padding: 10px 2px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.sn-row { border-top: 1px solid var(--line-soft); padding: 9px 2px; }
+.sn-row-top { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; min-width: 0; }
+.sn-rowdot { width: 10px; height: 10px; flex: none; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .15); }
+.sn-rowtext { font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.sn-row-keys { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.sn-row-keys .sn-del { margin-left: auto; }
 
 /* LAKAY | the people and the time clock: the status key's dot, the status card, the Team room. */
 .cl-key .pdot { background: #a7a3bb; }
@@ -1049,9 +1232,9 @@ tr.retired td { opacity: .58; }
   --i-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 :root[data-theme="night"] .intro-door, :root[data-theme="night"] #lockDoor {
-  --i-accent: var(--pri-text); --i-accent-bright: #d0c6f8; --i-accent-deep: #a79bea; --i-line-rgb: var(--pri-rgb); --i-accent-soft: var(--pri-soft);
-  --i-card-hi: #28233a; --i-card-lo: #231e33; --i-hairline: rgba(196, 186, 244, .11);
-  --i-ink-1: #f3eefb; --i-ink-2: #d3c9e3; --i-ink-3: #a99cc1; --i-input-bg: rgba(10, 6, 18, .32);
+  --i-accent: var(--pri-text); --i-accent-bright: #c9ccf7; --i-accent-deep: #a3a8ee; --i-line-rgb: var(--pri-rgb); --i-accent-soft: var(--pri-soft);
+  --i-card-hi: #262637; --i-card-lo: #20202f; --i-hairline: rgba(214, 213, 240, .11);
+  --i-ink-1: #f3eefb; --i-ink-2: #d3c9e3; --i-ink-3: #a99cc1; --i-input-bg: rgba(6, 6, 14, .32);
   --i-pop: inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 -2px 0 rgba(0, 0, 0, .45), 0 2px 0 rgba(0, 0, 0, .75), 0 4px 5px rgba(0, 0, 0, .50), 0 9px 14px rgba(0, 0, 0, .36);
   --i-well: inset 0 1px 3px rgba(0, 0, 0, .40);
 }
@@ -1073,19 +1256,19 @@ tr.retired td { opacity: .58; }
 .intro-ghost .g-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .intro-ghost .g-row i { min-height: 220px; }
 .intro-ghost .g-dot { position: absolute; width: 46px; height: 46px; border-radius: 50%; background: rgba(160, 120, 230, .32); }
-:root[data-theme="night"] .intro-ghost i { background: #1c1829; box-shadow: none; }
+:root[data-theme="night"] .intro-ghost i { background: #1c1c29; box-shadow: none; }
 :root[data-theme="night"] .intro-ghost .g-rail i, :root[data-theme="night"] .intro-ghost .g-main i:first-child { background: rgba(var(--pri-rgb), .10); }
 .intro-frost { position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none;
   background: radial-gradient(620px 520px at 50% 46%, rgba(var(--pri-rgb), .14), transparent 70%), radial-gradient(520px 380px at 50% 100%, rgba(176, 135, 62, .08), transparent 70%), rgba(245, 243, 250, .76);
   backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); }
-:root[data-theme="night"] .intro-frost { background: radial-gradient(620px 520px at 50% 46%, rgba(95, 72, 187, .20), transparent 70%), rgba(9, 7, 18, .80); }
+:root[data-theme="night"] .intro-frost { background: radial-gradient(620px 520px at 50% 46%, rgba(106, 114, 212, .14), transparent 70%), rgba(8, 8, 16, .80); }
 @media (max-width: 760px) { .intro-ghost { grid-template-columns: 1fr; } .intro-ghost .g-rail { display: none; } .intro-ghost .g-row { grid-template-columns: 1fr; } }
 
 .intro-card { position: relative; isolation: isolate; width: min(440px, 92vw); text-align: center; padding: 34px 32px 24px; border-radius: 26px; margin: auto;
   border: 1px solid rgba(var(--i-fam-rgb), .10); background: var(--i-card-hi);
   box-shadow: 0 1px 0 rgba(var(--i-fam-rgb), .08), 0 4px 7px rgba(var(--i-fam-rgb), .08), 0 20px 36px rgba(var(--i-fam-rgb), .12), 0 38px 72px rgba(var(--i-fam-rgb), .10);
   animation: introRise .45s ease; }
-:root[data-theme="night"] .intro-card { border-color: rgba(196, 186, 244, .14); background: #1f1b2e;
+:root[data-theme="night"] .intro-card { border-color: rgba(214, 213, 240, .13); background: #1e1e2c;
   box-shadow: 0 1px 0 rgba(0, 0, 0, .5), 0 4px 7px rgba(0, 0, 0, .45), 0 20px 36px rgba(0, 0, 0, .5), 0 38px 72px rgba(0, 0, 0, .45); }
 @keyframes introRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .intro-door.ild-card-away .intro-card { opacity: 0; transform: scale(.985); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
@@ -1094,13 +1277,13 @@ tr.retired td { opacity: .58; }
 .intro-corner { position: absolute; top: 15px; right: 15px; z-index: 8; }
 .intro-corner.intro-corner-l { right: auto; left: 15px; }
 .i-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; border: 1px solid var(--i-hairline); background: var(--i-input-bg); box-shadow: var(--i-well); }
-:root[data-theme="night"] .i-seg { background: rgba(10, 6, 18, .35); }
+:root[data-theme="night"] .i-seg { background: rgba(6, 6, 14, .35); }
 .i-seg .seg-btn { appearance: none; -webkit-appearance: none; min-width: 26px; min-height: 24px; padding: 2px 8px; border: 1px solid transparent; border-radius: 999px; margin: 0;
   font: 12px/1 var(--i-sans); display: inline-flex; align-items: center; justify-content: center; color: var(--i-ink-3); background: transparent; box-shadow: none; cursor: pointer;
   transition: color .15s ease; }
 .i-seg .seg-btn:hover { color: var(--i-accent); }
 .i-seg .seg-btn.active { color: var(--i-accent); font-weight: 700; background: var(--i-card-hi); border-color: var(--i-hairline); box-shadow: var(--i-pop); }
-:root[data-theme="night"] .i-seg .seg-btn.active { background: #28233a; color: #d0c6f8; }
+:root[data-theme="night"] .i-seg .seg-btn.active { background: #2b2b3e; color: #c9ccf7; }
 .i-seg .seg-btn:focus-visible { outline: 2px solid var(--i-accent); outline-offset: 2px; }
 .i-seg .seg-btn.lang { font-size: 11px; letter-spacing: .04em; font-weight: 600; }
 
@@ -1162,8 +1345,8 @@ tr.retired td { opacity: .58; }
   background: var(--bg); color: #1f1a30; font: 15px/1.5 var(--i-sans);
   --ild-face-a: #ffffff; --ild-face-b: #f7f6fb; --ild-face-c: #f4f2f9; --ild-wall: #d0cbe2; --ild-ink: #1f1a30; --ild-soft: rgba(66, 58, 96, .78); --ild-line: rgba(var(--pri-rgb), .30); --ild-fam: 40, 22, 68; --ild-field: #ffffff; --ild-acc: var(--pri-lo); }
 #lockDoor[hidden] { display: none; }
-:root[data-theme="night"] #lockDoor { background: var(--bg); color: #efecf9; --ild-face-a: #322b4c; --ild-face-b: #2a2441; --ild-face-c: #28223e; --ild-wall: #130f1e; --ild-ink: #ece8f8; --ild-soft: rgba(234, 230, 248, .74);
-  --ild-line: rgba(var(--pri-rgb), .34); --ild-fam: 0, 0, 0; --ild-field: #1c1829; --ild-acc: var(--pri-text); }
+:root[data-theme="night"] #lockDoor { background: var(--bg); color: #efecf9; --ild-face-a: #2b2b3f; --ild-face-b: #252536; --ild-face-c: #232333; --ild-wall: #0e0e18; --ild-ink: #ece8f8; --ild-soft: rgba(234, 230, 248, .74);
+  --ild-line: rgba(var(--pri-rgb), .34); --ild-fam: 0, 0, 0; --ild-field: #1a1a27; --ild-acc: var(--pri-text); }
 #lockDoor.ild-over { background: rgba(22, 18, 30, .58); }
 #lockDoor.ild-over.ild-indoor { background: transparent; }
 #lockDoor .ild-card { position: relative; width: min(470px, 94vw); max-height: 92vh; overflow: auto; box-sizing: border-box; padding: 28px 28px 22px; border-radius: 22px; color: var(--ild-ink); margin: auto;
@@ -1198,7 +1381,7 @@ tr.retired td { opacity: .58; }
 #lockDoor .ild-key[disabled] { opacity: .55; cursor: default; filter: none; }
 #lockDoor .ild-key.ild-ghost { color: var(--ild-ink); text-shadow: none; border: 1px solid rgba(31, 26, 48, .12); background: linear-gradient(180deg, #ffffff, #eeebf6);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 2px 0 rgba(var(--pri-rgb), .18), 0 4px 10px rgba(40, 20, 70, .12); }
-:root[data-theme="night"] #lockDoor .ild-key.ild-ghost { background: linear-gradient(180deg, #2b253c, #211c30); color: #efecf9; border-color: rgba(255, 255, 255, .1);
+:root[data-theme="night"] #lockDoor .ild-key.ild-ghost { background: linear-gradient(180deg, #2b2b3e, #212130); color: #efecf9; border-color: rgba(255, 255, 255, .1);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 2px 0 rgba(0, 0, 0, .5), 0 4px 10px rgba(0, 0, 0, .35); }
 #lockDoor .ild-key.ild-danger { background: linear-gradient(180deg, #b04646, #8c2f2f); border-color: #4a1414; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 0 #2a0a0a, 0 4px 6px rgba(0, 0, 0, .25); }
 #lockDoor .ild-link { background: none; border: 0; padding: 0; color: var(--ild-acc); text-decoration: underline; cursor: pointer; font: inherit; font-size: 13.5px; box-shadow: none; min-height: 0; }
@@ -1540,6 +1723,29 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
     ["rail.label", "Side keys", "Touches de côté", "Bouton sou kote"], ["rail.bell", "Reminders", "Rappels", "Rapèl"], 
     
     ["rail.calc", "Calculator", "Calculatrice", "Kalkilatris"], ["rail.down", "Lay down the side keys", "Ranger les touches de côté", "Ranje bouton sou kote yo"], ["rail.up", "Bring back the side keys", "Ramener les touches de côté", "Remete bouton sou kote yo"],
+    /* Schedae: the sticky notes (22-schedae.js); the French is Carpe Diem's own where it has it */
+    ["rail.notes", "Schedae: sticky notes", "Schedae : notes", "Schedae: ti nòt"], ["sn.title", "Schedae", "Schedae", "Schedae"],
+    ["sn.new", "New note", "Nouvelle note", "Nouvo nòt"], ["sn.note", "Sticky note", "Note", "Ti nòt"],
+    ["sn.drag", "Drag to move", "Glisser pour déplacer", "Trennen pou deplase"], ["sn.close", "Close (unpin)", "Fermer (détacher)", "Fèmen (detache)"],
+    ["sn.undo", "Undo (Ctrl+Z)", "Annuler (Ctrl+Z)", "Defèt (Ctrl+Z)"], ["sn.redo", "Redo (Ctrl+Y)", "Rétablir (Ctrl+Y)", "Refè (Ctrl+Y)"],
+    ["sn.menu", "Menu", "Menu", "Meni"], ["sn.paper", "Paper colour", "Couleur du papier", "Koulè papye a"],
+    ["sn.bold", "Bold", "Gras", "Gra"], ["sn.italic", "Italic", "Italique", "Italik"], ["sn.underline", "Underline", "Souligné", "Souliye"],
+    ["sn.strike", "Strikethrough", "Barré", "Bare"], ["sn.list", "Bulleted list", "Liste à puces", "Lis ak pwen"], ["sn.image", "Insert a picture", "Insérer une image", "Mete yon foto"],
+    ["sn.save", "Save", "Enregistrer", "Anrejistre"], ["sn.saved", "Saved", "Enregistré", "Anrejistre"],
+    ["sn.saveTip", "Save this note now (it also saves itself as you write)", "Enregistrer cette note maintenant (elle s'enregistre aussi pendant que vous écrivez)", "Anrejistre nòt sa a kounye a (li anrejistre tou pandan w ap ekri)"],
+    ["sn.resize", "Resize", "Redimensionner", "Chanje gwosè"], ["sn.phWrite", "Write a note…", "Écrire une note…", "Ekri yon nòt…"],
+    ["sn.minimise", "Minimise note", "Réduire la note", "Pliye nòt la"], ["sn.unfold", "Unfold note", "Déplier la note", "Depliye nòt la"],
+    ["sn.unpin", "Unpin note", "Détacher la note", "Detache nòt la"], ["sn.notesList", "Notes list", "Liste des notes", "Lis nòt yo"],
+    ["sn.copyNote", "Copy the note", "Copier la note", "Kopye nòt la"], ["sn.delNote", "Delete note", "Supprimer la note", "Efase nòt la"],
+    ["sn.pin", "Pin", "Épingler", "Tache"], ["sn.unpinShort", "Unpin", "Détacher", "Detache"], ["sn.copy", "Copy", "Copier", "Kopye"], ["sn.copiedShort", "Copied ✓", "Copié ✓", "Kopye ✓"],
+    ["sn.copied", "The note's words are copied.", "Les mots de la note sont copiés.", "Mo nòt la kopye."],
+    ["sn.copyFailed", "The note could not be copied. Select its words and press Ctrl+C (⌘C on a Mac).", "La note n'a pas pu être copiée. Sélectionnez ses mots et appuyez sur Ctrl+C (⌘C sur un Mac).", "Nòt la pa t ka kopye. Chwazi mo li yo epi peze Ctrl+C (⌘C sou yon Mac)."],
+    ["sn.search", "Search notes…", "Rechercher des notes…", "Chèche nan nòt yo…"],
+    ["sn.empty", "No notes yet. A new note floats on every page until you unpin it, and its words can be copied anywhere. Your notes are yours: each person sees only their own.", "Aucune note pour l'instant. Une nouvelle note flotte sur chaque page jusqu'à ce que vous la détachiez, et ses mots peuvent être copiés n'importe où. Vos notes sont à vous : chacun ne voit que les siennes.", "Poko gen nòt. Yon nouvo nòt rete sou chak paj jiskaske ou detache l, epi mo li yo ka kopye nenpòt kote. Nòt ou yo se pou ou: chak moun wè pa yo sèlman."],
+    ["sn.emptyOne", "(empty note)", "(note vide)", "(nòt vid)"],
+    ["sn.col.ivory", "Foolscap (ivory)", "Foolscap (ivoire)", "Foolscap (ivwa)"], ["sn.col.gold", "Primrose (gold)", "Primrose (or)", "Primrose (lò)"],
+    ["sn.col.sky", "Inkwell (sky)", "Inkwell (ciel)", "Inkwell (syèl)"], ["sn.col.rose", "Claret (rose)", "Claret (rose)", "Claret (woz)"],
+    ["sn.col.sage", "Laurel (sage)", "Laurel (sauge)", "Laurel (vèt sali)"], ["sn.col.violet", "Vespers (violet)", "Vespers (violet)", "Vespers (vyolèt)"],
     ["rail.sale", "New sale", "Nouvelle vente", "Nouvo vant"], ["rail.find", "Price check", "Vérifier un prix", "Tcheke yon pri"], ["rail.low", "Low stock", "Stock bas", "Stòk ki ba"],
     ["find.what", "Name, code or barcode", "Nom, code ou code-barres", "Non, kòd oswa kòd-ba"], ["find.hint", "Type or scan to find any of the {n} items.", "Tapez ou scannez pour trouver l'un des {n} articles.", "Tape oswa eskane pou jwenn youn nan {n} atik yo."],
     ["find.none", "Nothing by that name or code.", "Rien sous ce nom ou ce code.", "Anyen pa gen non oswa kòd sa a."], ["find.in", "{n} in stock", "{n} en stock", "{n} an stòk"],
@@ -3791,7 +3997,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
     root.setAttribute("data-palette", look && look.palette ? look.palette : "dawn");
     root.setAttribute("data-density", look && look.density === "comfortable" ? "comfortable" : "compact");
     try { document.title = E.appName ? E.appName() : "Lakay"; } catch (e) { }
-    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#131430" : "#f6f4fa");
+    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", dark ? "#12121c" : "#f5f4f8");
   };
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ui.applyLook); } catch (e) { }
 
@@ -5721,7 +5927,7 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
   var S = E.studio = { room: "start" };
   var LANGS = ["en", "fr", "ht"];
   var PALETTES = ["dawn", "amethyst", "indigo", "royal", "burgundy", "graphite"];
-  var SWATCH = { dawn: ["#6f78d8", "#e9e7f8", "#c08b2f", "#131430"], indigo: ["#3F4797", "#E6E3F5", "#A8864E", "#101119"], royal: ["#1B5E8C", "#DDE9F2", "#A8864E", "#0E1318"],
+  var SWATCH = { dawn: ["#5f67cc", "#e7e6f5", "#c08b2f", "#12121c"], indigo: ["#3F4797", "#E6E3F5", "#A8864E", "#101119"], royal: ["#1B5E8C", "#DDE9F2", "#A8864E", "#0E1318"],
     amethyst: ["#5B3FA8", "#E8E0F6", "#A8864E", "#120F18"], burgundy: ["#7A2E3B", "#EEDFDD", "#A8864E", "#141011"], graphite: ["#3A4150", "#E3E4E8", "#A8864E", "#111214"] };
   var LIMIT = { app: 40, tagline: 70, word: 2000, lines: 300, thanks: 80 };
 
@@ -7138,7 +7344,8 @@ E.util = { h: h, add: add, clear: clear, icon: icon, parseMoney: parseMoney, mon
     back.addEventListener("click", function (e) { if (e.target === back) back.remove(); });
     var box = h("div.sn-panel", { role: "dialog", "aria-label": t("sn.title") });
     var newKey = h("button.sn-b.sn-b-primary#snNew", { type: "button" }, t("sn.new"));
-    newKey.addEventListener("click", function () { S.create(); openPanel(); });
+    /* the list steps aside so the new note can be written in at once (Carpe Diem keeps its list open here) */
+    newKey.addEventListener("click", function () { closePanel(); S.create(); });
     box.appendChild(h("div.sn-panel-head", null, [h("h3.sn-panel-title", null, t("sn.title")), newKey]));
     var list = notes(), rows = h("div.sn-rows"), q = null;
     if (list.length) {

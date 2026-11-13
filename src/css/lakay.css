@@ -7,7 +7,7 @@
    slip, the parchment of the proverb, and the brass. */
 :root {
   /* Dawn, refined (Build 8): white and ivory faces with crisp hairline rims and a firm stepped edge, as Ingenium and
-     Carpe Diem draw theirs; a deeper, matte periwinkle for the keys and the jewels; the dawn's gold kept as a whisper. */
+     Carpe Diem draw theirs; a deeper, matte periwinkle for the keys and the jewels; the sunrise kept, but quieter. */
   --bg: #f5f4f8; --bg-wash: #eeedf4;
   --surface: #ffffff; --surface-2: #fafafc; --tray: #f2f1f7; --sunk: rgba(34, 30, 58, .035);
   --tint: #f3f2fa; --tint-2: #e7e6f5; --parch: #fbf8f1; --parch-2: #f2eadb;
@@ -46,24 +46,24 @@
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --emoji: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif;
   --ease: cubic-bezier(.2, .8, .2, 1); --spring: cubic-bezier(.34, 1.35, .64, 1);
-  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(95, 103, 204, .06), transparent 60%), radial-gradient(900px 600px at -6% 108%, rgba(192, 139, 47, .05), transparent 55%), #f5f4f8;
+  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(244, 184, 112, .09), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(120, 128, 220, .08), transparent 60%), #f5f4f8;
   --bar-bg: #ffffff; --bar-sh: 0 1px 0 rgba(34, 28, 60, .06), 0 6px 18px rgba(34, 28, 60, .05);
   color-scheme: light;
 }
 :root[data-theme="night"] {
-  /* Dawn by night, refined (Build 8): a graphite with a faint periwinkle cast, in place of the saturated indigo; hairline
-     rims and black depth, as Ingenium's night has them; the periwinkle kept for the keys and the words that act. */
-  --bg: #111117; --bg-wash: #16161d;
-  --surface: #1d1d26; --surface-2: #191921; --tray: #15151c; --sunk: rgba(5, 5, 10, .34);
-  --tint: #24242f; --tint-2: #2c2c39; --parch: #221f1b; --parch-2: #2b2722;
+  /* Dawn by night, refined (Build 8): Lakay's periwinkle ink, calmer and deeper than the saturated indigo it replaces;
+     hairline rims and black depth, as Ingenium's night has them; the periwinkle kept for the keys and the words that act. */
+  --bg: #12121c; --bg-wash: #171723;
+  --surface: #1d1d2b; --surface-2: #191926; --tray: #151520; --sunk: rgba(5, 5, 12, .34);
+  --tint: #252536; --tint-2: #2d2d41; --parch: #221f1b; --parch-2: #2b2722;
   --ink: #efeef7; --ink-2: #cfcddf; --muted: #9e9cb3; --body-ink: #e5e4f0;
   --pri: #6a72d4; --pri-hi: #757dde; --pri-lo: #555cc0; --pri-jhi: #8a90e0; --pri-jlo: #4b52b0; --pri-edge: #2a2e6e; --pri-ledge: #16183f; --pri-jledge: #191b46;
   --on-pri: #ffffff; --pri-text: #b0b5f5; --pri-soft: rgba(176, 181, 245, .12); --pri-ring: rgba(176, 181, 245, .50); --pri-rgb: 176, 181, 245;
   --brass: #e6c27a; --brass-hi: #e3cfa2; --brass-ink: #e6c27a; --brass-soft: rgba(230, 194, 122, .12);
   --danger: #ee968e; --danger-soft: rgba(238, 150, 142, .11); --warn: #e5b46e; --warn-soft: rgba(229, 180, 110, .12); --ok: #86d0a8; --ok-soft: rgba(134, 208, 168, .12);
   --line: rgba(214, 213, 240, .11); --line-2: rgba(214, 213, 240, .18); --line-soft: rgba(214, 213, 240, .06); --rim: rgba(176, 181, 245, .36);
-  --field: #16161d; --field-line: rgba(176, 181, 245, .22); --wall: #0a0a0f;
-  --face: linear-gradient(180deg, #272732, #20202a); --face-tilt: linear-gradient(175deg, #272732, #20202a); --slab-face: linear-gradient(180deg, #1e1e27, #1a1a22);
+  --field: #161622; --field-line: rgba(176, 181, 245, .22); --wall: #0a0a12;
+  --face: linear-gradient(180deg, #282839, #21212f); --face-tilt: linear-gradient(175deg, #282839, #21212f); --slab-face: linear-gradient(180deg, #1f1f2d, #1b1b27);
   --fam: 0, 0, 0;
   --pill: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 1px 0 rgba(0, 0, 0, .5), 0 3px 5px rgba(0, 0, 0, .4), 0 8px 12px rgba(0, 0, 0, .3);
   --pill-hi: inset 0 1px 0 rgba(255, 255, 255, .10), inset 0 -1.5px 0 rgba(0, 0, 0, .4), 0 2px 0 rgba(0, 0, 0, .5), 0 5px 8px rgba(0, 0, 0, .44), 0 11px 18px rgba(0, 0, 0, .32);
@@ -78,10 +78,10 @@
   --jsh: inset 0 1px 0 rgba(255, 255, 255, .24), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 2px 0 var(--pri-jledge), 0 4px 8px rgba(0, 0, 0, .5), 0 9px 16px rgba(0, 0, 0, .3);
   --inset: inset 0 1px 2.5px rgba(0, 0, 0, .25);
   --well: inset 0 1px 3px rgba(0, 0, 0, .40);
-  --slab-top: #23232d; --slab-bot: #1c1c25; --slab-hi: rgba(255, 255, 255, .06); --slab-lo: rgba(0, 0, 0, .35); --slab-edge: rgba(214, 213, 240, .12);
+  --slab-top: #242434; --slab-bot: #1d1d2a; --slab-hi: rgba(255, 255, 255, .06); --slab-lo: rgba(0, 0, 0, .35); --slab-edge: rgba(214, 213, 240, .12);
   --slab-sh1: rgba(0, 0, 0, .4); --slab-sh2: rgba(0, 0, 0, .45); --slab-sh3: rgba(0, 0, 0, .55);
-  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(176, 181, 245, .055), transparent 62%), radial-gradient(900px 620px at 104% 112%, rgba(230, 194, 122, .04), transparent 58%), #111117;
-  --bar-bg: #1f1f28; --bar-sh: 0 1px 0 rgba(0, 0, 0, .40), 0 6px 18px rgba(0, 0, 0, .28);
+  --page-bg: radial-gradient(1100px 620px at 0% 100%, rgba(240, 170, 100, .05), transparent 62%), radial-gradient(1100px 700px at 100% 0%, rgba(150, 158, 236, .07), transparent 60%), #12121c;
+  --bar-bg: #20202e; --bar-sh: 0 1px 0 rgba(0, 0, 0, .40), 0 6px 18px rgba(0, 0, 0, .28);
   color-scheme: dark;
 }
 :root[data-size="l"] { font-size: 18px; }
@@ -187,7 +187,7 @@ a { color: var(--pri-text); }
 .seg button:hover { color: var(--pri-text); }
 .seg button .ico { width: 14px; height: 14px; }
 .seg button[aria-checked="true"] { background: var(--surface); color: var(--pri-text); font-weight: 700; border-color: var(--line); box-shadow: var(--pill); }
-:root[data-theme="night"] .seg button[aria-checked="true"] { background: #2c2c38; }
+:root[data-theme="night"] .seg button[aria-checked="true"] { background: #2d2d40; }
 .badge { display: inline-block; min-width: 2em; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: .68rem; letter-spacing: .04em; text-align: center; background: var(--pri-soft); color: var(--pri-text); }
 .badge.ok { background: var(--ok-soft); color: var(--ok); }
 .badge.warn { background: var(--warn-soft); color: var(--warn); }
@@ -271,7 +271,7 @@ input[type=file] { position: absolute !important; width: 1px !important; height:
 .cl-fold { order: -1; width: 26px; height: 21px; flex: none; padding: 0 5px; margin: 0 -3px 0 0; border-radius: 7px; border: 1px solid rgba(0, 0, 0, .08); background: rgba(255, 255, 255, .72); color: var(--ink-2);
   font: 700 15px/1 var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
   box-shadow: inset 0 -1.5px 0 rgba(30, 28, 70, .16), 0 1px 0 rgba(30, 28, 70, .32), 0 3px 3px rgba(30, 28, 70, .2), 0 6px 8px rgba(30, 28, 70, .11); transition: transform .12s var(--spring), color .12s; }
-:root[data-theme="night"] .cl-fold { background: rgba(31, 31, 40, .8); border-color: rgba(255, 255, 255, .10); }
+:root[data-theme="night"] .cl-fold { background: rgba(32, 32, 46, .8); border-color: rgba(255, 255, 255, .10); }
 .cl-fold:hover { transform: translateY(-2px); color: var(--pri-text); }
 .cl-fold:active { transform: translateY(2px) scale(.96); }
 /* the one language key shows a flag at the size of an emoji (drawn, so that it shows on every device) */

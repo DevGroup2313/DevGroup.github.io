@@ -1,0 +1,169 @@
+/* LAKAY | Schedae (22-schedae.js): Carpe Diem's sticky notes, in exact parity. The paper, its edges, its night paper,
+   the head, the tools and the corner carry the values measured from Carpe Diem as it draws them (day and night,
+   computed styles). The menu and the notes list wear Lakay's own slab, as Carpe Diem's wear Carpe Diem's. */
+
+/* ---------- the 🗒️ key on the rail: it turns once in a while, as Carpe Diem's does; it steps aside while the list is open ---------- */
+@keyframes cdHourTurn { 0%, 89% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+#rail-notes > span { display: inline-block; animation: cdHourTurn 12s ease-in-out infinite; }
+body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events: none !important; }
+
+/* ---------- the notes on the page ---------- */
+#sticky-pins { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 880; }
+.sticky-note { position: fixed; width: 202px; min-height: 152px; display: flex; flex-direction: column; box-sizing: border-box; border: 0; border-radius: 3px;
+  pointer-events: auto; touch-action: none; color: #4a3f1e; font: 400 16px/normal -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --sn-paper: #fdfaf0; --sn-edge: rgb(167, 165, 158); --sn-night: #33363a; --sn-nedge: #1f2124;
+  background: var(--sn-paper);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .72), inset 2px 0 0 rgba(255, 255, 255, .42), inset -2px 0 0 var(--sn-edge), inset 0 -3px 0 var(--sn-edge),
+    0 2px 3px -1px rgba(40, 34, 26, .18), 0 12px 18px -9px rgba(40, 34, 26, .40), 0 24px 30px -18px rgba(40, 34, 26, .22);
+  will-change: transform; transition: transform .08s ease-out, box-shadow .08s ease; }
+/* the six papers (Carpe Diem's STICKY_COLORS: the first stop of each, with its edge at two thirds of its light) and their night papers */
+.sticky-note[data-sn-col="ivory"] { --sn-paper: #fdfaf0; --sn-edge: rgb(167, 165, 158); --sn-night: #33363a; --sn-nedge: #1f2124; }
+.sticky-note[data-sn-col="gold"] { --sn-paper: #fbf3cf; --sn-edge: rgb(166, 160, 137); --sn-night: #3a3a1e; --sn-nedge: #232312; }
+.sticky-note[data-sn-col="sky"] { --sn-paper: #dcefff; --sn-edge: rgb(145, 158, 168); --sn-night: #1f2a3d; --sn-nedge: #131a26; }
+.sticky-note[data-sn-col="rose"] { --sn-paper: #ffe0ea; --sn-edge: rgb(168, 148, 154); --sn-night: #38181f; --sn-nedge: #240f14; }
+.sticky-note[data-sn-col="sage"] { --sn-paper: #e6f4de; --sn-edge: rgb(152, 161, 147); --sn-night: #1c2c1b; --sn-nedge: #111b10; }
+.sticky-note[data-sn-col="violet"] { --sn-paper: #ece2fb; --sn-edge: rgb(156, 149, 166); --sn-night: #271c33; --sn-nedge: #181020; }
+/* a slight tilt, as paper sits; it lifts when the hand comes near, and more when it is carried */
+.sticky-note:nth-child(odd) { transform: rotate(-0.25deg); }
+.sticky-note:nth-child(even) { transform: rotate(0.3deg); }
+.sticky-note:hover { transform: translateY(-2px); }
+.sticky-note:active { transform: translateY(-3px) scale(1.012); }
+
+.sticky-note .sn-head { height: 22px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 5px; cursor: default; border-radius: 3px 3px 0 0;
+  background: rgba(16, 42, 58, .07); color: #6b5d2e; }
+.sticky-note .sn-iconbtn { position: relative; z-index: 6; border: none; background: transparent; cursor: pointer; color: #6b5d2e; font-family: inherit; font-weight: 400; font-size: 12px; line-height: 1;
+  padding: 2px 5px; border-radius: 4px; }
+.sticky-note .sn-iconbtn:hover { color: #2c2410; background: rgba(0, 0, 0, .10); }
+.sticky-note .sn-iconbtn:focus-visible, .sticky-note .sn-tool:focus-visible { outline: 2px solid rgba(var(--pri-rgb), .7); outline-offset: 1px; }
+.sticky-note .sn-grip { flex: 1; align-self: stretch; cursor: grab; touch-action: none; }
+.sticky-note .sn-body { flex: 1; min-height: 0; overflow-y: auto; max-height: none; border: none; background: transparent; outline: none; padding: 8px 10px 4px;
+  font: 400 13px/1.45 Georgia, "Iowan Old Style", "Times New Roman", serif; color: #4a3f1e; word-wrap: break-word; overflow-wrap: anywhere; cursor: text; touch-action: auto; }
+.sticky-note .sn-body:empty::before { content: attr(data-ph); color: rgba(74, 63, 30, .45); pointer-events: none; }
+.sticky-note .sn-body img { max-width: 100%; height: auto; border-radius: 3px; margin: 4px 0; display: block; }
+.sticky-note .sn-body ul, .sticky-note .sn-body ol { margin: 2px 0; padding-left: 18px; }
+.sticky-note .sn-tools { flex: none; display: flex; flex-wrap: wrap; gap: 2px 1px; align-items: center; padding: 3px 20px 5px 6px; border-top: 1px solid rgba(0, 0, 0, .10); }
+.sticky-note .sn-tool { border: none; background: transparent; cursor: pointer; color: #6b5d2e; width: 26px; height: 22px; border-radius: 4px; padding: 0;
+  font: 400 12px/1 Georgia, "Iowan Old Style", "Times New Roman", serif; display: inline-grid; place-items: center; }
+.sticky-note .sn-tool:hover { background: rgba(0, 0, 0, .12); color: #2c2410; }
+.sticky-note .sn-tool.snb { font-weight: 800; }
+.sticky-note .sn-tool.sni { font-style: italic; }
+.sticky-note .sn-tool.snu { text-decoration: underline; }
+.sticky-note .sn-tool.sns { text-decoration: line-through; }
+.sticky-note .sn-tool .ico { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* Save comes first, as in Carpe Diem; it grows to fit the longer French and Kreyòl words */
+.sticky-note .sn-tools > button:last-child { order: -1; margin-left: 0; margin-right: auto; width: auto; min-width: 26px; padding: 0 3px; }
+.sticky-note .sn-resize { position: absolute; right: 1px; bottom: 1px; width: 20px; height: 20px; cursor: nwse-resize; touch-action: none; border-radius: 0 0 3px 0;
+  background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, .20) 50%); }
+.cd-sn-edge { position: absolute; z-index: 5; background: transparent; touch-action: none; }
+.cd-sn-edge-n { top: -4px; left: 10px; right: 10px; height: 8px; }
+.cd-sn-edge-s { bottom: -4px; left: 10px; right: 24px; height: 8px; }
+.cd-sn-edge-e { right: -4px; top: 10px; bottom: 24px; width: 8px; }
+.cd-sn-edge-w { left: -4px; top: 10px; bottom: 10px; width: 8px; }
+.cd-sn-edge-ne { top: -5px; right: -5px; width: 14px; height: 14px; }
+.cd-sn-edge-nw { top: -5px; left: -5px; width: 14px; height: 14px; }
+.cd-sn-edge-sw { bottom: -5px; left: -5px; width: 14px; height: 14px; }
+@media (pointer: coarse) {
+  .cd-sn-edge-n { top: -14px; height: 16px; }
+  .cd-sn-edge-s { height: 18px; bottom: -9px; }
+  .cd-sn-edge-e { width: 18px; right: -9px; }
+  .cd-sn-edge-w { width: 18px; left: -9px; }
+  .cd-sn-edge-ne, .cd-sn-edge-nw, .cd-sn-edge-sw { width: 26px; height: 26px; }
+  .cd-sn-edge-ne, .cd-sn-edge-nw { top: -14px; }
+  .sticky-note .sn-resize { min-width: 26px; min-height: 26px; }
+  .sticky-note .sn-grip { min-height: 30px; }
+  .sticky-note .sn-iconbtn { padding: 6px 9px; font-size: 14px; }
+}
+/* folded: the head and the tools stay; the words wait inside */
+.sticky-note[data-sn-min="1"] { min-height: 0; height: auto !important; }
+.sticky-note[data-sn-min="1"] .sn-body { display: none; }
+
+/* the note's night paper (Carpe Diem's cd-sn-night-paper): each colour its own dark paper, warm ink, the edge a shade deeper */
+:root[data-theme="night"] .sticky-note { background: var(--sn-night); color: #e8dcc0;
+  box-shadow: inset 0 2px 0 rgba(255, 246, 228, .10), inset 2px 0 0 rgba(255, 246, 228, .05), inset -2px 0 0 var(--sn-nedge), inset 0 -3px 0 var(--sn-nedge),
+    0 2px 0 rgba(0, 0, 0, .55), 0 9px 14px rgba(0, 0, 0, .46), 0 20px 32px rgba(0, 0, 0, .34), 0 36px 58px rgba(0, 0, 0, .24); }
+:root[data-theme="night"] .sticky-note .sn-body, :root[data-theme="night"] .sticky-note .sn-body * { color: #e8dcc0; -webkit-text-fill-color: #e8dcc0; background: transparent; }
+:root[data-theme="night"] .sticky-note .sn-body:empty::before { color: rgba(232, 220, 192, .42); -webkit-text-fill-color: rgba(232, 220, 192, .42); }
+:root[data-theme="night"] .sticky-note .sn-head { background: rgba(255, 246, 228, .06); color: #c4b795; }
+:root[data-theme="night"] .sticky-note .sn-iconbtn, :root[data-theme="night"] .sticky-note .sn-tool { color: #c4b795; }
+:root[data-theme="night"] .sticky-note .sn-iconbtn:hover, :root[data-theme="night"] .sticky-note .sn-tool:hover { background: rgba(255, 246, 228, .13); color: #f5eeda; }
+:root[data-theme="night"] .sticky-note .sn-tools { border-top: 1px solid rgba(0, 0, 0, .36); }
+:root[data-theme="night"] .sticky-note .sn-resize { background: linear-gradient(135deg, transparent 50%, rgba(255, 246, 228, .26) 50%); }
+
+/* a note arrives with a small pop, and leaves torn off; still in Calm and when the device asks for less motion */
+@keyframes cdFwPop { 0% { transform: scale(.93) translateY(20px); opacity: .45; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+@keyframes cdSnRip { 0% { transform: rotate(0) translateY(0); opacity: 1; } 25% { transform: rotate(-4deg) translateY(-8px) scale(1.02); } 100% { transform: rotate(14deg) translateY(160px) scale(.92); opacity: 0; } }
+.sticky-note.sn-pop { animation: cdFwPop .28s cubic-bezier(.34, 1.35, .64, 1) both; }
+.sticky-note.cd-ripping { animation: cdSnRip .42s cubic-bezier(.4, 0, .7, .4) both; pointer-events: none; }
+:root[data-calm="1"] .sticky-note:hover, :root[data-calm="1"] .sticky-note:active { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sticky-note:hover, .sticky-note:active { transform: none; }
+  .sticky-note.sn-pop, .sticky-note.cd-ripping, #rail-notes > span { animation: none !important; }
+}
+
+/* ---------- the paper dots (the menu, the list): the day paper by day, the night paper by night ---------- */
+.sn-dot, .sn-rowdot { --dot: linear-gradient(180deg, #fdfaf0, #f1e9d4); --dot-n: #33363a; background: var(--dot); }
+.sn-dot[data-sn-col="gold"], .sn-rowdot[data-sn-col="gold"] { --dot: linear-gradient(180deg, #fbf3cf, #f2e6a8); --dot-n: #3a3a1e; }
+.sn-dot[data-sn-col="sky"], .sn-rowdot[data-sn-col="sky"] { --dot: linear-gradient(180deg, #dcefff, #b6e0ff); --dot-n: #1f2a3d; }
+.sn-dot[data-sn-col="rose"], .sn-rowdot[data-sn-col="rose"] { --dot: linear-gradient(180deg, #ffe0ea, #ffc6d8); --dot-n: #38181f; }
+.sn-dot[data-sn-col="sage"], .sn-rowdot[data-sn-col="sage"] { --dot: linear-gradient(180deg, #e6f4de, #c8edc1); --dot-n: #1c2c1b; }
+.sn-dot[data-sn-col="violet"], .sn-rowdot[data-sn-col="violet"] { --dot: linear-gradient(180deg, #ece2fb, #d5c4f4); --dot-n: #271c33; }
+:root[data-theme="night"] .sn-dot, :root[data-theme="night"] .sn-rowdot { background: var(--dot-n); box-shadow: inset 0 0 0 1px rgba(255, 246, 228, .30); }
+
+/* ---------- a note's ⋯ menu ---------- */
+.sticky-card-menu-back { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1300; }
+.sn-menu { position: fixed; min-width: 182px; box-sizing: border-box; padding: 8px; border-radius: 12px; color: var(--ink); font-family: var(--sans);
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2);
+  animation: snMenuIn .16s cubic-bezier(.34, 1.3, .64, 1) both; transform-origin: top left; }
+@keyframes snMenuIn { from { opacity: 0; transform: scale(.94) translateY(-4px); } to { opacity: 1; transform: none; } }
+.sn-dots { display: flex; gap: 7px; padding: 2px 4px 8px; }
+.sn-dot { width: 20px; height: 20px; padding: 0; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0, 0, 0, .22); transition: transform .12s cubic-bezier(.34, 1.35, .64, 1); }
+.sn-dot:hover { transform: scale(1.12); }
+.sn-dot[aria-pressed="true"] { border: 2px solid var(--pri); }
+:root[data-theme="night"] .sn-dot[aria-pressed="true"] { border-color: var(--pri-text); }
+.sn-dot:focus-visible { outline: 2px solid var(--pri-ring); outline-offset: 2px; }
+/* the menu's keys: Carpe Diem's soft keys (a tint of the house colour, a firm bottom edge), in Lakay's periwinkle */
+.sn-mbtn, .sn-b { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; cursor: pointer; font: 500 12px/1.25 var(--sans); white-space: nowrap;
+  border: 1px solid rgba(var(--pri-rgb), .16); background: rgba(var(--pri-rgb), .10); color: var(--pri-text);
+  box-shadow: inset 0 -1.5px 0 rgba(var(--fam), .14), 0 2px 0 rgba(var(--fam), .20), 0 4px 5px rgba(var(--fam), .12), 0 9px 14px rgba(var(--fam), .08);
+  transition: transform .1s cubic-bezier(.34, 1.35, .64, 1), box-shadow .12s ease, background .14s ease; }
+.sn-mbtn { display: flex; width: 100%; margin-top: 4px; padding: 5px 10px; min-height: 27px; box-sizing: border-box; text-align: left; }
+.sn-mbtn:hover, .sn-b:hover { transform: translateY(-1.5px); background: rgba(var(--pri-rgb), .15);
+  box-shadow: inset 0 -1.5px 0 rgba(var(--fam), .14), 0 3px 0 rgba(var(--fam), .20), 0 7px 11px rgba(var(--fam), .14), 0 14px 22px rgba(var(--fam), .09); }
+.sn-mbtn:active, .sn-b:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(var(--fam), .25); }
+.sn-mbtn:focus-visible, .sn-b:focus-visible { outline: 2px solid var(--pri-ring); outline-offset: 2px; }
+:root[data-theme="night"] .sn-mbtn, :root[data-theme="night"] .sn-b { border-color: rgba(var(--pri-rgb), .26); background: rgba(var(--pri-rgb), .12);
+  box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, .44), 0 2px 0 rgba(0, 0, 0, .60), 0 4px 6px rgba(0, 0, 0, .42), 0 9px 14px rgba(0, 0, 0, .28); }
+:root[data-theme="night"] .sn-mbtn:hover, :root[data-theme="night"] .sn-b:hover {
+  box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, .44), 0 3px 0 rgba(0, 0, 0, .62), 0 7px 11px rgba(0, 0, 0, .46), 0 14px 22px rgba(0, 0, 0, .30); }
+:root[data-theme="night"] .sn-mbtn:active, :root[data-theme="night"] .sn-b:active { box-shadow: inset 0 2px 5px rgba(0, 0, 0, .55); }
+
+/* ---------- the notes list (the 🗒️ key) ---------- */
+.sticky-panel-back { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1300; background: rgba(0, 0, 0, .18); animation: fadeIn .16s ease both; }
+.sn-panel { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(108px + env(safe-area-inset-bottom, 0px)); width: min(300px, calc(100vw - 32px));
+  max-height: 70vh; overflow-y: auto; box-sizing: border-box; padding: 12px; border-radius: 14px; color: var(--ink); font-family: var(--sans);
+  background: linear-gradient(180deg, var(--slab-top) 0%, var(--slab-bot) 100%); border: 1px solid var(--line);
+  box-shadow: inset 0 1.5px 0 var(--slab-hi), inset 0 -2px 0 var(--slab-lo), 0 0 0 1px var(--slab-edge), 0 2px 4px var(--slab-sh1), 0 12px 26px var(--slab-sh2), 0 30px 70px var(--slab-sh3);
+  transform-origin: right bottom; animation: snPanelIn .2s cubic-bezier(.34, 1.3, .64, 1) both; }
+@keyframes snPanelIn { from { opacity: 0; transform: scale(.94) translateY(8px); } to { opacity: 1; transform: none; } }
+.sn-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.sn-panel-title { margin: 0; font: 700 13px/1.2 var(--sans); letter-spacing: .01em; }
+.sn-b { padding: 4px 8px; min-height: 24px; font-size: 11px; }
+.sn-b-primary { padding: 5px 10px; min-height: 25px; font-size: 12px; color: var(--on-pri); border-color: var(--pri-edge); background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo));
+  box-shadow: var(--psh); text-shadow: 0 1px 1px rgba(20, 10, 60, .3); }
+.sn-b-primary:hover { background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo)); box-shadow: var(--pshhi); }
+:root[data-theme="night"] .sn-b-primary { color: #fff; border-color: var(--pri-edge); background: linear-gradient(180deg, var(--pri-hi), var(--pri-lo)); box-shadow: var(--psh); }
+.sn-b-ghost { background: transparent; color: var(--muted); border-color: var(--line-2); }
+.sn-b-ghost:hover { background: var(--danger-soft); color: var(--danger); }
+:root[data-theme="night"] .sn-b-ghost { background: transparent; color: var(--muted); border-color: var(--line-2); }
+.sn-search { display: block; width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 6px 8px; border-radius: 8px; font: 12px/1.3 var(--sans);
+  border: 1px solid var(--line-2); background: var(--field); color: var(--ink); box-shadow: var(--inset); outline: none; }
+.sn-panel input.sn-search { height: 29px; min-height: 0; padding: 6px 8px; font-size: 12px; line-height: 1.3; border-radius: 8px; }
+.sn-search:focus { border-color: var(--rim); box-shadow: var(--inset), 0 0 0 3px var(--pri-soft); }
+.sn-empty { margin: 0; padding: 10px 2px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.sn-row { border-top: 1px solid var(--line-soft); padding: 9px 2px; }
+.sn-row-top { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; min-width: 0; }
+.sn-rowdot { width: 10px; height: 10px; flex: none; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .15); }
+.sn-rowtext { font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.sn-row-keys { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.sn-row-keys .sn-del { margin-left: auto; }

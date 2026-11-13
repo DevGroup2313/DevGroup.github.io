@@ -357,7 +357,8 @@
     back.addEventListener("click", function (e) { if (e.target === back) back.remove(); });
     var box = h("div.sn-panel", { role: "dialog", "aria-label": t("sn.title") });
     var newKey = h("button.sn-b.sn-b-primary#snNew", { type: "button" }, t("sn.new"));
-    newKey.addEventListener("click", function () { S.create(); openPanel(); });
+    /* the list steps aside so the new note can be written in at once (Carpe Diem keeps its list open here) */
+    newKey.addEventListener("click", function () { closePanel(); S.create(); });
     box.appendChild(h("div.sn-panel-head", null, [h("h3.sn-panel-title", null, t("sn.title")), newKey]));
     var list = notes(), rows = h("div.sn-rows"), q = null;
     if (list.length) {
