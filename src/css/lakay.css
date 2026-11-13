@@ -693,35 +693,35 @@ button.hx-item:hover { transform: translateY(-1px); box-shadow: var(--pill); }
 :root[data-palette="royal"] { --pri: #1b5e8c; --pri-hi: #2470a5; --pri-lo: #164d74; --pri-jhi: #3f86b8; --pri-jlo: #134466; --pri-edge: #10405f; --pri-ledge: #0b2f47; --pri-jledge: #0d3550;
   --pri-text: #175680; --pri-soft: rgba(27, 94, 140, .10); --pri-ring: rgba(27, 94, 140, .5); --pri-rgb: 27, 94, 140; --rim: rgba(27, 94, 140, .45);
   --bg: #f2f5f8; --tint: #eef4f9; --tint-2: #dde9f2; --tray: #ebf0f5; --face: linear-gradient(180deg, #ffffff, #f0f5fa); --face-tilt: linear-gradient(175deg, #ffffff, #f0f5fa);
-  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(27, 94, 140, .07), transparent 60%), radial-gradient(900px 600px at -6% 108%, rgba(27, 94, 140, .05), transparent 55%), #f2f5f8; }
+  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(27, 94, 140, .07), transparent 60%), radial-gradient(900px 600px at -6% 108%, rgba(27, 94, 140, .05), transparent 55%), #f2f5f8; --slab-bot: #f1f5f9; }
 :root[data-palette="burgundy"] { --pri: #7a2e3b; --pri-hi: #8c3747; --pri-lo: #662532; --pri-jhi: #a24a5a; --pri-jlo: #5a1f2b; --pri-edge: #4e1923; --pri-ledge: #3a1019; --pri-jledge: #40131c;
   --pri-text: #74293a; --pri-soft: rgba(122, 46, 59, .09); --pri-ring: rgba(122, 46, 59, .5); --pri-rgb: 122, 46, 59; --rim: rgba(122, 46, 59, .42);
   --bg: #f7f3f2; --tint: #f8f0ef; --tint-2: #eedfdd; --tray: #f2eae8; --face: linear-gradient(180deg, #ffffff, #f8f1f0); --face-tilt: linear-gradient(175deg, #ffffff, #f8f1f0);
-  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(122, 46, 59, .06), transparent 60%), radial-gradient(900px 600px at -6% 108%, rgba(168, 134, 78, .07), transparent 55%), #f7f3f2; }
+  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(122, 46, 59, .06), transparent 60%), radial-gradient(900px 600px at -6% 108%, rgba(168, 134, 78, .07), transparent 55%), #f7f3f2; --slab-bot: #f8f2f1; }
 :root[data-palette="graphite"] { --pri: #3a4150; --pri-hi: #4a5263; --pri-lo: #2f3542; --pri-jhi: #5f6878; --pri-jlo: #282d38; --pri-edge: #232833; --pri-ledge: #171a22; --pri-jledge: #1b1f28;
   --pri-text: #353c4a; --pri-soft: rgba(58, 65, 80, .09); --pri-ring: rgba(58, 65, 80, .5); --pri-rgb: 58, 65, 80; --rim: rgba(58, 65, 80, .42);
   --bg: #f4f4f5; --tint: #f1f1f3; --tint-2: #e3e4e8; --tray: #eeeef1; --face: linear-gradient(180deg, #ffffff, #f3f3f5); --face-tilt: linear-gradient(175deg, #ffffff, #f3f3f5);
-  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(58, 65, 80, .05), transparent 60%), #f4f4f5; }
+  --page-bg: radial-gradient(1200px 700px at 82% -8%, rgba(58, 65, 80, .05), transparent 60%), #f4f4f5; --slab-bot: #f4f4f6; }
 :root[data-theme="night"][data-palette="indigo"] { --pri: #4a53a8; --pri-hi: #5a63b8; --pri-lo: #3a4290; --pri-text: #aab2ee; --pri-rgb: 170, 178, 238; --pri-soft: rgba(170, 178, 238, .14);
   --pri-ring: rgba(170, 178, 238, .55); --rim: rgba(170, 178, 238, .38); --pri-edge: #1e2350; --pri-ledge: #10132e; --pri-jledge: #10132e; --brass: #cdaa68; --brass-ink: #dcc08a;
   --bg: #0f1018; --surface: #191b29; --surface-2: #151724; --bar-bg: #1f2233; --tint: #222538; --tint-2: #2a2e45; --tray: #13151f;
   --face: linear-gradient(180deg, #23263a, #1c1f2f); --face-tilt: linear-gradient(175deg, #23263a, #1c1f2f); --slab-face: linear-gradient(180deg, #191b29, #151724);
-  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(170, 178, 238, .07), transparent 62%), radial-gradient(900px 620px at 104% 112%, rgba(205, 170, 104, .06), transparent 58%), #0f1018; }
+  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(170, 178, 238, .07), transparent 62%), radial-gradient(900px 620px at 104% 112%, rgba(205, 170, 104, .06), transparent 58%), #0f1018; --slab-top: #222536; --slab-bot: #1b1e2c; }
 :root[data-theme="night"][data-palette="royal"] { --pri: #2a6c9c; --pri-hi: #347bb0; --pri-lo: #215a85; --pri-text: #8fc3ea; --pri-rgb: 143, 195, 234; --pri-soft: rgba(143, 195, 234, .14);
   --pri-ring: rgba(143, 195, 234, .55); --rim: rgba(143, 195, 234, .36); --pri-edge: #0d2c42; --pri-ledge: #071a28; --pri-jledge: #071a28;
   --bg: #0d1217; --surface: #151c24; --surface-2: #121820; --bar-bg: #1b2530; --tint: #1a2531; --tint-2: #22303f; --tray: #10161c;
   --face: linear-gradient(180deg, #1e2935, #18212b); --face-tilt: linear-gradient(175deg, #1e2935, #18212b); --slab-face: linear-gradient(180deg, #151c24, #121820);
-  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(143, 195, 234, .06), transparent 62%), #0d1217; }
+  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(143, 195, 234, .06), transparent 62%), #0d1217; --slab-top: #1d2733; --slab-bot: #172029; }
 :root[data-theme="night"][data-palette="burgundy"] { --pri: #8a3546; --pri-hi: #9c4053; --pri-lo: #702a39; --pri-text: #eaa3b0; --pri-rgb: 234, 163, 176; --pri-soft: rgba(234, 163, 176, .13);
   --pri-ring: rgba(234, 163, 176, .55); --rim: rgba(234, 163, 176, .34); --pri-edge: #3a1019; --pri-ledge: #22080e; --pri-jledge: #22080e;
   --bg: #130f10; --surface: #1d1718; --surface-2: #191314; --bar-bg: #251d1f; --tint: #2a1e20; --tint-2: #352528; --tray: #161112;
   --face: linear-gradient(180deg, #2c2224, #231b1d); --face-tilt: linear-gradient(175deg, #2c2224, #231b1d); --slab-face: linear-gradient(180deg, #1d1718, #191314);
-  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(234, 163, 176, .05), transparent 62%), #130f10; }
+  --page-bg: radial-gradient(1100px 680px at 6% -12%, rgba(234, 163, 176, .05), transparent 62%), #130f10; --slab-top: #2a2123; --slab-bot: #221a1c; }
 :root[data-theme="night"][data-palette="graphite"] { --pri: #555e70; --pri-hi: #646d80; --pri-lo: #474f60; --pri-text: #c3cad8; --pri-rgb: 195, 202, 216; --pri-soft: rgba(195, 202, 216, .12);
   --pri-ring: rgba(195, 202, 216, .5); --rim: rgba(195, 202, 216, .32); --pri-edge: #1d2129; --pri-ledge: #101217; --pri-jledge: #101217;
   --bg: #101113; --surface: #191a1d; --surface-2: #151619; --bar-bg: #202226; --tint: #222429; --tint-2: #2b2e34; --tray: #131416;
   --face: linear-gradient(180deg, #26282d, #1f2125); --face-tilt: linear-gradient(175deg, #26282d, #1f2125); --slab-face: linear-gradient(180deg, #191a1d, #151619);
-  --page-bg: #101113; }
+  --page-bg: #101113; --slab-top: #25272c; --slab-bot: #1e2024; }
 :root[data-density="comfortable"] { --key-h: 40px; }
 :root[data-density="comfortable"] .nav-btn { padding-top: 11px; padding-bottom: 11px; }
 

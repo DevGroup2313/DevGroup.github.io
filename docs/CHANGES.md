@@ -4,6 +4,18 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 8 (13 November 2026): Schedae, and the Dawn dress refined
+
+- **Schedae, Carpe Diem's sticky notes, in parity,** behind the 🗒️ key at the foot of the side keys. The list makes a new note, finds notes by their words, pins and unpins them, copies their words, and deletes them. A note floats over every room until its ✕ unpins it. It moves by its top and grows from any edge or its corner. Its ⋯ menu changes its paper (Carpe Diem's six: Foolscap, Primrose, Inkwell, Claret, Laurel, Vespers), folds it, opens the list, copies it, or deletes it. Its keys make words bold, italic, underlined or struck through, start a list, add a picture, and save. Undo and redo are on its top. The paper, edges, night papers, ink, head, tools and corner carry the values measured from Carpe Diem by day and by night.
+- **Two departures from Carpe Diem, on purpose.** "Send to Tabula" is "Copy the note", since Lakay has no Tabula. New note in the list puts the list away and leaves the caret in the new note, so it can be written in at once.
+- **Each person's own, and sealed.** Notes are sealed in the books with the Store Key, one record per person, and a backup carries them. A sign-in opens only that person's notes; the practice store opens all of its sample people's. A note saves itself half a second after typing stops, and again when the books lock. Notes are not ledger lines: they are a person's own scribbles, not the store's accounts.
+- **No foreign markup.** A note keeps its words and marks as a small model (bold, italic, underline, strikethrough, lists, line breaks, and pictures held inside the note), never as markup. A paste arrives as plain words, or as a picture. Nothing from outside the page can enter a note.
+- **The right press** inside a note opens the Offline Project's edit menu, as in every field.
+- **The Dawn dress, refined, by the owner's request.** Lakay keeps its design and its periwinkle; the surfaces are a step more refined. By day: white and ivory faces with crisp hairline rims and a firm stepped edge, a deeper and matte periwinkle on the main keys and the room jewels, and a quieter sunrise behind the page. By night: Lakay's periwinkle ink, calmer and deeper, in place of the saturated indigo. Dialogs, the edit menu, the side keys' panels and the calculator are flat slabs with a hairline rim, without the purple glow and the pillowed walls. The other colour sets follow.
+- **The Reset's erase choice** is a quiet card in the same ink as the others, marked by a small brick-red badge and dot, not painted red.
+- A new Guidebook chapter: Sticky notes (Schedae).
+- tests/t_build8.js: 36 checks, all passing, with the 48 of t_build3.js, the 42 of t_build6.js and the 24 of t_build7.js.
+
 ## Build 7 (12 November 2026): never locked out
 
 The owner reported being shut out of Lakay: refused at the door, asked again and again for a key, and unable to reach the practice store. Build 6 had prefilled the sign-in's name with the owner's record name while the door still compared the typed name with the name given at the first sign-in; when the two differed, every try was refused even with the right password, and five refusals started a wait that grew to fifteen minutes. This build removes every such lock.

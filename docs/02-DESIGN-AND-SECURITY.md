@@ -80,6 +80,24 @@ owner's (at least 10 characters), and their own envelope of the Store Key:
   shown) and the books (a change a person may not make is refused). Settings, backups, the Author Studio and the people
   are the owner's alone.
 
+### Each person's notes (Build 8)
+
+Schedae, the sticky notes, are each person's own. Each person's notes are one sealed record (`notes:<user id>`), sealed
+with the Store Key like every other record, with additional data that names the store and the record, so it cannot be
+moved. They are not ledger lines: a note changes with every keystroke, and it is a person's own scribble, not the
+store's accounts.
+
+- A note is written half a second after typing stops, and at once when the books lock, with the key that was in hand.
+  The writes are made one at a time, in order, each into the books it was made in (the store's own or the practice
+  store's), so an older copy never lands after a newer one. Erasing, resetting the practice store and restoring a backup
+  wait for the last write, so no note sealed with an old key is left in new books.
+- A sign-in opens only the signing-in person's notes. Other people's notes stay sealed and are not opened in that session.
+  The practice store opens all of its sample people's notes, since it changes from one person to another.
+- A note's words and marks are kept as a small model of allowed marks (bold, italic, underline, strikethrough, lists,
+  line breaks, and pictures kept inside the note as data), never as markup. What is pasted or dropped arrives as plain
+  words, or as a picture made small in the page. No address outside the page can enter a note.
+- A backup carries the notes, sealed, as it carries every record.
+
 ## 3b. The Author Studio's choices
 
 The owner can rename the app and the store, rewrite any phrase, choose the colours and word the receipt. These choices
@@ -149,6 +167,10 @@ Encryption protects data at rest and in transit. It cannot protect against every
 - **No program is proof against every attack.** Before Emporium is relied upon under audit, I recommend an independent
   security review by a professional, and that your accountant review the reports' arithmetic and tax rules.
 - Emporium does not file taxes, move money or replace the provider systems of RIA, CAM, Unitransfer or Boss Revolution.
+- **Notes are kept apart by Lakay, not by a key of each person's own.** Every person who can open the books holds the
+  Store Key, so someone who signs in and uses a browser's developer tools could, with effort, read another person's
+  sealed notes on that device. Lakay never opens or shows them, but the seal itself is shared by everyone with a key.
+
 
 ## 9. Verification
 

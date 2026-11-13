@@ -1,6 +1,6 @@
 Lakay
-Build: 7
-Date: 12 November 2026
-Stage: Lakay Build 7: never locked out. The owner signs in by password whatever the name; the practice store is always on the door; Refresh and Reset keys
+Build: 8
+Date: 13 November 2026
+Stage: Lakay Build 8: Schedae, Carpe Diem's sticky notes, each person's own and sealed; Lakay's Dawn dress refined by day and by night
 Copyright (c) 2026 Yannie D. Forest. All rights reserved.
 NO LICENCE IS GRANTED.

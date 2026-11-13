@@ -144,7 +144,11 @@
     ID = vault.storeId;
     return D.entries("rec").then(function (entries) {
       var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, notes: {}, head: null, unreadable: [] };
+      /* each person's notes are their own: a sign-in opens only the notes of the one signing in (the practice store opens
+         all of its sample people's, since it changes from one to another) */
+      var mine = "notes:" + (userId || "owner"), practice = B.mode === "practice";
       return Promise.all(entries.map(function (e) {
+        if (!practice && /^notes:/.test(e[0]) && e[0] !== mine) return null;
         return C.open(key, e[1], aadRec(ID, e[0])).then(function (val) { return [e[0], val]; }, function () { st.unreadable.push(e[0]); return null; });
       })).then(function (rows) {
         rows.forEach(function (r) { if (r) put(st, r[0], r[1]); });

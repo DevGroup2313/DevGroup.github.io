@@ -141,6 +141,18 @@ const wait = (p, ms) => p.waitForTimeout(ms);
   ok(await p.evaluate(() => E.books.notes().length) === 1 && !(await p.evaluate(() => JSON.stringify(E.books.notes()).indexOf("cassava") >= 0)), "Delete takes the note away");
   await p.keyboard.press("Escape");
 
+  console.log("A sign-in opens only that person's own notes");
+  await p.evaluate((pw) => E.books.addPerson({ name: "Rose Delva", password: "rose password 2026", preset: "cashier", access: E.books.PRESETS.cashier }, pw), OWNER_PW);
+  await p.evaluate(() => E.books.lock("test")); await p.waitForSelector("#introDoor #introLock", { timeout: 20000 });
+  await p.evaluate(() => E.books.signIn("Rose Delva", "rose password 2026")); await wait(p, 300);
+  const rose = await p.evaluate(() => ({ who: E.books.user.name, keys: Object.keys(E.books.state().notes), mine: E.books.notes().length, pins: document.querySelectorAll(".sticky-note").length }));
+  ok(rose.who === "Rose Delva" && rose.keys.indexOf("owner") < 0 && rose.mine === 0 && rose.pins === 0, "Rose signs in: the owner's notes are neither shown nor even opened in her session");
+  await p.evaluate(() => { const n = E.schedae.create(); n.doc = ["Rose's own note"]; return E.books.saveNotes(true); });
+  await p.evaluate(() => E.books.lock("test")); await p.waitForSelector("#introDoor #introLock", { timeout: 20000 });
+  await p.evaluate((pw) => E.books.signIn("", pw), OWNER_PW); await wait(p, 300);
+  const own = await p.evaluate(() => ({ keys: Object.keys(E.books.state().notes), n: E.books.notes().length, text: E.schedae.plain(E.books.notes()[0].doc) }));
+  ok(own.keys.join() === "owner" && own.n === 1 && /Florida/.test(own.text), "the owner signs in again: only the owner's own note is opened, and Rose's stays sealed");
+
   console.log("In the practice store, each person keeps their own notes");
   await p.evaluate(() => E.books.lock("test")); await p.waitForSelector("#introDoor #introLock", { timeout: 20000 });
   await p.click("#introPractice"); await p.waitForSelector(".shell", { timeout: 60000 });
