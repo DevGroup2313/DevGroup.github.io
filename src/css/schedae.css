@@ -1,7 +1,7 @@
 /* LAKAY | Schedae (22-schedae.js): Carpe Diem's sticky notes, made Lakay's own. The shapes keep Carpe Diem's measured
    values (the size, the head, the tools, the corner, the edges, the tilt and the lift). The colours are Lakay's: six
-   papers named in Kreyòl for things of Haiti and the Caribbean (Build 9), each with its own night paper, and Lakay's
-   inks. The menu and the notes list wear Lakay's own slab. */
+   light pastel papers named for gems (Build 11), each with its own night paper, and Lakay's inks. The menu and the
+   notes list wear Lakay's own slab. */
 
 /* ---------- the 🗒️ key on the rail: it turns once in a while, as Carpe Diem's does; it steps aside while the list is open ---------- */
 @keyframes cdHourTurn { 0%, 89% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -19,12 +19,12 @@ body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events
   will-change: transform; transition: transform .08s ease-out, box-shadow .08s ease; }
 /* Lakay's six papers, light pastels by day: each paper's own light, its edge at two thirds of that light (as Carpe Diem shades its paper),
    and its night paper with a deeper edge, made to sit on Lakay's periwinkle ink */
-.sticky-note[data-sn-col="mango"] { --sn-paper: #fdf4d9; --sn-edge: rgb(167, 161, 143); --sn-night: #3b3216; --sn-nedge: #231d0c; }
-.sticky-note[data-sn-col="lanme"] { --sn-paper: #e2f4f1; --sn-edge: rgb(149, 161, 159); --sn-night: #15332f; --sn-nedge: #0b1e1c; }
-.sticky-note[data-sn-col="flanbwayan"] { --sn-paper: #fde9e3; --sn-edge: rgb(167, 154, 150); --sn-night: #3f201a; --sn-nedge: #25120e; }
-.sticky-note[data-sn-col="zaboka"] { --sn-paper: #ebf3dc; --sn-edge: rgb(155, 160, 145); --sn-night: #283117; --sn-nedge: #171d0c; }
-.sticky-note[data-sn-col="douvanjou"] { --sn-paper: #eaebfb; --sn-edge: rgb(154, 155, 166); --sn-night: #26274a; --sn-nedge: #15162c; }
-.sticky-note[data-sn-col="kokoye"] { --sn-paper: #faf5ec; --sn-edge: rgb(165, 162, 156); --sn-night: #332e26; --sn-nedge: #1e1b16; }
+.sticky-note[data-sn-col="citrine"] { --sn-paper: #fdf4d9; --sn-edge: rgb(167, 161, 143); --sn-night: #3b3216; --sn-nedge: #231d0c; }
+.sticky-note[data-sn-col="aquamarine"] { --sn-paper: #e2f4f1; --sn-edge: rgb(149, 161, 159); --sn-night: #15332f; --sn-nedge: #0b1e1c; }
+.sticky-note[data-sn-col="rosequartz"] { --sn-paper: #fde9e3; --sn-edge: rgb(167, 154, 150); --sn-night: #3f201a; --sn-nedge: #25120e; }
+.sticky-note[data-sn-col="jade"] { --sn-paper: #ebf3dc; --sn-edge: rgb(155, 160, 145); --sn-night: #283117; --sn-nedge: #171d0c; }
+.sticky-note[data-sn-col="moonstone"] { --sn-paper: #eaebfb; --sn-edge: rgb(154, 155, 166); --sn-night: #26274a; --sn-nedge: #15162c; }
+.sticky-note[data-sn-col="pearl"] { --sn-paper: #faf5ec; --sn-edge: rgb(165, 162, 156); --sn-night: #332e26; --sn-nedge: #1e1b16; }
 /* a slight tilt, as paper sits; it lifts when the hand comes near, and more when it is carried */
 .sticky-note:nth-child(odd) { transform: rotate(-0.25deg); }
 .sticky-note:nth-child(even) { transform: rotate(0.3deg); }
@@ -104,11 +104,11 @@ body:has(.sticky-panel-back) #rail-notes { opacity: 0 !important; pointer-events
 
 /* ---------- the paper dots (the menu, the list): the day paper by day, the night paper by night ---------- */
 .sn-dot, .sn-rowdot { --dot: linear-gradient(180deg, #fdf4d9, #f7e7b8); --dot-n: #3b3216; background: var(--dot); }
-.sn-dot[data-sn-col="lanme"], .sn-rowdot[data-sn-col="lanme"] { --dot: linear-gradient(180deg, #e2f4f1, #c9e9e4); --dot-n: #15332f; }
-.sn-dot[data-sn-col="flanbwayan"], .sn-rowdot[data-sn-col="flanbwayan"] { --dot: linear-gradient(180deg, #fde9e3, #f8d4c9); --dot-n: #3f201a; }
-.sn-dot[data-sn-col="zaboka"], .sn-rowdot[data-sn-col="zaboka"] { --dot: linear-gradient(180deg, #ebf3dc, #d9e8c2); --dot-n: #283117; }
-.sn-dot[data-sn-col="douvanjou"], .sn-rowdot[data-sn-col="douvanjou"] { --dot: linear-gradient(180deg, #eaebfb, #d7d9f5); --dot-n: #26274a; }
-.sn-dot[data-sn-col="kokoye"], .sn-rowdot[data-sn-col="kokoye"] { --dot: linear-gradient(180deg, #faf5ec, #efe5d2); --dot-n: #332e26; }
+.sn-dot[data-sn-col="aquamarine"], .sn-rowdot[data-sn-col="aquamarine"] { --dot: linear-gradient(180deg, #e2f4f1, #c9e9e4); --dot-n: #15332f; }
+.sn-dot[data-sn-col="rosequartz"], .sn-rowdot[data-sn-col="rosequartz"] { --dot: linear-gradient(180deg, #fde9e3, #f8d4c9); --dot-n: #3f201a; }
+.sn-dot[data-sn-col="jade"], .sn-rowdot[data-sn-col="jade"] { --dot: linear-gradient(180deg, #ebf3dc, #d9e8c2); --dot-n: #283117; }
+.sn-dot[data-sn-col="moonstone"], .sn-rowdot[data-sn-col="moonstone"] { --dot: linear-gradient(180deg, #eaebfb, #d7d9f5); --dot-n: #26274a; }
+.sn-dot[data-sn-col="pearl"], .sn-rowdot[data-sn-col="pearl"] { --dot: linear-gradient(180deg, #faf5ec, #efe5d2); --dot-n: #332e26; }
 :root[data-theme="night"] .sn-dot, :root[data-theme="night"] .sn-rowdot { background: var(--dot-n); box-shadow: inset 0 0 0 1px rgba(255, 250, 236, .30); }
 
 /* ---------- a note's ⋯ menu ---------- */

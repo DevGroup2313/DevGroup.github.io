@@ -3,7 +3,7 @@
    notes, sealed in the books with everything else (B.notes and B.saveNotes in 04-books.js), and carried in backups.
    A note floats over every page until it is unpinned. It takes bold, italic, underline, strikethrough, a bulleted list
    and pictures; it moves by its top, grows from any edge or its corner, folds to its top, and changes its paper: Lakay's
-   own six (Build 9), each with its own night paper. The notes list finds, pins, unpins, copies and deletes them.
+   own six pastels (Build 11), each with its own night paper. The notes list finds, pins, unpins, copies and deletes them.
    Carpe Diem's "Send to Tabula" becomes "Copy the note", since Lakay has no Tabula.
    The words and marks of a note are kept as a small model of allowed marks, never as markup, so a note can never carry
    a script, a link or a picture from outside the page. */
@@ -11,13 +11,13 @@
 (function () {
   var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
   var S = E.schedae = {};
-  /* Lakay's own six papers (Build 9), named in Kreyòl: Mango, Lanmè (the sea), Flanbwayan (the flame tree's flower),
-     Zaboka (avocado), Douvanjou (dawn: Lakay's own periwinkle) and Kokoye (coconut). A note made in Build 8 kept one of
-     Carpe Diem's papers; it takes the Lakay paper nearest to it. */
+  /* Lakay's own six papers, light pastels named for gems (Build 11): Citrine, Aquamarine, Rose Quartz, Jade, Moonstone
+     and Pearl. A note made in an earlier build keeps its colour under the paper's new name. */
   var COLORS = [
-    { id: "mango", name: "Mango" }, { id: "lanme", name: "Lanmè" }, { id: "flanbwayan", name: "Flanbwayan" },
-    { id: "zaboka", name: "Zaboka" }, { id: "douvanjou", name: "Douvanjou" }, { id: "kokoye", name: "Kokoye" }];
-  var BEFORE = { gold: "mango", sky: "lanme", rose: "flanbwayan", sage: "zaboka", violet: "douvanjou", ivory: "kokoye" };
+    { id: "citrine", name: "Citrine" }, { id: "aquamarine", name: "Aquamarine" }, { id: "rosequartz", name: "Rose Quartz" },
+    { id: "jade", name: "Jade" }, { id: "moonstone", name: "Moonstone" }, { id: "pearl", name: "Pearl" }];
+  var BEFORE = { gold: "citrine", sky: "aquamarine", rose: "rosequartz", sage: "jade", violet: "moonstone", ivory: "pearl",
+    mango: "citrine", lanme: "aquamarine", flanbwayan: "rosequartz", zaboka: "jade", douvanjou: "moonstone", kokoye: "pearl" };
   function col(id) { id = BEFORE[id] || id; for (var i = 0; i < COLORS.length; i++) if (COLORS[i].id === id) return COLORS[i]; return COLORS[0]; }
   function still() { return document.documentElement.getAttribute("data-calm") === "1" || !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
   function snd(n) { if (E.sound) E.sound.play(n); }

@@ -4,6 +4,12 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 11 (13 November 2026): the sticky notes' papers renamed
+
+- The six papers had been given fruit and other stereotyped names. The owner found them offensive and unfitting for the app, and they were a poor choice. The papers are now named for gems, each with a plain colour word: Citrine (pale yellow), Aquamarine (sea glass), Rose Quartz (soft pink), Jade (pale green), Moonstone (soft lilac blue) and Pearl (ivory). The colours are unchanged.
+- Notes made in Builds 8, 9 and 10 keep their colour under the new name.
+- The tests of Builds 8 and 9 check the new names; every suite passes.
+
 ## Build 10 (13 November 2026): the Home page, redesigned
 
 The Home page was Ingenium's layout, with seven large room cards that repeated the menu and pushed the day's work to the bottom. It now puts the counter's work first, and reads from action to calm.
@@ -24,7 +30,7 @@ The Home page was Ingenium's layout, with seven large room cards that repeated t
   - On the Fire tablet, Paste put the tablet program's whole answer into the field, braces and all, instead of the words. The page now takes the words from it.
   - In a browser and the standalone page, Copy borrowed the focus for a moment, so Cut inside a note copied the words but did not remove them. The focus and the selection now go straight back, and Cut removes what it copied.
 - **Checked on every road the words travel:** the browser's own clipboard, the Fire tablet's program, the iPhone and iPad program, and the Mac and Windows program, in a sticky note, a search field, a text area in a dialog, and words chosen on the page.
-- **Schedae's own papers.** The notes no longer use Carpe Diem's colours. Lakay has six papers of its own, light pastels by day, each with its own night paper, named in Kreyòl: Mango, Lanmè, Flanbwayan, Zaboka, Douvanjou and Kokoye. The inks are Lakay's too. A note made in Build 8 takes the Lakay paper nearest to its old one.
+- **Schedae's own papers.** The notes no longer use Carpe Diem's colours. Lakay has six papers of its own, light pastels by day, each with its own night paper. The inks are Lakay's too. A note made in Build 8 takes the Lakay paper nearest to its old one. (Build 11 renamed the papers.)
 - tests/t_build9.js: 21 checks, served from this computer so the test reaches a real clipboard. All the earlier suites pass.
 
 ## Build 8 (13 November 2026): Schedae, and the Dawn dress refined

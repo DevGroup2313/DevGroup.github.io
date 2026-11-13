@@ -44,9 +44,9 @@ const PAGE = fs.readFileSync(path.resolve(__dirname, "..", "app", "Lakay.html"))
   await p.waitForSelector(".shell", { timeout: 60000 });
   await p.evaluate(() => { E.util.prefSet("theme", "day"); E.ui.applyLook(); const n = E.schedae.create(); n.doc = ["Order ", ["b", ["Florida water"]], " today"]; E.books.saveNotes(true); E.schedae.render(); });
   await p.waitForSelector(".sticky-note .sn-body b");
-  ok(await p.getAttribute(".sticky-note", "data-sn-col") === "mango", "a new note takes Lakay's first paper, Mango");
+  ok(await p.getAttribute(".sticky-note", "data-sn-col") === "citrine", "a new note takes Lakay's first paper, Citrine");
   const paper = await p.evaluate(() => getComputedStyle(document.querySelector(".sticky-note")).backgroundColor);
-  ok(paper === "rgb(253, 244, 217)", "Mango by day is a light pastel, #fdf4d9 (" + paper + ")");
+  ok(paper === "rgb(253, 244, 217)", "Citrine by day is a light pastel, #fdf4d9 (" + paper + ")");
 
   console.log("The right press inside a sticky note");
   await menuOn(p.locator(".sticky-note .sn-body b"));
