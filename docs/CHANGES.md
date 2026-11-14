@@ -4,6 +4,21 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 12 (14 November 2026): the Home in the seashell's colours, Lakay's logo on home screens, and the builds off Node.js 20
+
+The owner found Build 10's Home too close to what came before. A green design was tried after it and rejected outright; it was never released. The owner then asked for the colours of Lakay's seashell logo and something far better to look at.
+
+- **Every colour on the Home comes from the logo:** its periwinkle enamel, the indigo of the shell's sides, the pearl of the shell, the blush of the pearl at its heart, and the fine champagne gold of its rim. Nothing on the Home is green. The other rooms keep Lakay's Dawn, which comes from the same logo.
+- **The hero is an enamel plate** with the shell's own spiral engraved across it, turning slowly around the logo, with a soft play of colour like the inside of a shell. The logo sits in a pearl ring.
+- **The day's figures roll into place on pearl drums** behind a champagne rim, as a mechanical counter's do. A screen reader hears each figure whole. A profit, a loss and low stock each light a small lamp beside the figure: periwinkle, red and amber.
+- **The counter's three keys** are enamel (New sale), pearl (Receive a delivery) and blush pearl (Price check), each in a champagne rim, on a pearl tray below the plate. A key travels down when pressed. On a narrow screen the keys wrap rather than cut their words.
+- **The day's ledger** on ruled paper with a champagne margin, the takings of each hour as columns in the logo's periwinkle, and the day in brief with dotted leaders. **What needs seeing to** as ledger entries. **The latest sales** on a receipt roll with a torn foot. **The rooms** as pearl drawers with champagne label plates in an enamel cabinet. **The day's proverb** on a champagne plaque.
+- By night the enamel deepens to the shell's indigo and the drums turn dark with pearl figures. Calm and the system's "reduce motion" hold the drums and the engraving still.
+- **Lakay's logo in the tab and on home screens.** The page now carries the logo for the tab (the round coin alone, with nothing around it), for a home screen shortcut, and for the iPhone and iPad home screen. A home screen icon is a tile filled edge to edge with the logo's own periwinkle, never a white square. For a website, the same pictures stand beside the page in `app/` (see the README). The page's security policy is unchanged.
+- **The app icons, without the white square.** The iPhone and iPad app's icons are the logo's periwinkle tile. The Fire tablet's icon is the round coin alone. The Mac and Windows icons were already the coin alone. `release/icons.py` makes every icon from the one approved drawing.
+- **GitHub's builds moved off Node.js 20.** GitHub warned that Lakay's actions ran on Node.js 20, which it no longer supports. Every action now names a release written for Node.js 24 by its full commit, so a moved or altered release can never reach Lakay's builds: checkout 7.0.1 and setup-python 7.1.0. Each runtime was read from the action's own file at that commit. See `release/ACTIONS.md`.
+- tests/t_build12.js: 28 checks. The Build 10 test reads each drum's figure as a screen reader hears it. Every suite passes: 232 checks in all.
+
 ## Build 11 (13 November 2026): the sticky notes' papers renamed
 
 - The six papers had been given fruit and other stereotyped names. The owner found them offensive and unfitting for the app, and they were a poor choice. The papers are now named for gems, each with a plain colour word: Citrine (pale yellow), Aquamarine (sea glass), Rose Quartz (soft pink), Jade (pale green), Moonstone (soft lilac blue) and Pearl (ivory). The colours are unchanged.

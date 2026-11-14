@@ -146,6 +146,14 @@ card company, as far as possible.
 - **Known builds.** Each release lists the SHA-256 fingerprint of every file, so a download can be checked. From Stage 9,
   builds will also be signed with your own key (PermitCore).
 - **Tested builds.** Each build runs its tests before release (section 9).
+- **Pinned build tools** (Build 12). The GitHub actions that build the apps are each named by the full commit of a
+  release written for Node.js 24, not by a label that can be moved, so altered or hijacked action code cannot reach a
+  build without a change to the repository. Each runtime was read from the action's own file at that commit
+  (`release/ACTIONS.md`).
+- **The logo inside the page** (Build 12). The tab and home screen icons are carried in the page as pictures, so the
+  Content Security Policy needed no change: it still allows pictures only from inside the page. A first try pointed the
+  iPhone's icon at a file beside the page, and the policy rightly refused it; the test of Build 12 checks that the
+  policy refuses nothing the page needs.
 
 ## 8. Honest limits
 

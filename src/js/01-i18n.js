@@ -722,6 +722,8 @@
     ["home.backupKey", "Back up", "Sauvegarder", "Fè sovgad"],
     ["home.roomsH", "Rooms", "Les pièces", "Chanm yo"], ["home.roomsP", "Each room is also in the menu.", "Chaque pièce est aussi dans le menu.", "Chak chanm la tou nan meni an."],
     ["home.provKicker", "Pwovèb jodi a", "Pwovèb jodi a", "Pwovèb jodi a"],
+    ["home.ledgerH", "The day's ledger", "Le registre du jour", "Rejis jounen an"], ["home.itemsSold", "Items sold", "Articles vendus", "Atik vann"],
+    ["home.avgSale", "Average sale", "Vente moyenne", "Vant mwayèn"], ["home.hoursOpen", "Hours with sales", "Heures avec des ventes", "Lè ki gen vant"],
     ["home.yourShift", "Your shift", "Votre service", "Sèvis ou"],
     ["home.clockKeys", "A break, or clock out", "Une pause, ou le départ", "Yon poz, oswa soti"],
     ["key.team.d", "The people of the store: who is on the clock, the hours, user IDs and access.", "Les gens du magasin : qui est en service, les heures, les numéros et les accès.", "Moun magazen an: ki moun ki nan sèvis, lè travay, nimewo ak aksè."],

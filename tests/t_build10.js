@@ -1,4 +1,4 @@
-/* LAKAY | Build 10 test: the Home page, redesigned. The counter's three keys lead where they say; the day's figures and
+/* LAKAY | Build 10 test: the Home page, redesigned (its look made new again in Build 12, in the shell's colours). The counter's three keys lead where they say; the day's figures and
    the takings of each hour agree with the books, answer the pointer and the keyboard, and are in a table for screen
    readers; Needs you offers the right key for each thing; the latest sales open their receipts; the room tiles open
    their rooms; the proverb is in Kreyòl. A cashier sees her shift and no profit; the owner of a new store sees the
@@ -59,7 +59,7 @@ const OWNER_PW = "kreyol and coffee 2026";
   ok(/Busiest/.test(await p.textContent(".hm-peak")), "the busiest hour is named above the columns");
   const dayBar = await p.evaluate(() => getComputedStyle(document.querySelector(".hm-bar")).backgroundColor);
   ok(dayBar === "rgb(95, 103, 204)", "by day the columns wear the checked periwinkle #5f67cc (" + dayBar + ")");
-  ok(+(await p.textContent("#hxSales .g-value")).replace(/[^0-9]/g, "") === r.count, "the sales gauge agrees with the books");
+  ok(+(await p.textContent("#hxSales .g-value .sr-only")).replace(/[^0-9]/g, "") === r.count, "the sales gauge agrees with the books");
 
   console.log("Needs you, the latest sales, the rooms and the proverb");
   const needRows = await p.$$eval(".hm-needs .hm-need", n => n.length);

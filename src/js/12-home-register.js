@@ -11,12 +11,13 @@
   ui.stat = stat;
   ui.capsLabel = function (emoji, text) { return h("p.label-caps", null, [emoji ? ui.emo(emoji) : null, text]); };
 
-  /* ---------- Home (Build 10): the counter's day, its work first ----------
-     From action to calm: the three jobs done most at the counter (a sale, a delivery, a price) beside the greeting and
-     a few live facts; one slim strip for what comes next (the first steps, your shift, or the practice store); the
-     day's figures with the takings of each hour; what needs seeing to now, each with its key; the latest sales; the
-     rooms as small tiles; and the day's Haitian proverb on parchment. */
-  var ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI"];
+  /* ---------- Home (Build 12): the shell's own colours ----------
+     The Home is made of the materials of Lakay's mark: its periwinkle enamel, its pearl, a blush pearl, and the fine
+     champagne gold of its rim. The hero is an enamel plate with the shell's spiral engraved across it, turning slowly
+     around the mark; behind a champagne bezel, the day's figures roll into place on pearl drums. Below it the counter's
+     three keys, in enamel, pearl and blush pearl, travel down when pressed. Then the day's ledger on ruled paper, what
+     needs seeing to, the latest sales on a receipt roll, the rooms as drawers with champagne label plates, and the day's
+     proverb on a champagne plaque. Calm and "reduce motion" hold all of it still (room-home.css). */
   function hourLabel(hr) {
     try { return new Date(2000, 0, 1, hr).toLocaleTimeString(E.lang === "ht" ? "fr" : E.lang, { hour: "numeric" }); } catch (e) { return String(hr); }
   }
@@ -25,62 +26,112 @@
     var hr = new Date().getHours(), greet = hr < 12 ? "home.morning" : hr < 18 ? "home.afternoon" : "home.evening";
     var me = B.user, staff = !B.isOwner();
     var sealKey = ui.crestKey(88, { cls: "hx-seal-key", id: "heroCrest", rise: true, title: t("crest.press") });
-    main.appendChild(h("section.hm", { "aria-label": t("room.home") }, [
-      hero(st, r, me, staff, practice, greet, sealKey),
+    main.appendChild(h("section.hm.ct", { "aria-label": t("room.home") }, [
+      hero(st, r, stock, me, staff, practice, greet, sealKey),
+      keysRow(staff),
       strip(st, me, staff, practice),
-      todaySlab(r, stock),
+      ledger(r),
       h("div.hm-pair", null, [needs(stock, staff, practice), latest(st)]),
       rooms(st, r, stock),
       proverbCard()]));
-    ["hxSales", "hxTaken", "hxProfit"].forEach(function (id, i) {
-      if (id === "hxProfit" && !B.can("costs")) return;
-      var el = main.querySelector("#" + id + " .g-value"); if (el) ui.countUp(el, [r.count, r.gross, r.profit][i], i ? money : String);
-    });
-    var bars = main.querySelectorAll(".hm-bar[data-pct]");
+    /* the drums roll to the day's figures, the columns rise to the hours' takings (both stay still in Calm) */
+    var strips = main.querySelectorAll(".ct-strip[data-d]"), bars = main.querySelectorAll(".hm-bar[data-pct]");
     requestAnimationFrame(function () { requestAnimationFrame(function () {
+      Array.prototype.forEach.call(strips, function (x, i) { x.style.transitionDelay = (i % 9) * 70 + "ms"; x.style.transform = "translateY(" + (-10 * Number(x.getAttribute("data-d"))) + "%)"; });
       Array.prototype.forEach.call(bars, function (b) { b.style.height = b.getAttribute("data-pct") + "%"; });
     }); });
   };
 
-  /* the greeting, a few live facts, and the counter's three keys */
-  function chip(tone, emoji, text) { return h("li.hm-chip" + (tone ? "." + tone : ""), null, [ui.emo(emoji), h("span", null, text)]); }
-  function act(id, emoji, title, hint, fn, primary) {
-    return h("button.hm-act" + (primary ? ".pri" : ""), { type: "button", id: id, onclick: fn },
-      [h("span.hm-act-emo", { "aria-hidden": "true" }, emoji), h("span.hm-act-t", null, [h("b", null, title), h("small", null, hint)])]);
+  /* The engraving across the hero: the shell's own spiral (r = a·e^(b·θ), the curve a nautilus grows along), drawn
+     eighteen times each way around the mark so that the lines cross as a guilloche does, with three fine rings. */
+  function engraving() {
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "-150 -150 300 300"); svg.setAttribute("class", "ct-engr");
+    svg.setAttribute("aria-hidden", "true"); svg.setAttribute("focusable", "false");
+    function el(name, attrs) { var n = document.createElementNS(ns, name); Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); }); return n; }
+    for (var turn = -1; turn <= 1; turn += 2) for (var k = 0; k < 18; k++) {
+      var d = "", start = k * Math.PI / 9;
+      for (var i = 0; i <= 160; i++) {
+        var th = i * 0.1, r = 3 * Math.exp(0.17 * th), a = start + turn * th;
+        if (r > 212) break;
+        d += (i ? "L" : "M") + (r * Math.cos(a)).toFixed(1) + " " + (r * Math.sin(a)).toFixed(1);
+      }
+      svg.appendChild(el("path", { d: d }));
+    }
+    [46, 74, 108].forEach(function (r) { svg.appendChild(el("circle", { r: r, "class": "ring" })); });
+    return svg;
   }
-  function hero(st, r, me, staff, practice, greet, sealKey) {
+
+  /* a figure on the register's drums: each digit on its own drum, which rolls from 0 to its digit */
+  function drums(text) {
+    var n = String(text).replace(/[^0-9]/g, "").length;
+    var box = h("span.ct-drums" + (n > 9 ? ".longer" : n > 7 ? ".long" : ""), { "aria-hidden": "true" });
+    String(text).split("").forEach(function (ch) {
+      if (/[0-9]/.test(ch)) {
+        var strip = h("span.ct-strip", { "data-d": ch });
+        for (var d = 0; d <= 9; d++) strip.appendChild(h("span", null, String(d)));
+        box.appendChild(h("span.ct-cell", null, strip));
+      } else box.appendChild(h("span.ct-sep", null, ch));
+    });
+    return box;
+  }
+  function readout(id, emoji, label, value, text, tone, big) {
+    return h("div.ct-read.hx-gauge" + (tone ? "." + tone : "") + (big ? ".big" : ""), { id: id, "data-value": String(value) }, [
+      h("span.g-label", null, [ui.emo(emoji), label]),
+      h("span.g-value", null, [drums(text), h("span.sr-only", null, text)])]);
+  }
+
+  /* the register: the mark, the greeting, a few live facts, and the window of drums */
+  function chip(tone, emoji, text) { return h("li.hm-chip" + (tone ? "." + tone : ""), null, [ui.emo(emoji), h("span", null, text)]); }
+  function hero(st, r, stock, me, staff, practice, greet, sealKey) {
     var now = new Date(), onClock = B.onClock(), todayKey = U.dayKey();
     var last = st.sales.filter(function (s) { return s.status === "completed" && s.day === todayKey; }).slice(-1)[0];
     var chips = [
-      chip(null, "🧾", r.count ? t("km.salesToday", { n: r.count }) : t("home.chipNoSale")),
-      last ? chip(null, "🕰️", t("home.chipLast", { t: ui.time(last.at) })) : null,
+      last ? chip(null, "🕰️", t("home.chipLast", { t: ui.time(last.at) })) : chip(null, "🧾", t("home.chipNoSale")),
       !staff || B.can("team") ? chip(onClock.length ? "on" : null, "👥", t("home.chipClock", { n: onClock.length })) : null];
-    var keys = [
-      B.can("sell") ? act("homeSale", "🛒", t("home.newSale"), t("home.saleHint"), function () { if (E.rail && E.rail.toSale) E.rail.toSale(); else ui.go("register"); }, true) : null,
-      B.can("receive") ? act("homeReceive", "🚚", t("home.receive"), t("home.receiveHint"), function () { ui.inventoryMode = "receive"; ui.go("inventory"); }) : null,
-      act("homeFind", "🔎", t("home.find"), t("home.findHint"), function () { var b = document.getElementById("rail-find"); if (E.rail && b) E.rail.press("find", b); else ui.go("inventory"); })];
-    return h("header.hm-hero.hx-slab", null, [
-      h("div.hm-mark", null, sealKey),
-      h("div.hm-intro", null, [
-        h("div.hx-eyebrow", null, [h("h1", null, E.appName()), h("span.hx-date", null, ROMAN[now.getDate()] + " · " + E.fmtDate(now, "long").toUpperCase())]),
-        h("p.hm-hello", null, practice && !staff ? t("home.helloPractice") : t(greet, { name: me.name || "" })),
-        h("p.hm-lede", null, practice ? t("home.ledePractice") : t("home.ledeReal")),
-        h("ul.hm-chips", { "aria-label": t("home.chipsH") }, chips)]),
-      h("nav.hm-acts", { "aria-label": t("home.actsH") }, keys)]);
+    var window_ = h("div.ct-window", { "aria-label": t("home.today") }, [
+      readout("hxTaken", "💵", t("home.takenToday"), r.gross, money(r.gross), null, true),
+      h("div.ct-reads", null, [
+        readout("hxSales", "🧾", t("home.salesToday"), r.count, String(r.count)),
+        B.can("costs") ? readout("hxProfit", "📈", t("home.profitToday"), r.profit, money(r.profit), r.profit < 0 ? "bad" : "good") : readout("hxOnClock", "🕘", t("clock.nowH"), onClock.length, String(onClock.length)),
+        readout("hxLow", "📦", t("home.lowStock"), stock.low.length, String(stock.low.length), stock.low.length ? "warn" : null)])]);
+    return h("header.hm-hero.ct-hero", null, [
+      engraving(),
+      h("span.ct-nacre", { "aria-hidden": "true" }),
+      h("div.ct-intro", null, [
+        h("div.ct-mark", null, sealKey),
+        h("div.ct-words", null, [
+          h("div.hx-eyebrow", null, [h("h1", null, E.appName()), h("span.hx-date", null, E.fmtDate(now, "long"))]),
+          h("p.hm-hello", null, practice && !staff ? t("home.helloPractice") : t(greet, { name: me.name || "" })),
+          h("p.hm-lede", null, practice ? t("home.ledePractice") : t("home.ledeReal")),
+          h("ul.hm-chips", { "aria-label": t("home.chipsH") }, chips)])]),
+      window_]);
+  }
+
+  /* the counter's three keys: enamel, pearl and blush pearl, each in a champagne rim */
+  function act(id, emoji, title, hint, fn, tone) {
+    return h("button.ct-key." + tone, { type: "button", id: id, onclick: fn }, [
+      h("span.ct-key-face", null, [h("span.ct-key-emo", { "aria-hidden": "true" }, emoji), h("span.ct-key-t", null, [h("b", null, title), h("small", null, hint)])])]);
+  }
+  function keysRow(staff) {
+    return h("nav.ct-keys", { "aria-label": t("home.actsH") }, [
+      B.can("sell") ? act("homeSale", "🛒", t("home.newSale"), t("home.saleHint"), function () { if (E.rail && E.rail.toSale) E.rail.toSale(); else ui.go("register"); }, "enamel") : null,
+      B.can("receive") ? act("homeReceive", "🚚", t("home.receive"), t("home.receiveHint"), function () { ui.inventoryMode = "receive"; ui.go("inventory"); }, "pearl") : null,
+      act("homeFind", "🔎", t("home.find"), t("home.findHint"), function () { var b = document.getElementById("rail-find"); if (E.rail && b) E.rail.press("find", b); else ui.go("inventory"); }, "blush")]);
   }
 
   /* one slim strip for what comes next: the first steps, your shift, or the practice store */
   function strip(st, me, staff, practice) {
     if (staff) {
       var sh = B.openShift(me.id);
-      return h("section.hm-strip.hx-slab", { "aria-label": t("home.yourShift") }, [
+      return h("section.hm-strip.ct-strip-bar", { "aria-label": t("home.yourShift") }, [
         h("span.hm-strip-emo", { "aria-hidden": "true" }, sh ? (B.onBreak(sh) ? "☕" : "🟢") : "🕘"),
         h("div.hm-strip-t", null, [h("b", null, t("home.yourShift")), h("span#heroStepNote", null, sh ? (B.onBreak(sh) ? t("clock.onBreak", { t: E.fmtTime(new Date(sh.breaks[sh.breaks.length - 1].from)) }) : t("clock.onSince", { t: E.fmtTime(new Date(sh.in)), d: ui.dur(B.shiftMs(sh)) })) : t("clock.off"))]),
         h("div.hm-strip-k", null, [h("button.hx-btn", { type: "button", onclick: ui.statusPanel }, [ui.emo(sh ? "☕" : "🕘"), sh ? t("home.clockKeys") : t("clock.in")]),
           h("button.hx-btn", { type: "button", onclick: function () { ui.go("team"); } }, [ui.emo("🗓️"), t("team.mine")])])]);
     }
     if (practice) {
-      return h("section.hm-strip.practice.hx-slab", { "aria-label": t("practice.pill") }, [
+      return h("section.hm-strip.ct-strip-bar.practice", { "aria-label": t("practice.pill") }, [
         h("span.hm-strip-emo", { "aria-hidden": "true" }, "🧪"),
         h("div.hm-strip-t", null, [h("b", null, t("practice.pill")), h("span#heroStepNote", null, t("home.practiceNext"))]),
         h("div.hm-strip-k", null, [h("button.hx-btn.pri#heroNext", { type: "button", onclick: function () { E.door.startReal("app"); } }, [ui.emo("🏠"), t("practice.real")]),
@@ -88,7 +139,7 @@
     }
     var steps = firstStepList(st), done = steps.filter(function (x) { return x[1]; }).length, next = steps.filter(function (x) { return !x[1]; })[0];
     if (!next) return null;
-    return h("section.hm-strip.hx-slab", { "aria-label": t("home.stepsH") }, [
+    return h("section.hm-strip.ct-strip-bar", { "aria-label": t("home.stepsH") }, [
       h("span.hm-strip-emo", { "aria-hidden": "true" }, "🧭"),
       h("div.hm-strip-t", null, [h("b", null, t("home.stepsH")), h("span#heroStepNote", null, t("home.stepOf", { n: done + 1, of: steps.length, what: t(next[0]) }))]),
       h("ol.hm-steps", { "aria-label": t("home.stepsN", { n: done, of: steps.length }) }, steps.map(function (x, i) {
@@ -97,19 +148,17 @@
       h("div.hm-strip-k", null, [h("button.hx-btn.pri#heroNext", { type: "button", onclick: next[2] }, [ui.emo("➡️"), t(next[0])])])]);
   }
 
-  /* the day's figures, and the takings of each hour */
-  function gauge(id, label, value, tone, note, emoji) {
-    return h("div.hx-gauge" + (tone ? "." + tone : ""), { id: id }, [h("span.g-label", null, [ui.emo(emoji), label]), h("span.g-value", null, value), note ? h("span.g-note", null, note) : null]);
-  }
-  function todaySlab(r, stock) {
-    return h("section.hm-today.hx-slab", { "aria-label": t("home.today") }, [
-      h("div.hx-sech", null, [h("h2", null, t("home.today")), h("p", null, t("home.todayP")),
+  /* the day's ledger: the takings of each hour on ruled paper, and three lines of the day in brief */
+  function ledger(r) {
+    var avg = r.count ? Math.round(r.gross / r.count) : 0;
+    return h("section.ct-ledger", { "aria-label": t("home.today") }, [
+      h("div.hx-sech", null, [h("h2", null, t("home.ledgerH")), h("p", null, t("home.todayP")),
         B.can("reports") ? h("button.hx-btn.quiet", { type: "button", onclick: function () { E.reports.period = "today"; ui.go("reports"); } }, t("home.seeAll")) : null]),
-      h("div.hm-today-body", null, [
-        h("div.hm-gauges", null, [gauge("hxSales", t("home.salesToday"), String(r.count), null, null, "🧾"), gauge("hxTaken", t("home.takenToday"), money(r.gross), null, null, "💵"),
-          B.can("costs") ? gauge("hxProfit", t("home.profitToday"), money(r.profit), r.profit < 0 ? "bad" : "good", null, "📈") : gauge("hxOnClock", t("clock.nowH"), String(B.onClock().length), null, null, "🕘"),
-          gauge("hxLow", t("home.lowStock"), String(stock.low.length), stock.low.length ? "warn" : null, null, "📦")]),
-        hours(r)])]);
+      h("div.ct-ledger-body", null, [hours(r),
+        h("dl.ct-brief", null, [
+          h("div", null, [h("dt", null, t("home.itemsSold")), h("dd", null, String(r.items))]),
+          h("div", null, [h("dt", null, t("home.avgSale")), h("dd", null, money(avg))]),
+          h("div", null, [h("dt", null, t("home.hoursOpen")), h("dd", null, String(r.byHour.filter(function (x) { return x.count; }).length))])])])]);
   }
   /* A single series of columns, one per hour of the store's day, from 8 in the morning (or the first sale) to 7 in the
      evening (or the last sale, or now). Each column answers a hover, a press or the keyboard with its takings and its
@@ -149,7 +198,7 @@
     return fig;
   }
 
-  /* what needs seeing to now, each with its key */
+  /* what needs seeing to now, as ledger entries, each with its key */
   function need(emoji, title, sub, tone, key) {
     return h("li.hm-need" + (tone ? "." + tone : ""), null, [h("span.hm-need-emo", { "aria-hidden": "true" }, emoji), h("div.hm-need-t", null, [h("b", null, title), h("small", null, sub)]),
       key ? h("button.hx-btn.hm-need-k", { type: "button", onclick: key[1] }, key[0]) : null]);
@@ -172,26 +221,29 @@
       if (days === null || days >= 7) list.push(need("💾", days === null ? t("home.attnBackupNone") : t("home.attnBackupOld", { n: days }), t("home.attnBackupSub"), days === null ? "warn" : null,
         [t("home.backupKey"), function () { ui.go("settings"); }]));
     }
-    return h("section.hm-needs.hx-slab", { "aria-label": t("home.attnH") }, [
+    return h("section.hm-needs", { "aria-label": t("home.attnH") }, [
       h("div.hx-sech", null, [h("h2", null, [ui.emo("📌"), t("home.attnH")]), h("p", null, t("home.attnP"))]),
       list.length ? h("ul.hm-list", null, list) : h("div.hm-calm", null, [h("span.hm-calm-emo", { "aria-hidden": "true" }, "🌤️"), h("p", null, t("home.attnNone"))])]);
   }
 
-  /* the latest sales, each with who served it; a press shows its receipt */
+  /* the latest sales on a receipt roll; a press shows the receipt */
   function latest(st) {
     var recent = st.sales.filter(function (s) { return s.status === "completed"; }).slice(-5).reverse();
-    return h("section.hm-sales.hx-slab", { "aria-label": t("home.recentTitle") }, [
+    return h("section.hm-sales", { "aria-label": t("home.recentTitle") }, [
       h("div.hx-sech", null, [h("h2", null, [ui.emo("🧾"), t("home.recentTitle")]),
         B.can("reports") ? h("button.hx-btn.quiet", { type: "button", onclick: function () { ui.go("reports"); } }, t("home.seeAll")) : null]),
-      recent.length ? h("ul.hm-list", null, recent.map(function (x) {
-        var who = st.users[x.by];
-        return h("li", null, h("button.hm-sale", { type: "button", onclick: function () { E.register.showReceipt(x); } }, [
-          h("span.hm-sale-no", null, x.no), h("span.hm-sale-t", null, [h("span", null, ui.time(x.at)), who ? h("small", null, who.name) : null]), h("span.hm-sale-m.num", null, money(x.total))]));
-      })) : h("div.hm-calm", null, [h("span.hm-calm-emo", { "aria-hidden": "true" }, "🧾"), h("p", null, t("home.recentNone")),
-        B.can("sell") ? h("button.hx-btn", { type: "button", onclick: function () { ui.go("register"); } }, t("home.newSale")) : null])]);
+      h("div.ct-tape", null, [
+        h("p.ct-tape-head", { "aria-hidden": "true" }, [h("b", null, E.appName().toUpperCase()), h("span", null, E.fmtDate(new Date(), "long"))]),
+        recent.length ? h("ul.hm-list.ct-tape-lines", null, recent.map(function (x) {
+          var who = st.users[x.by];
+          return h("li", null, h("button.hm-sale", { type: "button", onclick: function () { E.register.showReceipt(x); } }, [
+            h("span.hm-sale-no", null, x.no), h("span.hm-sale-t", null, [h("span", null, ui.time(x.at)), who ? h("small", null, who.name) : null]),
+            h("span.ct-lead", { "aria-hidden": "true" }), h("span.hm-sale-m.num", null, money(x.total))]));
+        })) : h("div.hm-calm", null, [h("span.hm-calm-emo", { "aria-hidden": "true" }, "🧾"), h("p", null, t("home.recentNone")),
+          B.can("sell") ? h("button.hx-btn", { type: "button", onclick: function () { ui.go("register"); } }, t("home.newSale")) : null])])]);
   }
 
-  /* the rooms as small tiles (each is also in the menu) */
+  /* the rooms, as a cabinet of drawers with champagne label plates */
   function rooms(st, r, stock) {
     var items = Object.keys(st.items).filter(function (k) { return !st.items[k].archived; }).length, last = U.prefGet("lastBackup", "");
     var keys = [
@@ -204,21 +256,22 @@
       ["studio", "edit", t("km.studio"), null]];
     return h("section.hm-rooms", { "aria-label": t("home.roomsH") }, [
       h("div.hx-sech", null, [h("h2", null, t("home.roomsH")), h("p", null, t("home.roomsP"))]),
-      h("div.hm-tiles", null, keys.filter(function (k) { return ui.allowed(k[0]); }).map(function (k) {
-        return h("button.hm-tile", { type: "button", "data-room": k[0], onclick: function () { ui.go(k[0]); } }, [h("span.hx-jewel.sm", null, U.icon(k[1])),
-          h("span.hm-tile-t", null, [h("b", null, t("room." + k[0])), h("small" + (k[3] ? "." + k[3] : ""), null, k[2])]), h("span.hm-tile-arrow", { "aria-hidden": "true" }, "›")]);
+      h("div.hm-tiles.ct-cabinet", null, keys.filter(function (k) { return ui.allowed(k[0]); }).map(function (k) {
+        return h("button.hm-tile.ct-drawer", { type: "button", "data-room": k[0], onclick: function () { ui.go(k[0]); } }, [
+          h("span.ct-plate", null, [h("span.ct-plate-ico", null, U.icon(k[1])), h("span.hm-tile-t", null, [h("b", null, t("room." + k[0])), h("small" + (k[3] ? "." + k[3] : ""), null, k[2])])]),
+          h("span.ct-pull", { "aria-hidden": "true" })]);
       }))]);
   }
   function quickKey(emoji, key, fn, kind) { return h("button.key" + (kind ? "." + kind : ""), { type: "button", onclick: fn }, [ui.emo(emoji), t(key)]); }
   ui.quickKey = quickKey;
 
-  /* A Haitian proverb for the day, on parchment: the Kreyòl as it is said, with its meaning in the language of the screen. */
+  /* A Haitian proverb for the day, engraved on a champagne plaque: the Kreyòl as it is said, with its meaning in the language of the screen. */
   var PROVERBS = ["piti", "mon", "men", "sak", "woch", "lespwa", "mapou", "kreyol"];
   function proverbCard() {
     var now = new Date(), day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000), k = PROVERBS[day % PROVERBS.length];
-    return h("aside.hm-proverb", { "aria-label": t("prov.label") }, [
+    return h("aside.hm-proverb.ct-plaque", { "aria-label": t("prov.label") }, [
+      h("span.ct-screw.tl", { "aria-hidden": "true" }), h("span.ct-screw.tr", { "aria-hidden": "true" }), h("span.ct-screw.bl", { "aria-hidden": "true" }), h("span.ct-screw.br", { "aria-hidden": "true" }),
       h("p.hm-pv-label", null, [h("span", { lang: "ht" }, t("home.provKicker")), E.lang === "ht" ? null : h("span.hm-pv-label-tr", null, t("prov.label"))]),
-      h("span.hm-pv-mark", { "aria-hidden": "true" }, "“"),
       h("p.hm-pv-ht", { lang: "ht" }, E.dict.ht["prov." + k]),
       E.lang === "ht" ? null : h("p.hm-pv-tr", null, t("prov." + k + ".m"))]);
   }

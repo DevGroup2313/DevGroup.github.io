@@ -46,11 +46,14 @@ def main():
     js = js.replace('"/*@@MARK@@*/"', json.dumps(mark))
     if "@@" in js:
         sys.exit("build stopped: a placeholder was left in the code")
-    favicon = b64png("spiral-day-icon.png")
+    # the logo alone for the tab, and its square tile for home screen shortcuts (both made by release/icons.py)
+    favicon = b64png("web-coin-96.png")
+    tile = b64png("web-tile-192.png")
+    touch = b64png("web-tile-180.png")
     if "</script" in js.lower():
         sys.exit("build stopped: the code contains a closing script tag")
     digest = base64.b64encode(hashlib.sha256(js.encode("utf-8")).digest()).decode("ascii")
-    out = (page.replace("@@CSS@@", css).replace("@@FAVICON@@", favicon).replace("@@BUILD@@", build).replace("@@DATE@@", date)
+    out = (page.replace("@@CSS@@", css).replace("@@FAVICON@@", favicon).replace("@@ICON_TILE@@", tile).replace("@@TOUCH_ICON@@", touch).replace("@@BUILD@@", build).replace("@@DATE@@", date)
            .replace("@@SCRIPT_HASH@@", "sha256-" + digest).replace("@@JS@@", js))
     os.makedirs(os.path.join(HERE, "app"), exist_ok=True)
     path = os.path.join(HERE, "app", "Lakay.html")
