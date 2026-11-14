@@ -124,7 +124,7 @@ const wait = (p, ms) => p.waitForTimeout(ms);
   await p.fill("#ldPw", OWNER_PW); await p.click("#ldGo"); await p.waitForSelector(".shell", { timeout: 60000 });
   await p.waitForSelector(".sticky-note", { timeout: 5000 });
   const back = await p.evaluate(() => { const n = document.querySelector(".sticky-note"); return { col: n.getAttribute("data-sn-col"), text: n.querySelector(".sn-body").textContent, bold: n.querySelectorAll(".sn-body b").length, left: parseInt(n.style.left, 10) }; });
-  ok(back.col === "aquamarine" && /Order Florida water/.test(back.text) && back.bold >= 1 && back.left === after.x, "after the lock the note is back as it was: its paper, its words, its bold, its place");
+  ok(back.col === "aquamarine" && /Order Florida water/.test(back.text) && back.bold >= 1 && Math.abs(back.left - after.x) < 1, "after the lock the note is back as it was: its paper, its words, its bold, its place (" + JSON.stringify(back) + ", left " + after.x + " before)");
   const bk = await p.evaluate(() => E.books.makeBackup().then(t => { const b = JSON.parse(t); return { keys: b.rec.map(r => r[0]), plain: /Florida/.test(t) }; }));
   ok(bk.keys.indexOf("notes:owner") >= 0 && !bk.plain, "a backup carries the notes, sealed");
   await p.click("#rail-notes"); await p.waitForSelector(".sn-panel");

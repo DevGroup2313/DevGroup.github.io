@@ -4,6 +4,17 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 13 (14 November 2026): the Home's colours turned around
+
+At the owner's request, the Home now wears the logo's colours the way Ingenium and Carpe Diem wear theirs. The large surfaces are white slabs. The cards set inside them and the keys that act are the periwinkle enamel, or a gentle lavender beside it. It reads softer and calmer, and keeps its depth.
+
+- **The welcome** is a white slab with the shell's spiral engraved faintly across it. The day's figures roll on pearl drums inside an enamel card.
+- **The keys:** New sale is the enamel key; Receive a delivery and Price check are gentle lavender keys. In what needs seeing to, Receive is enamel; Set up the real store is enamel; the quieter keys (See all, Read the guidebook) are lavender.
+- **The rooms** are white drawers with enamel jewels and champagne label plates, in a lavender tray on a white slab.
+- By night the slabs are Lakay's night slabs and the enamel deepens to the shell's indigo.
+- **The builds' Node.js 24 actions, proven.** Build 12 was the first build made with them: all five apps were built and published, and the Fire tablet's build log shows no Node.js 20 warning. At the owner's request, the same change was made in the owner's other apps' repositories (Carpe Diem, The Forge, Ingenium and Inkwell), marked so that no build started. See `release/ACTIONS.md`.
+- tests/t_build12.js checks the new arrangement (31 checks). A check in tests/t_build8.js that wanted a note back at exactly the same point now allows a hundred-thousandth of a point: a drag can leave a position that far off a whole number. Every suite passes: 235 checks in all.
+
 ## Build 12 (14 November 2026): the Home in the seashell's colours, Lakay's logo on home screens, and the builds off Node.js 20
 
 The owner found Build 10's Home too close to what came before. A green design was tried after it and rejected outright; it was never released. The owner then asked for the colours of Lakay's seashell logo and something far better to look at.

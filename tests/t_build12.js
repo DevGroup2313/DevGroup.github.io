@@ -1,5 +1,6 @@
 /* LAKAY | Build 12 test: the Home in the shell's own colours, and Lakay's logo in the tab and on the home screen.
-   The Home's colours come from the mark (its periwinkle enamel, pearl, blush and champagne) and nothing on it is green;
+   The Home's colours come from the mark (its periwinkle enamel, pearl and champagne), worn as Ingenium and Carpe Diem wear
+   theirs since Build 13 (white slabs, enamel cards and keys inside them), and nothing on it is green;
    the day's figures stand on their drums exactly as the books have them, by day, by night and in Calm; the shell's spiral
    is engraved across the hero and holds still in Calm and with "reduce motion"; the counter's keys travel down when
    pressed; no word is cut short on an iPad or a phone; the rest of the house keeps Lakay's Dawn. The page names the logo
@@ -67,7 +68,15 @@ function png(file) { const b = fs.readFileSync(file); return { w: b.readUInt32BE
   await p.evaluate(() => { E.util.prefSet("theme", "day"); E.ui.applyLook(); });
   await home();
   const hero = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-hero")).backgroundImage);
-  ok(/rgb\(103, 108, 204\)/.test(hero) && /rgb\(89, 96, 190\)/.test(hero), "the hero is the mark's periwinkle enamel");
+  const win = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-window")).backgroundImage);
+  ok(/rgb\(255, 255, 255\)/.test(hero) && !/rgb\(89, 96, 190\)/.test(hero), "the welcome is a white slab, as Ingenium and Carpe Diem set theirs (Build 13)");
+  ok(/rgb\(108, 113, 208\)/.test(win) && /rgb\(89, 96, 190\)/.test(win), "and the figures sit in a card of the mark's periwinkle enamel inside it");
+  const keyLook = await p.evaluate(() => ({ sale: getComputedStyle(document.querySelector("#homeSale .ct-key-face")).backgroundImage, recv: getComputedStyle(document.querySelector("#homeReceive .ct-key-face")).backgroundImage,
+    find: getComputedStyle(document.querySelector("#homeFind .ct-key-face")).backgroundImage }));
+  ok(/rgb\(107, 115, 214\)/.test(keyLook.sale) && /rgb\(248, 248, 255\)/.test(keyLook.recv) && /rgb\(248, 248, 255\)/.test(keyLook.find), "New sale is the enamel key; Receive and Price check are the gentle lavender beside it");
+  const rooms = await p.evaluate(() => ({ slab: getComputedStyle(document.querySelector(".hm-rooms")).backgroundImage, drawer: getComputedStyle(document.querySelector(".ct-drawer")).backgroundImage,
+    jewel: getComputedStyle(document.querySelector(".ct-plate-ico")).backgroundImage }));
+  ok(/rgb\(255, 255, 255\)/.test(rooms.slab) && /rgb\(255, 255, 255\)/.test(rooms.drawer) && /rgb\(141, 147, 226\)/.test(rooms.jewel), "the rooms are white drawers on a white slab, each with an enamel jewel");
   const greens = await p.evaluate(() => {
     const found = [];
     function check(c, where) { const m = (c || "").match(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/g) || []; m.forEach(s => { const v = s.match(/[\d.]+/g).map(Number); if ((v[3] === undefined || v[3] > .2) && v[1] > v[0] + 24 && v[1] > v[2] + 24) found.push(where + " " + s); }); }
@@ -109,7 +118,8 @@ function png(file) { const b = fs.readFileSync(file); return { w: b.readUInt32BE
   console.log("Night, Calm, and \"reduce motion\"");
   await p.evaluate(() => { E.util.prefSet("theme", "night"); E.ui.applyLook(); }); await home();
   const nightHero = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-hero")).backgroundImage);
-  ok(/rgb\(65, 70, 156\)/.test(nightHero) && /rgb\(31, 34, 96\)/.test(nightHero), "by night the enamel deepens to the shell's indigo");
+  const nightWin = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-window")).backgroundImage);
+  ok(/rgb\(31, 31, 45\)/.test(nightHero) && /rgb\(70, 75, 166\)/.test(nightWin) && /rgb\(43, 47, 120\)/.test(nightWin), "by night the slab is Lakay's night slab and the enamel deepens to the shell's indigo");
   await drumsRight("By night");
   await p.evaluate(() => { document.documentElement.setAttribute("data-calm", "1"); E.ui.go("home"); });
   await p.waitForSelector(".ct-hero"); await wait(p, 120);
