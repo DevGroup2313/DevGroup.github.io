@@ -120,7 +120,6 @@
     snd("page");
   }
   R.toSale = toSale;
-  function itemsOf() { var st = B.state(); return st ? Object.keys(st.items).map(function (k) { return st.items[k]; }).filter(function (it) { return !it.archived; }) : []; }
   function stockWord(it) {
     if (it.stock <= 0) return h("span.rp-stock.out", null, t("find.out"));
     if (it.reorderAt !== null && it.reorderAt !== undefined && it.stock <= it.reorderAt) return h("span.rp-stock.low", null, t("find.low", { n: it.stock }));
@@ -132,15 +131,16 @@
       h("div.rp-acts", null, keys)]);
   }
   /* 🔎 price check: any item by name, code or barcode */
-  function findPanel(box) {
-    var q = h("input#findQ", { type: "search", placeholder: t("find.what"), autocomplete: "off", spellcheck: "false", enterkeyhint: "search" });
+  function findPanel(box, start) {
+    var q = h("input#findQ", { type: "search", placeholder: t("find.what"), autocomplete: "off", spellcheck: "false", enterkeyhint: "search", value: start || "" });
     var list = h("ul.rp-list#findList");
     function draw() {
-      var v = U.norm(q.value), all = itemsOf(); U.clear(list);
-      var hits = !v ? [] : all.filter(function (it) {
-        return U.norm(it.name).indexOf(v) >= 0 || (it.barcode && U.norm(it.barcode) === v) || (it.sku && U.norm(it.sku).indexOf(v) >= 0);
-      }).sort(function (a, b) { var ea = a.barcode && U.norm(a.barcode) === v ? 0 : 1, eb = b.barcode && U.norm(b.barcode) === v ? 0 : 1; return ea - eb || a.name.localeCompare(b.name); }).slice(0, 8);
-      if (!v) { list.appendChild(h("li.rp-none", null, t("find.hint", { n: all.length }))); return; }
+      var v = q.value.trim(), st = B.state(); U.clear(list);
+      /* an exact code first (whatever form the scanner gives it in), then the names and codes that match (05-find.js) */
+      var exact = v ? E.find.byCode(v).filter(function (id) { return !st.items[id].archived; }) : [];
+      var ids = exact.concat(v ? E.find.search({ q: v, show: "active" }).filter(function (id) { return exact.indexOf(id) < 0; }) : []).slice(0, 8);
+      var hits = ids.map(function (id) { return st.items[id]; });
+      if (!v) { list.appendChild(h("li.rp-none", null, t("find.hint", { n: E.find.search({ show: "active" }).length }))); return; }
       if (!hits.length) { list.appendChild(h("li.rp-none", null, t("find.none"))); return; }
       hits.forEach(function (it) {
         list.appendChild(itemRow(it, [
@@ -150,9 +150,16 @@
     }
     q.addEventListener("input", draw);
     q.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); var first = list.querySelector(".rp-item .key.primary"); if (first) first.click(); } });
-    box.appendChild(head("🔎", "rail.find")); box.appendChild(h("div.rp-form", null, [q])); box.appendChild(list);
+    var cam = E.scan.cameraKey(function (code) { q.value = code; draw(); });
+    box.appendChild(head("🔎", "rail.find")); box.appendChild(h("div.rp-form.rp-find-row", null, [q, cam])); box.appendChild(list);
     draw();
   }
+  /* a code scanned where no room takes it: Price check opens with it (23-scan.js) */
+  R.showItem = function (code) {
+    var b = document.getElementById("rail-find"); if (!b) return;
+    if (!pop || pop.__k !== "find") openPop("find", b);
+    var q = document.getElementById("findQ"); if (q) { q.value = code; q.dispatchEvent(new Event("input")); }
+  };
   /* the badges follow the books: a sale or a delivery changes the stock */
   B.on("change", function () { setTimeout(R.badges, 0); });
 

@@ -143,7 +143,7 @@
   function load(vault, key, userId) {
     ID = vault.storeId;
     return D.entries("rec").then(function (entries) {
-      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], counters: {}, pad: {}, notes: {}, head: null, unreadable: [] };
+      var st = { settings: null, users: {}, cats: {}, items: {}, sales: [], moves: [], shifts: [], services: [], counters: {}, pad: {}, notes: {}, head: null, unreadable: [] };
       /* each person's notes are their own: a sign-in opens only the notes of the one signing in (the practice store opens
          all of its sample people's, since it changes from one to another) */
       var mine = "notes:" + (userId || "owner"), practice = B.mode === "practice";
@@ -155,6 +155,7 @@
         st.sales.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
         st.moves.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
         st.shifts.sort(function (a, b) { return a.in < b.in ? -1 : a.in > b.in ? 1 : 0; });
+        st.services.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
         if (!st.head || !st.settings) throw err("damaged");
         return D.get("journal", st.head.seq).then(function (env) {
           if (!env) { st.headProblem = true; return; }
@@ -184,6 +185,7 @@
     else if (kind === "sale") { var j = st.sales.findIndex(function (s) { return s.id === v.id; }); if (j >= 0) st.sales[j] = v; else st.sales.push(v); }
     else if (kind === "move") st.moves.push(v);
     else if (kind === "shift") { var q = st.shifts.findIndex(function (x) { return x.id === v.id; }); if (q >= 0) st.shifts[q] = v; else st.shifts.push(v); }
+    else if (kind === "svc") { st.services = st.services || []; var z = st.services.findIndex(function (x) { return x.id === v.id; }); if (z >= 0) st.services[z] = v; else st.services.push(v); }
     else if (kind === "counter") st.counters[id] = v;
     else if (kind === "pad") st.pad[id] = v;
     else if (kind === "notes") st.notes[id] = (v && Array.isArray(v.notes)) ? v.notes : [];
@@ -337,7 +339,29 @@
       });
       return c2;
     });
+    chain = chain.then(function () { return sampleServices(); });
     return chain.then(function () { B._at = null; B.user = state.users.owner; return state; }, function (e) { B._at = null; B.user = state && state.users.owner; throw e; });
+  }
+  /* The practice store's money transfers and top-ups: a few a day for two weeks, with made-up fees and references.
+     [provider, kind, amount, fee, commission] in cents; nothing here is a real provider's price. */
+  var SAMPLE_SVC = [["ria", "send", 15000, 1000, 300], ["cam", "send", 20000, 1200, 350], ["boss", "topup", 2000, 0, 150],
+    ["unitransfer", "payout", 10000, 0, 200], ["ria", "send", 5000, 600, 150], ["boss", "topup", 1000, 0, 80], ["cam", "payout", 25000, 0, 300]];
+  function sampleServices() {
+    var seed = 20261115, c = Promise.resolve(), today = new Date(); today.setHours(0, 0, 0, 0);
+    function rnd(n) { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n; }
+    for (var d = 14; d >= 0; d--) {
+      var day = new Date(today.getTime() - d * 86400000), n = 1 + rnd(3);
+      for (var k = 0; k < n; k++) (function (at, s, j) {
+        if (at.getTime() >= Date.now() - 3600000) return;
+        c = c.then(function () {
+          B._at = at.toISOString();
+          B.user = state.users[at.getHours() < 13 ? SAMPLE_PEOPLE[0][0] : "owner"] || state.users.owner;
+          return B.recordService({ provider: s[0], kind: s[1], amount: s[2], fee: s[3], commission: s[4], ref: (s[0] === "boss" ? "BR" : s[0].slice(0, 2).toUpperCase()) + String(483920 + j * 37) })
+            .then(function () { B.user = state.users.owner; });
+        });
+      })(new Date(day.getFullYear(), day.getMonth(), day.getDate(), 10 + rnd(8), rnd(60), 0), SAMPLE_SVC[rnd(SAMPLE_SVC.length)], d * 10 + k);
+    }
+    return c;
   }
   /* the sample people's shifts for the days before today: Marie from a quarter to nine, Jean from a quarter to one,
      each with a half-hour break */
@@ -822,6 +846,46 @@
     });
   };
 
+  /* ---------- money transfers and top-ups (Build 15) ----------
+     The money a customer sends, receives or puts on a phone is held for the provider (RIA, CAM, Unitransfer, Boss
+     Revolution): it is not the store's sale. Each one is written as it happens: the provider, what kind it was, the
+     amount, the fee, the store's commission when it is known, and the provider's reference. No customer's name or
+     papers are kept: the provider's own system keeps those. A mistake is voided with a reason, never erased. */
+  B.PROVIDERS = ["ria", "cam", "unitransfer", "boss", "other"];
+  B.SVC_KINDS = ["send", "payout", "topup"];
+  B.recordService = function (f) {
+    return B.change(function () {
+      need("sell");
+      var provider = String(f.provider || ""), kind = String(f.kind || "");
+      if (B.PROVIDERS.indexOf(provider) < 0) throw err("provider");
+      if (B.SVC_KINDS.indexOf(kind) < 0) throw err("kind");
+      if (!Number.isSafeInteger(f.amount) || f.amount <= 0) throw err("amount");
+      var fee = f.fee === null || f.fee === undefined ? 0 : f.fee;
+      if (!Number.isSafeInteger(fee) || fee < 0) throw err("fee");
+      var com = f.commission === null || f.commission === undefined ? null : f.commission;
+      if (com !== null && (!Number.isSafeInteger(com) || com < 0)) throw err("commission");
+      if (!B.can("reports")) com = null;
+      var now = clock();
+      var v = { id: U.uid("v"), provider: provider, kind: kind, amount: f.amount, fee: fee, commission: com,
+        ref: String(f.ref || "").trim().slice(0, 40), note: String(f.note || "").trim().slice(0, 200),
+        at: now.toISOString(), day: U.dayKey(now), hour: now.getHours(), by: B.user.id, byNo: B.numberOf(B.user), dev: B.device.id, status: "done" };
+      return { type: "service.recorded", data: { svc: clone(v) }, recs: [{ kind: "svc", id: v.id, value: v }], result: v };
+    });
+  };
+  B.voidService = function (id, reason) {
+    return B.change(function (st) {
+      need("reports");
+      var cur = (st.services || []).find(function (x) { return x.id === id; }); if (!cur) throw err("nosvc");
+      if (cur.status === "void") return null;
+      reason = String(reason || "").trim(); if (!reason) throw err("note");
+      var v = clone(cur); v.status = "void"; v.voidedBy = B.user.id; v.voidedAt = clock().toISOString(); v.voidReason = reason.slice(0, 200);
+      return { type: "service.voided", data: { id: id, reason: v.voidReason }, recs: [{ kind: "svc", id: id, value: v }], result: v };
+    });
+  };
+  B.services = function (filter) { return state ? (state.services || []).filter(function (x) { return !filter || filter(x); }) : []; };
+  /* what one entry did to the drawer: money in (the amount sent or put on a phone, and the fee) or out (a payout) */
+  B.svcCash = function (v) { return { cashIn: (v.kind === "payout" ? 0 : v.amount) + (v.fee || 0), cashOut: v.kind === "payout" ? v.amount : 0 }; };
+
   /* ---------- the ticket and the sale ---------- */
   /* Prices a ticket from the books as they stand: lines [{itemId, qty}] give lines with prices, the tax of each rate
      (worked out on the total taxed at that rate, rounded half up to the cent) and the totals. */
@@ -895,6 +959,17 @@
     });
     /* profit counts only lines whose cost is known; sales of items with no cost are shown apart */
     r.profit = r.net - r.noCost - r.cogs;
+    /* money transfers and top-ups: held for the providers, so never part of the sales above (Build 15) */
+    var sv = r.services = { count: 0, voided: 0, fees: 0, commission: 0, cashIn: 0, cashOut: 0, byProvider: {}, byKind: {} };
+    (st.services || []).forEach(function (v) {
+      if (v.day < fromKey || v.day > toKey || !inWin(v) || !mine(v)) return;
+      if (v.status === "void") { sv.voided++; return; }
+      var c = B.svcCash(v);
+      sv.count++; sv.fees += v.fee || 0; sv.commission += v.commission || 0; sv.cashIn += c.cashIn; sv.cashOut += c.cashOut;
+      var p = sv.byProvider[v.provider] = sv.byProvider[v.provider] || { count: 0, send: 0, payout: 0, topup: 0, fees: 0, commission: 0, cashIn: 0, cashOut: 0 };
+      p.count++; p[v.kind] += v.amount; p.fees += v.fee || 0; p.commission += v.commission || 0; p.cashIn += c.cashIn; p.cashOut += c.cashOut;
+      var k = sv.byKind[v.kind] = sv.byKind[v.kind] || { count: 0, amount: 0 }; k.count++; k.amount += v.amount;
+    });
     st.moves.forEach(function (m) {
       if (m.day < fromKey || m.day > toKey || !inWin(m) || !mine(m)) return;
       if (m.kind === "receive") { r.received.qty += m.qty; r.received.value += (m.unitCost || 0) * m.qty; }
@@ -926,14 +1001,14 @@
     var key = KEY, id = ID, st = state;
     if (!key) return Promise.reject(err("locked"));
     return D.entries("journal").then(function (entries) {
-      var res = { ok: true, lines: entries.length, problems: [] }, prev = ZERO, expect = 1, items = {}, i = 0;
+      var res = { ok: true, lines: entries.length, problems: [] }, prev = ZERO, expect = 1, items = {}, svcs = {}, i = 0;
       function next() {
         if (i >= entries.length) return Promise.resolve();
         var e = entries[i++];
         return C.open(key, e[1], aadLine(id, e[0])).then(function (line) {
           if (line.seq !== e[0] || e[0] !== expect) res.problems.push({ seq: e[0], what: "order" });
           if (line.prev !== prev) res.problems.push({ seq: e[0], what: "chain" });
-          replay(items, line, res);
+          replay(items, line, res, svcs);
           expect = e[0] + 1;
           return U.sha256hex(U.canon(line)).then(function (hsh) { prev = hsh; });
         }, function () { res.problems.push({ seq: e[0], what: "unreadable" }); prev = null; expect = e[0] + 1; }).then(function () {
@@ -951,15 +1026,26 @@
           });
         });
         Object.keys(items).forEach(function (k) { if (!st.items[k]) res.problems.push({ item: k, what: "extra" }); });
+        (st.services || []).forEach(function (v) {
+          var b = svcs[v.id];
+          if (!b) { res.problems.push({ svc: v.id, what: "missing" }); return; }
+          ["provider", "kind", "amount", "fee", "commission", "status"].forEach(function (f) {
+            if (JSON.stringify(v[f]) !== JSON.stringify(b[f])) res.problems.push({ svc: v.id, what: "differs", field: f });
+          });
+          delete svcs[v.id];
+        });
+        Object.keys(svcs).forEach(function (k) { res.problems.push({ svc: k, what: "extra" }); });
         (st.unreadable || []).forEach(function (k) { res.problems.push({ rec: k, what: "unreadable" }); });
         res.ok = res.problems.length === 0;
         return res;
       });
     });
   };
-  function replay(items, line, res) {
+  function replay(items, line, res, svcs) {
     var d = line.data || {};
     switch (line.type) {
+      case "service.recorded": if (d.svc) svcs[d.svc.id] = clone(d.svc); break;
+      case "service.voided": if (svcs[d.id]) svcs[d.id].status = "void"; else res.problems.push({ seq: line.seq, what: "void" }); break;
       case "item.created": items[d.item.id] = clone(d.item); break;
       case "item.updated": if (items[d.id]) Object.keys(d.changes).forEach(function (k) { items[d.id][k] = clone(d.changes[k][1]); }); break;
       case "item.archived": if (items[d.id]) items[d.id].archived = d.archived; break;

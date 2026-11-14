@@ -15,7 +15,7 @@
   --pri: #5f67cc; --pri-hi: #6b73d6; --pri-lo: #5057bc; --pri-jhi: #8d93e2; --pri-jlo: #4f56b6; --pri-edge: #434aa6; --pri-ledge: #33398a; --pri-jledge: #363c8e;
   --on-pri: #ffffff; --pri-text: #4d54b8; --pri-soft: rgba(77, 84, 184, .09); --pri-ring: rgba(77, 84, 184, .45); --pri-rgb: 77, 84, 184;
   --brass: #c08b2f; --brass-hi: #ecd4a2; --brass-ink: #8a6420; --brass-soft: rgba(192, 139, 47, .14);
-  --danger: #a8423d; --danger-soft: rgba(168, 66, 61, .09); --warn: #9a5a12; --warn-soft: rgba(184, 116, 46, .12); --ok: #2f7a55; --ok-soft: rgba(47, 122, 85, .11);
+  --danger: #a8423d; --danger-soft: rgba(168, 66, 61, .09); --warn: #9a5a12; --warn-soft: rgba(184, 116, 46, .12); --ok: #4d54b8; --ok-soft: rgba(95, 103, 204, .11);
   --line: rgba(33, 31, 51, .10); --line-2: rgba(33, 31, 51, .16); --line-soft: rgba(33, 31, 51, .06); --rim: rgba(77, 84, 184, .45);
   --field: #ffffff; --field-line: rgba(67, 74, 166, .24); --wall: #dcdbe8;
   --face: linear-gradient(180deg, #ffffff, #f7f6fb); --face-tilt: linear-gradient(175deg, #ffffff, #f7f6fb); --slab-face: linear-gradient(180deg, #ffffff, #fcfcfe);
@@ -60,7 +60,7 @@
   --pri: #6a72d4; --pri-hi: #757dde; --pri-lo: #555cc0; --pri-jhi: #8a90e0; --pri-jlo: #4b52b0; --pri-edge: #2a2e6e; --pri-ledge: #16183f; --pri-jledge: #191b46;
   --on-pri: #ffffff; --pri-text: #b0b5f5; --pri-soft: rgba(176, 181, 245, .12); --pri-ring: rgba(176, 181, 245, .50); --pri-rgb: 176, 181, 245;
   --brass: #e6c27a; --brass-hi: #e3cfa2; --brass-ink: #e6c27a; --brass-soft: rgba(230, 194, 122, .12);
-  --danger: #ee968e; --danger-soft: rgba(238, 150, 142, .11); --warn: #e5b46e; --warn-soft: rgba(229, 180, 110, .12); --ok: #86d0a8; --ok-soft: rgba(134, 208, 168, .12);
+  --danger: #ee968e; --danger-soft: rgba(238, 150, 142, .11); --warn: #e5b46e; --warn-soft: rgba(229, 180, 110, .12); --ok: #b3b8f2; --ok-soft: rgba(150, 157, 236, .14);
   --line: rgba(214, 213, 240, .11); --line-2: rgba(214, 213, 240, .18); --line-soft: rgba(214, 213, 240, .06); --rim: rgba(176, 181, 245, .36);
   --field: #161622; --field-line: rgba(176, 181, 245, .22); --wall: #0a0a12;
   --face: linear-gradient(180deg, #282839, #21212f); --face-tilt: linear-gradient(175deg, #282839, #21212f); --slab-face: linear-gradient(180deg, #1f1f2d, #1b1b27);

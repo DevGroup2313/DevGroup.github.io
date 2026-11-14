@@ -2,7 +2,8 @@
    The logo stands alone with its living 3D mark and no ring; the gold band at the foot of the Home is gone; the side
    rail carries three keys (notes, a new sale, price check) and the rest live in the top bar: the calculator has its own
    key, and what runs low and the reminders share one Alerts panel, where each low item has its Receive key. Then the
-   web app is served as GitHub Pages serves it (the site's front page at /, Lakay at /lakay/): its manifest names the
+   web app is served from builds/Lakay-Web.zip as the owner uploads it to the store's website (Build 15: the lakay folder
+   at /lakay/): its manifest names the
    logo for home screens and docks, every icon it names is there, Chromium finds nothing that stops it being installed,
    the service worker keeps the page, and Lakay opens again with the server gone. Nothing is refused by the page's policy.
    Run: node tests/t_build14.js [url]   (default: the built page, app/Lakay.html, opened from disk) */
@@ -19,18 +20,21 @@ function png(buf) { return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20), t
 function localInput(d) { const z = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()) + "T" + z(d.getHours()) + ":" + z(d.getMinutes()); }
 
 /* a small server that answers as GitHub Pages does: the site's front page at /, the web app at /lakay/ */
-const TYPES = { ".html": "text/html; charset=utf-8", ".webmanifest": "application/manifest+json", ".js": "text/javascript", ".png": "image/png", ".ico": "image/x-icon", ".sha256": "text/plain" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".json": "application/json", ".js": "text/javascript", ".png": "image/png", ".ico": "image/x-icon", ".sha256": "text/plain" };
+/* what the owner uploads: the lakay folder from builds/Lakay-Web.zip, unpacked here as a host's file manager would */
+const SITE = fs.mkdtempSync(path.join(require("os").tmpdir(), "lakay-site-"));
+require("child_process").execFileSync("python3", ["-I", "-m", "zipfile", "-e", path.join(ROOT, "builds", "Lakay-Web.zip"), SITE]);
+const UPLOADED = path.join(SITE, "lakay");
 function serve() {
-  const front = fs.readFileSync(path.join(ROOT, "release", "readme", "site-index.html"), "utf8").replace(/@@BUILD@@/g, String(BUILD));
   const asked = [];
   const server = http.createServer((req, res) => {
     const u = decodeURIComponent(req.url.split("?")[0]); asked.push(u);
-    if (u === "/" || u === "/index.html") { res.writeHead(200, { "Content-Type": TYPES[".html"] }); return res.end(front); }
+    if (u === "/") { res.writeHead(200, { "Content-Type": TYPES[".html"] }); return res.end("<!doctype html><title>The store's own site</title><p>Our store</p>"); }
     if (u === "/lakay") { res.writeHead(301, { Location: "/lakay/" }); return res.end(); }
     if (u.indexOf("/lakay/") !== 0) { res.writeHead(404); return res.end("not here"); }
     let rel = u.slice("/lakay/".length) || "index.html";
     if (rel.indexOf("..") >= 0 || rel.indexOf("/") >= 0) { res.writeHead(404); return res.end(); }
-    const file = path.join(WEB, rel);
+    const file = path.join(UPLOADED, rel);
     if (!fs.existsSync(file)) { res.writeHead(404); return res.end("not here"); }
     res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream", "Cache-Control": "max-age=600" });
     res.end(fs.readFileSync(file));
@@ -42,7 +46,8 @@ function serve() {
 }
 
 (async () => {
-  const browser = await chromium.launch();
+  /* lakay.test stands for a website reached by plain http, which is not a secure address */
+  const browser = await chromium.launch({ args: ["--host-resolver-rules=MAP lakay.test 127.0.0.1"] });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const errors = [], csp = [];
   const p = await ctx.newPage();
@@ -132,7 +137,11 @@ function serve() {
   ok(errors.length === 0, "no errors in the page" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
 
-  console.log("Lakay on the web, served as GitHub Pages serves it");
+  console.log("Lakay on the web, uploaded from builds/Lakay-Web.zip to a website");
+  const inZip = fs.readdirSync(UPLOADED).sort().join();
+  ok(inZip === "apple-touch-icon.png,favicon.ico,icon-192.png,icon-512.png,icon-maskable-192.png,icon-maskable-512.png,index.html,manifest.json,sw.js" && fs.existsSync(path.join(SITE, "READ ME FIRST (web).txt")),
+    "the zip holds the lakay folder (the page, its manifest, its worker and its icons) and the note on putting it online");
+  ok(fs.readFileSync(path.join(UPLOADED, "index.html")).equals(fs.readFileSync(path.join(WEB, "index.html"))), "the page in the zip is web/index.html, byte for byte");
   const html = fs.readFileSync(path.join(WEB, "index.html"));
   ok(fs.readFileSync(path.join(WEB, "index.html.sha256"), "utf8").indexOf(crypto.createHash("sha256").update(html).digest("hex")) === 0, "web/index.html.sha256 matches the page");
   const scriptOf = s => { const m = s.match(/<script>([\s\S]*)<\/script>/); return m ? m[1] : ""; };
@@ -142,12 +151,12 @@ function serve() {
   const w = await wctx.newPage(), werr = [], wcsp = [];
   w.on("pageerror", e => werr.push(e.message));
   w.on("console", m => { if (/Content Security Policy|Refused to/i.test(m.text())) wcsp.push(m.text()); });
-  await w.goto(base + "/"); await w.waitForURL(base + "/lakay/", { timeout: 10000 }); await w.waitForSelector("#introEnter", { timeout: 20000 });
-  ok(true, "the site's front page leads to Lakay at /lakay/");
+  await w.goto(base + "/lakay"); await w.waitForURL(base + "/lakay/", { timeout: 10000 }); await w.waitForSelector("#introEnter", { timeout: 20000 });
+  ok(true, "the uploaded folder opens at /lakay/ beside the store's own pages");
   const get = async (u) => { const r = await wctx.request.get(u); return { status: r.status(), type: r.headers()["content-type"], body: await r.body() }; };
   const manHref = await w.evaluate(() => document.querySelector('link[rel="manifest"]').href);
   const manRes = await get(manHref), man = { type: manRes.type, json: JSON.parse(manRes.body.toString("utf8")), href: manHref };
-  ok(manRes.status === 200 && /manifest\+json/.test(man.type), "the manifest is served as a manifest");
+  ok(manRes.status === 200 && /json/.test(man.type) && /manifest\.json$/.test(manHref), "the manifest is manifest.json, which any host serves as JSON");
   ok(man.json.name === "Lakay" && man.json.short_name === "Lakay" && man.json.display === "standalone" && man.json.start_url === "./" && man.json.scope === "./", "the manifest names Lakay, opens in its own window, and keeps to /lakay/");
   const icons = await Promise.all(man.json.icons.map(async (i) => { const r = await get(new URL(i.src, manHref).href), g = png(r.body);
     return { src: i.src, sizes: i.sizes, purpose: i.purpose, status: r.status, ctype: r.type, w: g.w, h: g.h, type: g.type }; }));
@@ -161,17 +170,23 @@ function serve() {
   ok(tab.length === 2 && /^96x96 data:image\/png/.test(tab[1]), "the tab shows the coin alone, carried inside the page, so every browser has it at once");
   const cdp = await wctx.newCDPSession(w);
   const am = await cdp.send("Page.getAppManifest").catch(e => ({ fail: e.message }));
-  ok(am && !am.fail && am.errors && am.errors.length === 0 && /manifest\.webmanifest$/.test(am.url), "Chromium reads the manifest with no errors" + (am && am.errors && am.errors.length ? ": " + JSON.stringify(am.errors) : am && am.fail ? ": " + am.fail : ""));
+  ok(am && !am.fail && am.errors && am.errors.length === 0 && /manifest\.json$/.test(am.url), "Chromium reads the manifest with no errors" + (am && am.errors && am.errors.length ? ": " + JSON.stringify(am.errors) : am && am.fail ? ": " + am.fail : ""));
   const sw = await w.evaluate(() => navigator.serviceWorker.ready.then(r => ({ scope: r.scope, script: r.active && r.active.scriptURL })));
   ok(sw.scope === base + "/lakay/" && sw.script === base + "/lakay/sw.js", "the service worker is at work for /lakay/ and nothing beyond it");
   await w.reload(); await w.waitForSelector("#introEnter", { timeout: 20000 });
   ok(await w.evaluate(() => !!navigator.serviceWorker.controller), "after a reload the page is in its care");
   const kept = await w.evaluate(async (b) => { const ks = await caches.keys(); const c = await caches.open("lakay-web-" + b); const reqs = await c.keys(); return { ks, n: reqs.map(r => new URL(r.url).pathname) }; }, BUILD);
-  ok(kept.ks.indexOf("lakay-web-" + BUILD) >= 0 && ["/lakay/", "/lakay/index.html", "/lakay/manifest.webmanifest", "/lakay/apple-touch-icon.png", "/lakay/icon-512.png"].every(f => kept.n.indexOf(f) >= 0),
+  ok(kept.ks.indexOf("lakay-web-" + BUILD) >= 0 && ["/lakay/", "/lakay/index.html", "/lakay/manifest.json", "/lakay/apple-touch-icon.png", "/lakay/icon-512.png"].every(f => kept.n.indexOf(f) >= 0),
     "it keeps the page, the manifest and the icons (" + kept.n.length + " files), and nothing of the store's");
   const inst = await cdp.send("Page.getInstallabilityErrors").catch(e => ({ fail: e.message }));
   ok(inst && !inst.fail && Array.isArray(inst.installabilityErrors) && inst.installabilityErrors.length === 0,
     "Chromium finds nothing that stops Lakay being installed or added to a home screen or dock" + (inst && inst.installabilityErrors && inst.installabilityErrors.length ? ": " + JSON.stringify(inst.installabilityErrors) : inst && inst.fail ? ": " + inst.fail : ""));
+  /* a plain http address on another host is not secure: Lakay says what to do instead of failing */
+  const insecure = await browser.newContext(); const ip = await insecure.newPage();
+  await ip.goto("http://lakay.test:" + site.port + "/lakay/"); await ip.waitForSelector("#fatalWhy", { timeout: 20000 });
+  const why = await ip.textContent("#fatalWhy");
+  ok(/https/.test(why) && !(await ip.evaluate(() => window.isSecureContext)), "on a plain http address Lakay asks for https, since browsers seal only on secure addresses");
+  await insecure.close();
   await site.stop();
   await w.reload(); await w.waitForSelector("#introEnter", { timeout: 20000 });
   ok(true, "with the server gone, Lakay opens again from what the worker kept");

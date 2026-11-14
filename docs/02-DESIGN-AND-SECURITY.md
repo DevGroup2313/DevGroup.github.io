@@ -154,13 +154,27 @@ card company, as far as possible.
   Content Security Policy needed no change: it still allows pictures only from inside the page. A first try pointed the
   iPhone's icon at a file beside the page, and the policy rightly refused it; the test of Build 12 checks that the
   policy refuses nothing the page needs.
+- **Scanning and the camera** (Build 15). A scanner that types is heard only when no field has the focus, and only by
+  its speed, so a person's typing is never taken for a code. The camera is opened only when someone presses its key;
+  each picture is read in memory, on the device, and dropped at once; nothing is kept or sent, and the camera is let go
+  as soon as a code is read or the window closes. Lakay's own reader accepts a code only with a right check digit,
+  read twice.
+- **Money transfers and top-ups** (Build 15). Each entry is a sealed record and a ledger line, like a sale, and Verify
+  replays them. They hold the provider, the amount, the fee, the commission, the provider's reference and a short note,
+  and never a customer's name, address or papers. A cashier may record; only someone who sees the reports may void,
+  with a reason, and the books themselves refuse anyone else. The commission is shown only to those who see the reports.
+- **The finder** (Build 15) is an index of the items kept in memory while the books are open, and dropped when they
+  lock. It is never written anywhere.
 - **The web app's policy** (Build 14). The web build (`web/index.html`) is the apps' page with three additions to its
   Content Security Policy, all limited to its own address: `img-src 'self'` (the iPhone's home screen tile beside the
   page), `manifest-src 'self'` (the manifest that names its icons) and `worker-src 'self'` (its service worker). Scripts
   are still only its own, named by SHA-256; `connect-src` is still `'none'`, so the page can send nothing anywhere. The
   service worker answers only for the site's own files, fetches the newest first, keeps the page, the manifest and the
   icons for use with no connection, and never sees the books, which stay sealed in the browser's own store on each
-  device. It is registered only in the web build, and only over https or on this computer. The test of Build 14 serves
+  device. It is registered only in the web build, and only over https or on this computer. Since Build 15 the web app
+  is a zip for the owner's own website (`builds/Lakay-Web.zip`), and its manifest is `manifest.json`. A website must
+  use https: browsers give Web Crypto, which seals the books, only to secure addresses, and on plain http Lakay says so
+  and does not open. The test of Build 14 serves
   the site as GitHub Pages does and checks that the policy refuses nothing.
 
 ## 8. Honest limits

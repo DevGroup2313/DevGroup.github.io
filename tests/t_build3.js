@@ -74,7 +74,8 @@ function ok(cond, what) { if (cond) { passed++; console.log("  ok   " + what); }
   await page.click('.nav-btn[data-room="inventory"]'); await page.waitForTimeout(300);
   const field = page.locator("main#room input[type=text], main#room input[type=search], main#room input:not([type])").first();
   if (await field.count()) {
-    await field.click(); await field.fill("Kremas");
+    /* the list below redraws as one types (Build 15: below the departments' cards), so a person's pause comes first */
+    await field.click(); await field.fill("Kremas"); await page.waitForTimeout(300);
     await field.click({ button: "right" }); await page.waitForTimeout(200);
     ok(await page.locator("#cd-em-menu[role=menu]").count() === 1, "a right press on a field opens the family's edit menu");
     await page.screenshot({ path: path.join(__dirname, "edit-menu.png") });

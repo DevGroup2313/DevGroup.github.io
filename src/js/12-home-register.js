@@ -292,51 +292,54 @@
     var payKey = h("button.key.primary.lg", { type: "button", id: "takeCash", onclick: takeCash }, [ui.emo("💵"), t("reg.takeCash")]);
     view = { search: search, results: results, lines: lines, totals: totals, payKey: payKey };
 
-    [["all", t("all"), "✨"]].concat(ui.cats().map(function (c) { return [c.id, ui.catName(c), ui.catEmo(c.id)]; })).forEach(function (c) {
-      chips.appendChild(h("button.chip", { type: "button", "aria-pressed": String(c[0] === cat), onclick: function (e) {
+    [["all", t("all")]].concat(ui.cats().map(function (c) { return [c.id, ui.catName(c)]; })).forEach(function (c) {
+      chips.appendChild(h("button.chip", { type: "button", "aria-pressed": String(c[0] === cat), "data-dept": c[0], onclick: function (e) {
         cat = c[0]; Array.prototype.forEach.call(chips.children, function (x) { x.setAttribute("aria-pressed", String(x === e.currentTarget)); }); draw();
-      } }, [ui.emo(c[2]), c[1]]));
+      } }, [c[0] === "all" ? h("span.dept-jewel.xs", { "aria-hidden": "true" }, U.icon("box")) : ui.deptIcon(c[0], "xs"), c[1]]));
     });
-    function matches() {
-      var q = U.norm(search.value);
-      return Object.keys(st.items).map(function (k) { return st.items[k]; }).filter(function (it) {
-        if (it.archived) return false;
-        if (cat !== "all" && it.cat !== cat) return false;
-        if (!q) return true;
-        return U.norm(it.name).indexOf(q) >= 0 || (it.barcode && U.norm(it.barcode) === q) || (it.sku && U.norm(it.sku).indexOf(q) >= 0);
-      }).sort(function (a, b) { return a.name.localeCompare(b.name); });
-    }
+    /* the finder (05-find.js) answers at once however many items there are; the first 80 are drawn */
+    function matches() { return E.find.search({ q: search.value, cat: cat, show: "active" }); }
     function draw() {
       U.clear(results);
-      var list = matches();
-      if (!list.length) { results.appendChild(h("p.muted.empty", null, Object.keys(st.items).length ? t("reg.noMatch") : t("reg.noItems"))); return; }
-      list.slice(0, 80).forEach(function (it) {
-        var low = it.reorderAt !== null && it.stock <= it.reorderAt;
+      var ids = matches();
+      /* the department of money transfers and top-ups records one here, at the counter, apart from the sale */
+      if (cat === "services" && B.can("sell")) results.appendChild(h("button.product.svc-product#regRecordSvc", { type: "button", onclick: function () { E.inventory.recordService(); } }, [
+        h("span.p-emo", { "aria-hidden": "true" }, ui.deptIcon("services", "sm")), h("span.p-name", null, t("svc.recordHere")), h("span.p-stock", null, t("svc.recordHereHint"))]));
+      if (!ids.length) { if (cat !== "services") results.appendChild(h("p.muted.empty", null, Object.keys(st.items).length ? t("reg.noMatch") : t("reg.noItems"))); return; }
+      ids.slice(0, 80).forEach(function (id) {
+        var it = st.items[id], low = E.find.low(it);
         results.appendChild(h("button.product", { type: "button", "data-id": it.id, onclick: function (e) { add(it.id); ui.plusOne(e.currentTarget); search.focus(); } }, [
-          h("span.p-emo.cat-" + (ui.CAT_EMO[it.cat] ? it.cat : "other"), { "aria-hidden": "true" }, ui.emo(ui.catEmo(it.cat))),
+          h("span.p-emo", { "aria-hidden": "true" }, ui.deptIcon(it.cat, "sm")),
           h("span.p-name", null, it.name), h("span.p-price", null, money(it.price)),
           h("span.p-stock" + (it.stock <= 0 ? ".bad" : low ? ".warn" : ""), null, t("inv.inStock", { n: it.stock }))]));
       });
-      if (list.length > 80) results.appendChild(h("p.muted", null, t("reg.more", { n: list.length - 80 })));
+      if (ids.length > 80) results.appendChild(h("p.muted", null, t("reg.more", { n: ids.length - 80 })));
     }
-    search.addEventListener("input", U.debounce(draw, 80));
+    /* a code, typed or scanned into the search: its item goes onto the ticket; a code no item has offers to add it */
+    function byCode(code) {
+      var ids = E.find.byCode(code).filter(function (id) { return !st.items[id].archived; });
+      if (ids.length) { add(ids[0]); if (E.sound) E.sound.play("scan"); return true; }
+      return false;
+    }
+    search.addEventListener("input", U.debounce(draw, 70));
     search.addEventListener("keydown", function (e) {
       if (e.key !== "Enter") return;
       e.preventDefault();
-      var q = U.norm(search.value); if (!q) return;
-      var exact = Object.keys(st.items).map(function (k) { return st.items[k]; }).filter(function (it) {
-        return !it.archived && ((it.barcode && U.norm(it.barcode) === q) || (it.sku && U.norm(it.sku) === q));
-      });
-      var list = exact.length ? exact : matches();
-      if (list.length === 1) { add(list[0].id); search.value = ""; draw(); }
-      else if (!list.length) ui.toast(t("reg.notFound", { q: search.value }), "bad");
+      var raw = search.value.trim(); if (!raw) return;
+      if (byCode(raw)) { search.value = ""; draw(); return; }
+      var list = matches();
+      if (list.length === 1) { add(list[0]); search.value = ""; draw(); }
+      else if (!list.length) { if (/^[0-9A-Za-z-]{4,}$/.test(raw) && /\d/.test(raw)) { E.scan.unknown(raw); search.value = ""; draw(); } else ui.toast(t("reg.notFound", { q: raw }), "bad"); }
     });
+    var cam = E.scan.cameraKey(function (code) { if (!byCode(code)) E.scan.unknown(code); });
+    /* a scanner that types, with no field in focus: the item goes onto the ticket */
+    ui.onScan = function (code) { if (!B.can("sell")) return false; if (!byCode(code)) E.scan.unknown(code); return true; };
 
     main.appendChild(ui.roomHead("room.register", "tip.register", [h("span.kbd-hint", null, t("reg.keys"))]));
     if (B.mode === "practice") main.appendChild(h("div.banner.practice", null, [ui.emo("🧪"), h("span", null, t("reg.practiceBanner")),
       h("button.key.sm", { type: "button", onclick: function () { E.door.startReal("app"); } }, t("practice.real"))]));
     main.appendChild(h("div.register", null, [
-      h("section.reg-pick.card", { "aria-label": t("reg.pick") }, [h("div.search-row", null, [U.icon("search"), search]), chips, results]),
+      h("section.reg-pick.card", { "aria-label": t("reg.pick") }, [h("div.search-row", null, [U.icon("search"), search, cam]), chips, results]),
       h("aside.reg-ticket.card", { "aria-label": t("reg.ticket") }, [
         h("div.card-head", null, [h("h2", null, [ui.emo("🧾"), t("reg.ticket")]), h("span.kbd-hint", null, ui.dateLong(new Date()))]),
         lines, totals, h("div.pay-row", null, [h("button.key.sm", { type: "button", id: "clearTicket", onclick: clearTicket }, [ui.emo("🧹"), t("reg.clear")]), payKey])])]));

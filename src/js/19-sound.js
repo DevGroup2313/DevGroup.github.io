@@ -90,6 +90,8 @@
     shut: function (t) { cloud(t, .14, 38, 760, 2600, .045, 0); tone(t + .05, 78, .012, .42, .11, "sine", .88); tone(t + .05, 150, .012, .26, .05, "sine", .9); },
     lamp: function (t) { tap(t, .12, 1900, .025, .2); tone(t + .02, 180, .02, .5, .07); tone(t + .06, 720, .01, .4, .03); },
     sale: function (t) { bell(t, 783.99, .08, .7, -.2); bell(t + .09, 1174.66, .07, .9, .2); },
+    /* a code read by the scanner or the camera: one short, clear note (Build 15) */
+    scan: function (t) { tone(t, 1975.53, .003, .11, .045, "sine", 0, 0); tap(t, .05, 2400, .015, 0); },
     nope: function (t) { tap(t, .1, 300, .06, 0); tap(t + .1, .08, 260, .06, 0); }
   };
   var lastAt = 0, GAP = 45;

@@ -4,8 +4,8 @@
    store on this device, and the worker never sees them. With a connection it always fetches the newest page first;
    only when there is none does it answer from what it kept. It touches nothing but this site's own files. */
 "use strict";
-var CACHE = "lakay-web-14";
-var FILES = ["./", "index.html", "manifest.webmanifest", "apple-touch-icon.png", "favicon.ico", "icon-192.png", "icon-512.png", "icon-maskable-192.png", "icon-maskable-512.png"];
+var CACHE = "lakay-web-15";
+var FILES = ["./", "index.html", "manifest.json", "apple-touch-icon.png", "favicon.ico", "icon-192.png", "icon-512.png", "icon-maskable-192.png", "icon-maskable-512.png"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
 });

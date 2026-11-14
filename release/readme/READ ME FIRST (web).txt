@@ -1,0 +1,42 @@
+LAKAY ON YOUR OWN WEBSITE
+Build @@BUILD@@, @@DATE@@.
+
+PUT IT ONLINE
+1. Unzip this file. You get the folder "lakay" and this note.
+2. Upload the whole "lakay" folder to your website, beside your other pages
+   (with your host's File Manager, or by FTP).
+3. Open https://YOUR-DOMAIN/lakay/ in a browser.
+
+To have Lakay at the main address (https://YOUR-DOMAIN/) instead, upload what is
+inside the "lakay" folder rather than the folder itself. Do this only if nothing
+else lives there: it would replace an index.html that is already there.
+
+THE ADDRESS MUST BEGIN WITH https://
+Lakay seals the store's books, and browsers allow that only on a secure address.
+Most hosts give https for free; turn it on in your host's settings if it is not
+on yet. On an address that begins with http:// Lakay will say so and not open.
+
+ON A PHONE, A TABLET OR A COMPUTER
+- iPhone and iPad: open the address in Safari, press Share, then
+  "Add to Home Screen". Lakay's logo goes on the home screen.
+- Mac: open it in Safari, then File, "Add to Dock". The logo goes in the Dock.
+- Windows, Mac or Android with Chrome or Edge: choose "Install Lakay" in the
+  address bar or in the browser's menu.
+The logo also shows in the browser's tab and address bar.
+Once Lakay has been opened, it opens again with no connection.
+
+THE BOOKS STAY ON EACH DEVICE
+Nothing the store types is sent to your website or anywhere else. Each browser,
+and each Lakay added to a home screen or the Dock, keeps its own books, sealed
+with the store's password. Use one place for the store's books on each device,
+and keep a backup (Settings, Backups).
+
+A NEW BUILD
+Upload the new "lakay" folder over the old one. Each device takes the new build
+the next time Lakay opens with a connection. The books are not touched.
+
+CHECKING THE FILES
+The SHA-256 fingerprint of lakay/index.html is
+@@SHA@@
+
+Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.

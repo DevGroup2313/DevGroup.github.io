@@ -169,6 +169,14 @@
     if (slow.length) node.appendChild(section("🐢 " + t("rep.slow"), table([t("inv.name"), t("inv.stock")].concat(costs ? [t("inv.value")] : []), slow.slice(0, 10).map(function (it) {
       return [it.name, it.stock].concat(costs ? [it.cost === null ? "—" : money(it.stock * it.cost)] : []);
     }), [1, 2]), t("rep.slowHint")));
+    /* money transfers and top-ups, apart from the sales: the money is the providers' (Build 15) */
+    var sv = r.services, provs = Object.keys(sv.byProvider);
+    if (sv.count || sv.voided) node.appendChild(section("💱 " + t("rep.svc"), h("div", null, [
+      table([t("svc.provider"), t("svc.entries"), t("svc.k.send"), t("svc.k.payout"), t("svc.k.topup"), t("svc.fees")].concat(B.can("reports") ? [t("svc.commission")] : []),
+        provs.map(function (p) { var x = sv.byProvider[p]; return [t("svc.p." + p), x.count, money(x.send), money(x.payout), money(x.topup), money(x.fees)].concat(B.can("reports") ? [money(x.commission)] : []); })
+          .concat([[t("rep.total"), sv.count, money((sv.byKind.send || { amount: 0 }).amount), money((sv.byKind.payout || { amount: 0 }).amount), money((sv.byKind.topup || { amount: 0 }).amount), money(sv.fees)]
+            .concat(B.can("reports") ? [money(sv.commission)] : [])]), [1, 2, 3, 4, 5, 6]),
+      h("p.hint#repSvcCash", null, t("rep.svcCash", { a: money(sv.cashIn), b: money(sv.cashOut) }) + (sv.voided ? " " + t("rep.svcVoided", { n: sv.voided }) : ""))]), t("rep.svcHint")));
     var reasons = Object.keys(r.losses.byReason);
     node.appendChild(section("💔 " + t("rep.losses"), reasons.length ? table([t("ad.reason"), t("rep.items")].concat(costs ? [t("inv.value")] : []), reasons.map(function (k) {
       var x = r.losses.byReason[k]; return [t("reason." + k), x.qty].concat(costs ? [money(x.value)] : []);

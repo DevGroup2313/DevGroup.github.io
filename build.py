@@ -7,7 +7,7 @@
 The page refuses every script but its own: its Content Security Policy names the SHA-256 of the one script it carries.
 The build stops if the code reaches for anything that would weaken that (eval, new Function, innerHTML, document.write,
 a script or a style from the network)."""
-import base64, glob, hashlib, json, os, re, shutil, sys
+import base64, glob, hashlib, json, os, re, shutil, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "src")
@@ -74,14 +74,16 @@ def main():
     for old_s, new_s in (("img-src data: blob:;", "img-src data: blob: 'self';"), ("manifest-src 'none';", "manifest-src 'self';"), ("worker-src 'none';", "worker-src 'self';"),
                          ('<link rel="apple-touch-icon" sizes="180x180" href="' + touch + '">', '<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">'),
                          ('<meta name="apple-mobile-web-app-title" content="Lakay">',
-                          '<meta name="apple-mobile-web-app-title" content="Lakay">\n<link rel="manifest" href="manifest.webmanifest">\n'
+                          '<meta name="apple-mobile-web-app-title" content="Lakay">\n<link rel="manifest" href="manifest.json">\n'
                           '<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-capable" content="yes">\n'
                           '<meta name="apple-mobile-web-app-status-bar-style" content="default">\n<meta name="lakay-web" content="1">')):
         if web.count(old_s) != 1:
             sys.exit("build stopped: the web page could not be made (%s)" % old_s[:40])
         web = web.replace(old_s, new_s)
     WEB = os.path.join(HERE, "web")
-    os.makedirs(WEB, exist_ok=True)
+    if os.path.isdir(WEB):
+        shutil.rmtree(WEB)
+    os.makedirs(WEB)
     with open(os.path.join(WEB, "index.html"), "w", encoding="utf-8", newline="\n") as f:
         f.write(web)
     icons = {"apple-touch-icon.png": "web-tile-180.png", "icon-192.png": "web-coin-192.png", "icon-512.png": "web-coin-512.png",
@@ -96,9 +98,10 @@ def main():
                   {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
                   {"src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
                   {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}
-    with open(os.path.join(WEB, "manifest.webmanifest"), "w", encoding="utf-8", newline="\n") as f:
+    # manifest.json, not .webmanifest (Build 15): every web host serves .json with a type browsers accept
+    with open(os.path.join(WEB, "manifest.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False); f.write("\n")
-    kept = ["./", "index.html", "manifest.webmanifest"] + sorted(icons)
+    kept = ["./", "index.html", "manifest.json"] + sorted(icons)
     with open(os.path.join(SRC, "web", "sw.js"), encoding="utf-8") as f:
         sw = f.read().replace('"/*@@CACHE@@*/"', json.dumps("lakay-web-" + build)).replace('"/*@@FILES@@*/"', json.dumps(kept))
     if "@@" in sw:
@@ -109,6 +112,28 @@ def main():
     with open(os.path.join(WEB, "index.html.sha256"), "w", encoding="ascii", newline="\n") as f:
         f.write("%s  index.html\n" % wsha)
     print("Lakay web app %s: web/ (index.html %d bytes, SHA-256 %s; manifest, service worker, %d icons)" % (build, len(web.encode("utf-8")), wsha, len(icons)))
+
+    # The web app, ready to upload to the owner's own website (Build 15): builds/Lakay-Web.zip holds a "lakay" folder
+    # and a note on putting it online. The same input always makes the same zip (fixed times), so a build that changes
+    # nothing changes nothing here.
+    with open(os.path.join(HERE, "release", "readme", "READ ME FIRST (web).txt"), encoding="utf-8") as f:
+        note = f.read().replace("@@BUILD@@", build).replace("@@DATE@@", date).replace("@@SHA@@", wsha)
+    if "@@" in note:
+        sys.exit("build stopped: a placeholder was left in the web app's note")
+    os.makedirs(os.path.join(HERE, "builds"), exist_ok=True)
+    zpath = os.path.join(HERE, "builds", "Lakay-Web.zip")
+    stamp = tuple(int(x) for x in date.split("-")) + (12, 0, 0)
+    def put(z, name, data):
+        zi = zipfile.ZipInfo(name, date_time=stamp)
+        zi.compress_type = zipfile.ZIP_DEFLATED
+        zi.external_attr = 0o644 << 16
+        z.writestr(zi, data, compresslevel=9)
+    with zipfile.ZipFile(zpath, "w") as z:
+        put(z, "READ ME FIRST (web).txt", note.replace("\n", "\r\n").encode("utf-8"))
+        for name in ["index.html", "manifest.json", "sw.js"] + sorted(icons):
+            with open(os.path.join(WEB, name), "rb") as f:
+                put(z, "lakay/" + name, f.read())
+    print("Lakay web app %s: builds/Lakay-Web.zip, %d bytes, ready to upload" % (build, os.path.getsize(zpath)))
 
 
 if __name__ == "__main__":

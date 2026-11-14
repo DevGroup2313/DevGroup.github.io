@@ -4,6 +4,25 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 15 (14 November 2026): Inventory's departments, scanning everywhere, large inventories, and the transfers and top-ups
+
+The first item on the owner's list: Inventory, with the store's departments as real sections, barcode scanning everywhere, and room for an inventory of any size.
+
+- **The departments, each with its own tab and page:** Music, Films, Perfume and beauty, Caribbean groceries, Drinks, Haitian patties and food, Money transfers and top-ups, and Other goods (and any department the owner adds). All departments shows them side by side, with what runs low and what is out. Each department's page has its own sign, its own figures (items, units on the shelf, value at cost, running low), and its own search and filters. An item added from a department starts in it. The arrow keys move between the tabs, and the tabs fade at an edge where more of them wait.
+- **New signs for the departments.** Each is a line drawing of what it holds, set in the logo's periwinkle jewel: a disc, a film, a bottle, a basket, a cup, a covered dish, two arrows, a tag. The coconut and dumpling emoji are gone, in keeping with the owner's rule against fruit and food as decoration.
+- **Nothing green.** The stock figures that were green, and every other "all is well" mark (the people who are active in Team, the success messages), are now the logo's periwinkle, by day and by night.
+- **Barcode scanning everywhere.**
+  - A scanner that types, plugged in or paired, is heard in every room, even with no field in focus. At the Register the item goes onto the ticket. In Inventory its card opens, or its delivery while receiving. Anywhere else Price check shows it. With a window open, a scan fills its barcode field.
+  - A code no item has says so and offers to add one with that barcode; at the Register the new item then goes straight onto the ticket.
+  - The same product is found whether its code comes as EAN-13, UPC-A, EAN-8 or GTIN-14.
+  - Ordinary typing is never mistaken for a scan: Lakay tells a scanner by its speed.
+  - **The camera, where the device allows.** A camera key stands beside the searches and the barcode field on devices with a camera. It uses the device's own barcode reader where there is one, and otherwise Lakay's own reader for the codes on store goods (EAN-13, UPC-A and EAN-8), which accepts a code only when its check digit is right and it reads the same code twice. The picture never leaves the device and is never kept.
+- **Large inventories.** Every list is drawn a page of fifty at a time, with Previous and Next, from one index kept in memory. With twenty thousand items in the test: a search took about 5 ms, a scanned code about 0.1 ms, and Inventory drew in under 20 ms.
+- **Money transfers and top-ups, a service with its own log.** Each transfer sent, transfer paid out and phone top-up is recorded with its provider (RIA, CAM, Unitransfer, Boss Revolution or another), the amount, the fee, the provider's reference and, for those who see the reports, the store's commission. The page shows today's figures, the log by period and provider, and what came into and went out of the drawer. The money is held for the provider, so it is never counted in the store's sales or profit; the Reports show it in a section of its own. A mistake is voided with a reason by someone who sees the reports, and stays in the log. No customer's name or papers are kept. Verify replays every entry from the ledger. At the Register, the department records one at the counter.
+- **The web app as a zip for the owner's own website.** At the owner's request, `builds/Lakay-Web.zip` replaces the GitHub Pages plan: a `lakay` folder to upload, and a READ ME FIRST. Its manifest is now `manifest.json`, which every host serves correctly. The address must begin with https, because browsers allow Lakay's sealing only on secure addresses; on plain http Lakay now says so.
+- **Two new chapters in the Guidebook:** Departments and scanning, and Money transfers and top-ups.
+- tests/t_build15.js: 60 checks, including Chromium's fake camera showing a printed barcode, and twenty thousand items. The Build 14 test now serves the web app from the zip and checks the https message (49 checks). Every suite passes: 344 checks in all.
+
 ## Build 14 (14 November 2026): the logo left alone, the colour woven in, a quieter rail, and Lakay on the web
 
 The owner approved the arrangement of Build 13 and asked for five corrections. Everything else stays as approved.

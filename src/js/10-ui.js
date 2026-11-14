@@ -40,15 +40,22 @@
   /* ---------- emojis (drawn by the device's own emoji font; hidden from screen readers, the words carry the meaning) ---------- */
   ui.emo = function (ch, cls) { return h("span.emo" + (cls ? "." + cls : ""), { "aria-hidden": "true" }, ch); };
   ui.ROOM_EMO = { home: "🏠", register: "🛒", inventory: "📦", reports: "📊", team: "👥", guide: "📖", settings: "⚙️", studio: "⚒️" };
-  ui.CAT_EMO = { music: "🎵", movies: "🎬", perfume: "🌸", grocery: "🥥", drinks: "🥤", food: "🥟", services: "💸", other: "🛍️" };
+  /* the departments' signs: no fruit or food as decoration (the owner, 13 November 2026), only what each one holds */
+  ui.CAT_EMO = { music: "🎵", movies: "🎬", perfume: "🌸", grocery: "🧺", drinks: "🥤", food: "🍽️", services: "💱", other: "🛍️" };
   ui.catEmo = function (c) { return ui.CAT_EMO[c] || "🏷️"; };
+  /* and their line drawings, set in the logo's periwinkle jewel (Build 15) */
+  ui.CAT_ICON = { music: "disc", movies: "film", perfume: "bottle", grocery: "basket", drinks: "cup", food: "cloche", services: "swap", other: "tag" };
+  ui.deptIcon = function (cat, cls) { return h("span.dept-jewel" + (cls ? "." + cls : ""), { "aria-hidden": "true" }, U.icon(ui.CAT_ICON[cat] || "tag")); };
 
   /* ---------- messages ---------- */
-  ui.toast = function (text, kind) {
+  /* act: an optional key inside the message, { label, fn } (Build 15: "No item has this code" offers to add it) */
+  ui.toast = function (text, kind, act) {
     var box = document.getElementById("toasts");
-    var n = h("div.toast" + (kind ? "." + kind : ""), { role: kind === "bad" ? "alert" : "status" }, [ui.emo({ bad: "⚠️", warn: "⚠️", good: "✅" }[kind] || "💬"), h("span", null, text)]);
+    var n = h("div.toast" + (kind ? "." + kind : "") + (act ? ".has-act" : ""), { role: kind === "bad" ? "alert" : "status" }, [ui.emo({ bad: "⚠️", warn: "⚠️", good: "✅" }[kind] || "💬"), h("span", null, text),
+      act ? h("button.key.sm.primary.toast-act", { type: "button", onclick: function () { n.remove(); act.fn(); } }, act.label) : null]);
     box.appendChild(n);
-    setTimeout(function () { n.classList.add("going"); setTimeout(function () { n.remove(); }, 400); }, kind === "bad" ? 7000 : 4200);
+    setTimeout(function () { n.classList.add("going"); setTimeout(function () { n.remove(); }, 400); }, act ? 9000 : kind === "bad" ? 7000 : 4200);
+    return n;
   };
 
   /* ---------- dialogs: focus stays inside, Esc closes, focus returns where it was ---------- */
@@ -119,7 +126,9 @@
     var hint = opt.hint ? h("p.hint", { id: id + "-h" }, opt.hint) : null;
     if (hint) input.setAttribute("aria-describedby", id + "-h");
     var errN = h("p.err", { id: id + "-e", role: "alert" });
-    return h("div.field" + (opt.cls ? "." + opt.cls : ""), null, [h("div.label-row", null, [label, opt.tip ? ui.tip(opt.tip) : null]), input, hint, errN]);
+    /* opt.after: a key that stands beside the field, such as the camera beside a barcode (Build 15) */
+    var box = opt.after ? h("div.field-row", null, [input, opt.after]) : input;
+    return h("div.field" + (opt.cls ? "." + opt.cls : ""), null, [h("div.label-row", null, [label, opt.tip ? ui.tip(opt.tip) : null]), box, hint, errN]);
   };
   ui.fieldError = function (input, text) {
     var e = document.getElementById(input.id + "-e"); if (!e) return;
@@ -267,6 +276,8 @@
     });
     var main = document.getElementById("room"); if (!main) return;
     U.clear(main);
+    /* a room may say what a scanned code does there (the Register adds it, Inventory opens it): 23-scan.js */
+    ui.onScan = null;
     ui.rooms[room](main);
     main.appendChild(ui.footer());
     if (!quiet && E.sound) E.sound.play("page");

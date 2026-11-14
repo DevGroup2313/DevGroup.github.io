@@ -80,7 +80,17 @@ var ICONS = {
   truck: "M2.5 6h11v10h-11zM13.5 9.5H18l3.5 3.5V16h-8M6 18.5a1.5 1.5 0 1 0 0-.1M17 18.5a1.5 1.5 0 1 0 0-.1",
   clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3.5 2",
   list: "M8 6.5h12M8 12h12M8 17.5h12M4 6.5v.2M4 12v.2M4 17.5v.2",
-  people: "M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M15.5 4.8a3.5 3.5 0 0 1 0 6.4M17.5 14.2A6.5 6.5 0 0 1 21.5 20"
+  people: "M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20a6.5 6.5 0 0 1 13 0M15.5 4.8a3.5 3.5 0 0 1 0 6.4M17.5 14.2A6.5 6.5 0 0 1 21.5 20",
+  /* the departments (Build 15): plain line drawings of what each one holds, never food or fruit as decoration */
+  disc: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM6.4 12A5.6 5.6 0 0 1 12 6.4",
+  film: "M4 4.5h16v15H4zM8 4.5v15M16 4.5v15M4 8.5h4M4 12h4M4 15.5h4M16 8.5h4M16 12h4M16 15.5h4",
+  bottle: "M10 3h4v3.5h-4zM8.5 6.5h7a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zM6.5 12.5h11",
+  basket: "M3.5 10h17l-1.9 9.5H5.4zM8 10l3.2-5.5M16 10l-3.2-5.5M9 13.5v3M12 13.5v3M15 13.5v3",
+  cup: "M6.5 8h11l-1.3 12.5H7.8zM5.5 8h13M13.5 8l1.6-5H18",
+  cloche: "M3 18.5h18M4.8 18.5a7.2 7.2 0 0 1 14.4 0M12 8.2V6.6M10.3 6.6h3.4",
+  swap: "M4.5 8h14l-4-4M19.5 16h-14l4 4",
+  camera: "M4 7.5h3.5L9 5h6l1.5 2.5H20V19H4zM12 10a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z",
+  barcode: "M4 5v14M7 5v14M9.5 5v14M13 5v14M15 5v14M18 5v14M20 5v14"
 };
 function icon(name, cls) {
   var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");
