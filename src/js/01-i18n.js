@@ -591,7 +591,8 @@
 
     /* Build 3: the top keys, after Carpe Diem's */
     ["top.tools", "The store's keys", "Les touches du magasin", "Bouton magazen an"], ["top.fold", "Fold or unfold the top keys", "Replier ou déplier les touches du haut", "Pliye oswa depliye bouton anwo yo"],
-    ["top.atCounter", "{name} at the counter", "{name} au comptoir", "{name} nan kontwa a"], ["top.alerts", "Alerts", "Alertes", "Alèt"], ["top.display", "Display", "Affichage", "Afichaj"],
+    ["top.atCounter", "{name} at the counter", "{name} au comptoir", "{name} nan kontwa a"], ["top.alerts", "Alerts", "Alertes", "Alèt"], ["top.alertsTip", "Alerts: what needs seeing to, and your reminders", "Alertes : ce qui demande votre attention, et vos rappels", "Alèt: sa ki bezwen atansyon ou, ak rapèl ou yo"],
+    ["alerts.needH", "Needs seeing to", "À voir", "Sa pou wè"], ["top.display", "Display", "Affichage", "Afichaj"],
     ["top.guide", "Guide", "Guide", "Gid"], ["top.about", "About", "À propos", "Konsènan"], ["top.day", "Day", "Jour", "Jou"], ["top.night", "Night", "Nuit", "Lannwit"],
     ["top.dayNight", "Day or night", "Jour ou nuit", "Jou oswa lannwit"], ["top.lock", "Lock the store", "Verrouiller le magasin", "Fèmen magazen an"],
     ["lang.en", "English", "English", "English"], ["lang.fr", "Français", "Français", "Français"], ["lang.ht", "Kreyòl", "Kreyòl", "Kreyòl"],

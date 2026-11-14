@@ -11,13 +11,12 @@
   ui.stat = stat;
   ui.capsLabel = function (emoji, text) { return h("p.label-caps", null, [emoji ? ui.emo(emoji) : null, text]); };
 
-  /* ---------- Home (Build 12): the shell's own colours ----------
-     The Home is made of the materials of Lakay's mark: its periwinkle enamel, its pearl, a blush pearl, and the fine
-     champagne gold of its rim. The hero is an enamel plate with the shell's spiral engraved across it, turning slowly
-     around the mark; behind a champagne bezel, the day's figures roll into place on pearl drums. Below it the counter's
-     three keys, in enamel, pearl and blush pearl, travel down when pressed. Then the day's ledger on ruled paper, what
-     needs seeing to, the latest sales on a receipt roll, the rooms as drawers with champagne label plates, and the day's
-     proverb on a champagne plaque. Calm and "reduce motion" hold all of it still (room-home.css). */
+  /* ---------- Home (Builds 12 to 14): the shell's own colours, worn as Ingenium and Carpe Diem wear theirs ----------
+     The Home is made of the colours of Lakay's mark, on white slabs: the welcome, with the mark standing alone in its
+     own depth and motion and the shell's spiral engraved faintly around it; the day's figures rolling into place on
+     pearl drums in a pearl card touched with periwinkle; the counter's three keys, which travel down when pressed; the
+     day's ledger on ruled paper; what needs seeing to; the latest sales on a receipt roll; and the rooms as drawers with
+     enamel jewels. Calm and "reduce motion" hold all of it still (room-home.css). */
   function hourLabel(hr) {
     try { return new Date(2000, 0, 1, hr).toLocaleTimeString(E.lang === "ht" ? "fr" : E.lang, { hour: "numeric" }); } catch (e) { return String(hr); }
   }
@@ -32,8 +31,7 @@
       strip(st, me, staff, practice),
       ledger(r),
       h("div.hm-pair", null, [needs(stock, staff, practice), latest(st)]),
-      rooms(st, r, stock),
-      proverbCard()]));
+      rooms(st, r, stock)]));
     /* the drums roll to the day's figures, the columns rise to the hours' takings (both stay still in Calm) */
     var strips = main.querySelectorAll(".ct-strip[data-d]"), bars = main.querySelectorAll(".hm-bar[data-pct]");
     requestAnimationFrame(function () { requestAnimationFrame(function () {
@@ -214,7 +212,7 @@
     var pad = B.pad ? B.pad() : { reminders: [] };
     (pad.reminders || []).filter(function (x) { return !x.done && Date.parse(x.at) <= end.getTime(); }).sort(function (a, b) { return a.at < b.at ? -1 : 1; }).slice(0, 3).forEach(function (x) {
       list.push(need("🔔", x.text, t("home.attnRem", { t: ui.time(x.at) }), Date.parse(x.at) <= Date.now() ? "warn" : null,
-        [t("home.open"), function () { var b = document.getElementById("rail-bell"); if (E.rail && b) E.rail.press("bell", b); }]));
+        [t("home.open"), function () { ui.alertsPanel(); }]));
     });
     if (!staff && !practice) {
       var lastB = U.prefGet("lastBackup", ""), days = lastB ? Math.floor((Date.now() - Date.parse(lastB)) / 86400000) : null;
@@ -265,16 +263,7 @@
   function quickKey(emoji, key, fn, kind) { return h("button.key" + (kind ? "." + kind : ""), { type: "button", onclick: fn }, [ui.emo(emoji), t(key)]); }
   ui.quickKey = quickKey;
 
-  /* A Haitian proverb for the day, engraved on a champagne plaque: the Kreyòl as it is said, with its meaning in the language of the screen. */
-  var PROVERBS = ["piti", "mon", "men", "sak", "woch", "lespwa", "mapou", "kreyol"];
-  function proverbCard() {
-    var now = new Date(), day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000), k = PROVERBS[day % PROVERBS.length];
-    return h("aside.hm-proverb.ct-plaque", { "aria-label": t("prov.label") }, [
-      h("span.ct-screw.tl", { "aria-hidden": "true" }), h("span.ct-screw.tr", { "aria-hidden": "true" }), h("span.ct-screw.bl", { "aria-hidden": "true" }), h("span.ct-screw.br", { "aria-hidden": "true" }),
-      h("p.hm-pv-label", null, [h("span", { lang: "ht" }, t("home.provKicker")), E.lang === "ht" ? null : h("span.hm-pv-label-tr", null, t("prov.label"))]),
-      h("p.hm-pv-ht", { lang: "ht" }, E.dict.ht["prov." + k]),
-      E.lang === "ht" ? null : h("p.hm-pv-tr", null, t("prov." + k + ".m"))]);
-  }
+
 
   function firstStepList(st) {
     var items = Object.keys(st.items).length;

@@ -31,4 +31,9 @@
     E.door.show().catch(fatal);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+  /* The web app (Build 14): on a website, a service worker keeps the page, so that Lakay opens with no connection
+     (web/sw.js). Only the web app's page names it (meta lakay-web), and only a secure site may register it. */
+  if (document.querySelector('meta[name="lakay-web"]') && "serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function (e) { console.warn("Lakay: the page could not be kept for use with no connection", e); }); });
+  }
 })();

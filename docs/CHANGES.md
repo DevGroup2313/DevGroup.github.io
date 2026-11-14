@@ -4,6 +4,21 @@ Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED.
 
 The newest build is first. The build number also shows in Lakay's About.
 
+## Build 14 (14 November 2026): the logo left alone, the colour woven in, a quieter rail, and Lakay on the web
+
+The owner approved the arrangement of Build 13 and asked for five corrections. Everything else stays as approved.
+
+- **The logo, left alone.** The thick ring drawn around the logo in Builds 12 and 13 is gone. The logo keeps the living, popped-out 3D mark and the movement it had before the redesign.
+- **The colour woven in, not poured on.** The day's figures sit in a pearl card with a periwinkle rim and a slim periwinkle band along its top, in place of the solid purple card. New sale is a pearl key with a periwinkle edge and a periwinkle jewel, in place of the solid purple key. By night both are darker slabs with the same periwinkle touches.
+- **No gold band.** The proverb's champagne plaque at the foot of the Home is removed. The Home now ends with the rooms.
+- **A quieter side rail.** It carried seven keys. It now carries the three the counter reaches for all day: the sticky notes, a new sale and Price check. The others moved to the top bar:
+  - **Alerts** now holds what needs seeing to (each low item with its Receive and Open keys, and a backup to make) and the reminders (their list and the form to add one). Its dot shows while anything waits, and it rings while a reminder is due.
+  - **The calculator** has its own small key beside Alerts. It still floats and can be carried anywhere.
+  - **Day or night** stays in Display.
+- **Lakay on the web.** `build.py` now also makes `web/`: the same page as the apps, a manifest, the logo's icons and a service worker. It is made for the owner's GitHub Pages site, at **https://devgroup2313.github.io/lakay/**. The site's repository (`DevGroup2313.github.io`) is still to be created by the owner: GitHub did not allow this session to create it. There it shows Lakay's logo in the address bar and the tab in any browser. Added to a home screen or the Dock, or installed from Chrome or Edge, it shows the logo with no white square: the coin alone where a system allows a round picture, the logo's own periwinkle tile where a system draws a square. Once opened, it works with no connection. The books stay on each device, sealed in the browser that opens the page.
+  - The web build's security policy allows one thing more than the apps': its own manifest, icons and service worker, from its own address only. It still runs no script but its own and reaches no other site. The service worker keeps only the site's own files, never the books.
+- tests/t_build14.js: 46 checks, including the web app served as GitHub Pages serves it, checked by Chromium for installing, and opened again with the server gone. The tests of Builds 10 and 12 follow the changes. Every suite passes: 281 checks in all.
+
 ## Build 13 (14 November 2026): the Home's colours turned around
 
 At the owner's request, the Home now wears the logo's colours the way Ingenium and Carpe Diem wear theirs. The large surfaces are white slabs. The cards set inside them and the keys that act are the periwinkle enamel, or a gentle lavender beside it. It reads softer and calmer, and keeps its depth.

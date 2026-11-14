@@ -51,11 +51,12 @@ function png(file) { const b = fs.readFileSync(file); return { w: b.readUInt32BE
   ok(touch && touch.sizes === "180x180" && /^data:image\/png;base64,/.test(touch.href) && tt.w === 180 && tt.corner[3] === 255 && tt.corner[2] > tt.corner[1] + 40,
     "the iPhone and iPad home screen icon is inside the page too: 180 points, filled to its corners with the coin's periwinkle");
   ok(await p.getAttribute('meta[name="apple-mobile-web-app-title"]', "content") === "Lakay", "and the home screen names it Lakay");
-  const ati = png(path.join(APP, "apple-touch-icon.png")), pre = png(path.join(APP, "apple-touch-icon-precomposed.png"));
-  ok(ati.png && ati.w === 180 && ati.h === 180 && ati.type === 2 && pre.w === 180 && pre.type === 2, "apple-touch-icon.png is 180 points with no transparency, so the iPhone has no corner to fill in black");
-  const i192 = png(path.join(APP, "icon-192.png")), i512 = png(path.join(APP, "icon-512.png"));
-  ok(i192.w === 192 && i512.w === 512 && i192.type === 2 && i512.type === 2, "icon-192.png and icon-512.png are beside the page for a website");
-  const ico = fs.readFileSync(path.join(APP, "favicon.ico"));
+  const WEB = path.resolve(__dirname, "..", "web");
+  const ati = png(path.join(WEB, "apple-touch-icon.png"));
+  ok(ati.png && ati.w === 180 && ati.h === 180 && ati.type === 2, "the web app's apple-touch-icon.png is 180 points with no transparency, so the iPhone has no corner to fill in black");
+  const i192 = png(path.join(WEB, "icon-192.png")), i512 = png(path.join(WEB, "icon-512.png")), m512 = png(path.join(WEB, "icon-maskable-512.png"));
+  ok(i192.w === 192 && i512.w === 512 && i192.type === 6 && i512.type === 6 && m512.w === 512 && m512.type === 2, "the web app's icons: the coin alone for browsers and docks, and Android's square with the coin in its safe circle");
+  const ico = fs.readFileSync(path.join(WEB, "favicon.ico"));
   ok(ico.readUInt16LE(2) === 1 && ico.readUInt16LE(4) === 3, "favicon.ico holds the coin at three sizes");
   const ios = ["AppIcon60x60@2x.png", "AppIcon60x60@3x.png", "AppIcon76x76@2x~ipad.png", "AppIcon83.5x83.5@2x~ipad.png"].map(n => png(path.join(__dirname, "..", "packages", "ios", "Shell", "Icons", n)));
   ok(ios.every(x => x.type === 2) && ios.map(x => x.w).join() === "120,180,152,167", "the iPhone and iPad app's icons: the coin's own tile, every size, no transparency");
@@ -70,10 +71,12 @@ function png(file) { const b = fs.readFileSync(file); return { w: b.readUInt32BE
   const hero = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-hero")).backgroundImage);
   const win = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-window")).backgroundImage);
   ok(/rgb\(255, 255, 255\)/.test(hero) && !/rgb\(89, 96, 190\)/.test(hero), "the welcome is a white slab, as Ingenium and Carpe Diem set theirs (Build 13)");
-  ok(/rgb\(108, 113, 208\)/.test(win) && /rgb\(89, 96, 190\)/.test(win), "and the figures sit in a card of the mark's periwinkle enamel inside it");
+  ok(/rgb\(255, 255, 255\)/.test(win) && /rgb\(107, 115, 214\)/.test(win), "and the figures sit in a pearl card with the periwinkle woven in: its rim and a slim band along its top (Build 14)");
   const keyLook = await p.evaluate(() => ({ sale: getComputedStyle(document.querySelector("#homeSale .ct-key-face")).backgroundImage, recv: getComputedStyle(document.querySelector("#homeReceive .ct-key-face")).backgroundImage,
     find: getComputedStyle(document.querySelector("#homeFind .ct-key-face")).backgroundImage }));
-  ok(/rgb\(107, 115, 214\)/.test(keyLook.sale) && /rgb\(248, 248, 255\)/.test(keyLook.recv) && /rgb\(248, 248, 255\)/.test(keyLook.find), "New sale is the enamel key; Receive and Price check are the gentle lavender beside it");
+  const saleJewel = await p.evaluate(() => getComputedStyle(document.querySelector("#homeSale .ct-key-emo")).backgroundImage);
+  ok(/rgb\(255, 255, 255\)/.test(keyLook.sale) && /rgb\(141, 147, 226\)/.test(saleJewel) && /rgb\(248, 248, 255\)/.test(keyLook.recv) && /rgb\(248, 248, 255\)/.test(keyLook.find),
+    "New sale is a pearl key with a periwinkle jewel; Receive and Price check are the gentle lavender beside it (Build 14)");
   const rooms = await p.evaluate(() => ({ slab: getComputedStyle(document.querySelector(".hm-rooms")).backgroundImage, drawer: getComputedStyle(document.querySelector(".ct-drawer")).backgroundImage,
     jewel: getComputedStyle(document.querySelector(".ct-plate-ico")).backgroundImage }));
   ok(/rgb\(255, 255, 255\)/.test(rooms.slab) && /rgb\(255, 255, 255\)/.test(rooms.drawer) && /rgb\(141, 147, 226\)/.test(rooms.jewel), "the rooms are white drawers on a white slab, each with an enamel jewel");
@@ -119,7 +122,7 @@ function png(file) { const b = fs.readFileSync(file); return { w: b.readUInt32BE
   await p.evaluate(() => { E.util.prefSet("theme", "night"); E.ui.applyLook(); }); await home();
   const nightHero = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-hero")).backgroundImage);
   const nightWin = await p.evaluate(() => getComputedStyle(document.querySelector(".ct-window")).backgroundImage);
-  ok(/rgb\(31, 31, 45\)/.test(nightHero) && /rgb\(70, 75, 166\)/.test(nightWin) && /rgb\(43, 47, 120\)/.test(nightWin), "by night the slab is Lakay's night slab and the enamel deepens to the shell's indigo");
+  ok(/rgb\(31, 31, 45\)/.test(nightHero) && /rgb\(38, 38, 57\)/.test(nightWin) && /rgb\(117, 125, 222\)/.test(nightWin), "by night the slab is Lakay's night slab, and the figures' card a darker slab with its periwinkle band");
   await drumsRight("By night");
   await p.evaluate(() => { document.documentElement.setAttribute("data-calm", "1"); E.ui.go("home"); });
   await p.waitForSelector(".ct-hero"); await wait(p, 120);

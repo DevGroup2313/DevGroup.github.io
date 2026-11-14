@@ -86,3 +86,21 @@
 .calc-tape { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .calc-line { border: 0; background: transparent; padding: 1px 0; text-align: left; font: 11.5px/1.3 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); cursor: pointer; overflow-wrap: anywhere; }
 .calc-line:hover { color: var(--pri-text); }
+
+/* Build 14: the top bar's calculator key, and Alerts holding the reminders and what runs low (the side rail keeps
+   only notes, a new sale and Price check, at the owner's request) */
+.cl-key.icon { padding: 0 6px; }
+.cl-key.icon > span { font: 13px/1 var(--emoji); }
+#alertsBtn.ringing .cnt { animation: alertRing 1.4s ease-in-out infinite; }
+@keyframes alertRing { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(197, 68, 59, .5); } 50% { transform: scale(1.25); box-shadow: 0 0 0 4px rgba(197, 68, 59, 0); } }
+@media (prefers-reduced-motion: reduce) { #alertsBtn.ringing .cnt { animation: none; } }
+.alerts-body { display: flex; flex-direction: column; gap: 18px; width: min(480px, 78vw); }
+.alerts-sec { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.alerts-h { display: flex; align-items: center; gap: 8px; margin: 0; font: 600 .98rem/1.2 var(--serif); letter-spacing: .05em; color: var(--ink); }
+.alerts-h .emo { font-size: .95rem; }
+.alert-list li.warn { box-shadow: inset 3px 0 0 rgba(201, 138, 29, .8); }
+.alert-list li.bad { box-shadow: inset 3px 0 0 rgba(168, 66, 61, .8); }
+.alerts-sec.rail-pop-in { padding-top: 14px; border-top: 1px solid var(--line); }
+.alerts-sec.rail-pop-in .rp-head { margin-bottom: 2px; }
+.alerts-sec.rail-pop-in .rp-head h3 { font: 600 .98rem/1.2 var(--serif); letter-spacing: .05em; }
+.alerts-sec.rail-pop-in .rp-emo { font-size: .95rem; }

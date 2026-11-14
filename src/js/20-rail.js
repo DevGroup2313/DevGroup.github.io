@@ -1,9 +1,11 @@
 /* LAKAY | Copyright (c) 2026 Yannie D. Forest. All rights reserved. NO LICENCE IS GRANTED. See LICENCE.txt.
    The side rail, as Ingenium and Carpe Diem have it: bare emoji keys down the right edge, and a small key above them
-   that lays them down. In Lakay every key serves the store's work: Reminders (orders, deliveries, bills; they ring when
-   due), Price check (any item by name, code or barcode: its price and its stock, and a sale or a delivery from there),
-   Low stock (what runs low or out, and a delivery received in one press), the calculator, which floats and can be
-   carried anywhere, day or night, a new sale, and Schedae (each person's sticky notes, 22-schedae.js). The reminders are each person's own, sealed in the books. */
+   that lays them down. Since Build 14 it carries only the three keys the counter reaches for all day: Schedae (each
+   person's sticky notes, 22-schedae.js), a new sale, and Price check (any item by name, code or barcode: its price and
+   its stock, and a sale or a delivery from there). The rest moved to the top bar at the owner's request, so that the
+   rail stays uncrowded: the reminders (orders, deliveries, bills; they ring when due; each person's own, sealed in the
+   books) and what runs low now share the Alerts panel; the calculator, which floats and can be carried anywhere, has
+   its own small key there; day or night is in Display. */
 "use strict";
 (function () {
   var U = E.util, h = U.h, t = E.t, B = E.books, ui = E.ui;
@@ -15,18 +17,15 @@
   function when(iso) { try { var d = new Date(iso); return d.toLocaleString(E.lang === "ht" ? "fr" : E.lang, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }); } catch (e) { return iso; } }
 
   /* ---------- the rail ---------- */
-  var KEYS = [
-    ["notes", "🗒️", "rail.notes"], ["sale", "🛒", "rail.sale"], ["theme", null, "top.dayNight"], ["calc", "🧮", "rail.calc"],
-    ["low", "📦", "rail.low"], ["find", "🔎", "rail.find"], ["bell", "🔔", "rail.bell"]];
+  var KEYS = [["notes", "🗒️", "rail.notes"], ["sale", "🛒", "rail.sale"], ["find", "🔎", "rail.find"]];
   R.build = function () {
-    var down = U.prefGet("railDown", "0") === "1", night = document.documentElement.getAttribute("data-theme") === "night";
+    var down = U.prefGet("railDown", "0") === "1";
     var box = h("div#rail.rail" + (down ? ".down" : ""), { role: "toolbar", "aria-label": t("rail.label") });
     /* the new-sale key only for those who sell */
     var keys = KEYS.filter(function (k) { return k[0] !== "sale" || !B.isOpen || B.can("sell"); });
     keys.forEach(function (k, i) {
-      var emo = k[0] === "theme" ? (night ? "☀️" : "🌙") : k[1];
       var b = h("button.rail-btn#rail-" + k[0], { type: "button", title: t(k[2]), "aria-label": t(k[2]), onclick: function () { R.press(k[0], b); } },
-        [h("span", { "aria-hidden": "true" }, emo), k[0] === "bell" || k[0] === "low" ? h("b.rail-badge#badge-" + k[0], { hidden: true }) : null]);
+        h("span", { "aria-hidden": "true" }, k[1]));
       b.style.bottom = "calc(" + (52 + i * 56) + "px + env(safe-area-inset-bottom, 0px))";
       box.appendChild(b);
     });
@@ -39,15 +38,19 @@
     return box;
   };
   R.refresh = function () { var old = document.getElementById("rail"); if (old) old.replaceWith(R.build()); };
+  /* the reminders due by tonight; and the Alerts key's dot, which shows when anything waits and rings when a reminder is due */
+  R.dueCount = function () {
+    var p = pad(), end = new Date(); end.setHours(23, 59, 59, 999);
+    return p.reminders.filter(function (r) { return !r.done && new Date(r.at).getTime() <= end.getTime(); }).length;
+  };
   R.badges = function () {
-    var p = pad(), now = Date.now(), end = new Date(); end.setHours(23, 59, 59, 999);
-    var due = p.reminders.filter(function (r) { return !r.done && new Date(r.at).getTime() <= end.getTime(); }).length;
-    var low = 0; try { var ss = B.isOpen ? B.stockSummary() : null; low = ss ? ss.low.length : 0; } catch (e) { }
-    [["bell", due], ["low", low]].forEach(function (x) { var b = document.getElementById("badge-" + x[0]); if (b) { b.textContent = String(x[1]); b.hidden = !x[1]; } });
-    var bell = document.getElementById("rail-bell"); if (bell) bell.classList.toggle("ringing", p.reminders.some(function (r) { return !r.done && new Date(r.at).getTime() <= now; }));
+    var a = document.getElementById("alertsBtn"); if (!a || !B.isOpen) return;
+    var n = R.dueCount() + (ui.alerts ? ui.alerts().length : 0), dot = a.querySelector(".cnt"), now = Date.now();
+    if (n && !dot) a.appendChild(h("span.cnt", { "aria-hidden": "true" })); else if (!n && dot) dot.remove();
+    a.setAttribute("aria-label", t("top.alerts") + (n ? " (" + n + ")" : ""));
+    a.classList.toggle("ringing", pad().reminders.some(function (r) { return !r.done && new Date(r.at).getTime() <= now; }));
   };
   R.press = function (k, b) {
-    if (k === "theme") { var night = document.documentElement.getAttribute("data-theme") === "night"; U.prefSet("theme", night ? "day" : "night"); ui.applyLook(); R.refresh(); snd("lamp"); return; }
     if (k === "calc") { closePop(); return calc.toggle(); }
     if (k === "sale") { closePop(); return toSale(); }
     if (k === "notes") { closePop(); return E.schedae && E.schedae.toggle(); }
@@ -62,7 +65,7 @@
   function openPop(k, b) {
     closePop();
     pop = h("div.rail-pop", { role: "dialog", "aria-label": t("rail." + k) }); pop.__k = k;
-    ({ bell: bellPanel, find: findPanel, low: lowPanel })[k](pop);
+    ({ find: findPanel })[k](pop);
     document.body.appendChild(pop);
     var r = b.getBoundingClientRect();
     pop.style.bottom = Math.max(12, window.innerHeight - r.bottom) + "px";
@@ -72,8 +75,9 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && pop) { closePop(); } }, true);
   function head(icon, key) { return h("div.rp-head", null, [h("span.rp-emo", { "aria-hidden": "true" }, icon), h("h3", null, t(key))]); }
 
-  /* 🔔 reminders */
-  function bellPanel(box) {
+  /* 🔔 reminders: drawn in the Alerts panel (10-ui.js); again() draws them afresh after a change */
+  function bellPanel(box, again) {
+    again = again || function () { var b = document.getElementById("alertsBtn"); if (b) ui.alertsPanel(); };
     var p = pad();
     var text = h("input#remText", { type: "text", maxlength: "160", placeholder: t("rem.what"), autocomplete: "off" });
     var d = new Date(Date.now() + 3600000); d.setMinutes(0, 0, 0);
@@ -83,21 +87,22 @@
       var late = !r.done && new Date(r.at).getTime() <= Date.now();
       list.appendChild(h("li" + (r.done ? ".done" : "") + (late ? ".late" : ""), null, [
         h("button.rp-check", { type: "button", "aria-pressed": String(!!r.done), title: t("rem.done"), "aria-label": t("rem.done"), onclick: function () {
-          var q = pad(); q.reminders.forEach(function (x) { if (x.id === r.id) x.done = !x.done; }); save(q, "reminder.done").then(function () { openPop("bell", document.getElementById("rail-bell")); });
+          var q = pad(); q.reminders.forEach(function (x) { if (x.id === r.id) x.done = !x.done; }); save(q, "reminder.done").then(again);
         } }, r.done ? "✓" : ""),
         h("div.rp-text", null, [h("span", null, r.text), h("small", null, when(r.at))]),
         h("button.rp-del", { type: "button", title: t("delete"), "aria-label": t("delete"), onclick: function () {
-          var q = pad(); q.reminders = q.reminders.filter(function (x) { return x.id !== r.id; }); save(q, "reminder.deleted").then(function () { openPop("bell", document.getElementById("rail-bell")); });
+          var q = pad(); q.reminders = q.reminders.filter(function (x) { return x.id !== r.id; }); save(q, "reminder.deleted").then(again);
         } }, "×")]));
     });
     if (!p.reminders.length) list.appendChild(h("li.rp-none", null, t("rem.none")));
     var form = h("form.rp-form", { onsubmit: function (e) {
       e.preventDefault(); var v = text.value.trim(); if (!v || !at.value) return;
       var q = pad(); q.reminders.push({ id: uid(), text: v, at: new Date(at.value).toISOString(), done: false, rung: false });
-      save(q, "reminder.added").then(function () { snd("sale"); openPop("bell", document.getElementById("rail-bell")); });
+      save(q, "reminder.added").then(function () { snd("sale"); again(); });
     } }, [text, h("div.rp-row", null, [at, h("button.key.primary.sm", { type: "submit" }, t("rem.add"))])]);
-    box.appendChild(head("🔔", "rail.bell")); box.appendChild(form); box.appendChild(list);
+    box.appendChild(head("🔔", "rail.bell")); box.appendChild(list); box.appendChild(form);
   }
+  R.reminders = bellPanel;
   /* reminders ring when they come due */
   setInterval(function () {
     if (!B.isOpen) return;
@@ -147,22 +152,6 @@
     q.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); var first = list.querySelector(".rp-item .key.primary"); if (first) first.click(); } });
     box.appendChild(head("🔎", "rail.find")); box.appendChild(h("div.rp-form", null, [q])); box.appendChild(list);
     draw();
-  }
-  /* 📦 low stock: what runs low or out, and a delivery received in one press */
-  function lowPanel(box) {
-    var ss = B.isOpen ? B.stockSummary() : { low: [], negative: [] }, list = h("ul.rp-list");
-    var seen = {}, rows = ss.low.concat(ss.negative || []).filter(function (it) { if (seen[it.id]) return false; seen[it.id] = 1; return !it.archived; });
-    rows.sort(function (a, b) { return a.stock - b.stock; });
-    rows.forEach(function (it) {
-      list.appendChild(itemRow(it, [B.can("receive") ? h("button.key.sm.primary", { type: "button", title: t("low.receiveTip"), onclick: function () {
-        closePop(); if (E.inventory && E.inventory.receive) E.inventory.receive(it.id);
-      } }, ["🚚 ", t("low.receive")]) : null]));
-    });
-    if (!rows.length) list.appendChild(h("li.rp-none", null, t("low.none")));
-    box.appendChild(head("📦", "rail.low"));
-    box.appendChild(h("p.hint", null, rows.length ? t("low.lede", { n: rows.length }) : t("low.ledeNone")));
-    box.appendChild(list);
-    box.appendChild(h("div.rp-row", null, [h("span"), h("button.key.sm", { type: "button", onclick: function () { closePop(); ui.go("inventory"); } }, ["📦 ", t("low.all")])]));
   }
   /* the badges follow the books: a sale or a delivery changes the stock */
   B.on("change", function () { setTimeout(R.badges, 0); });

@@ -313,14 +313,18 @@
     var fold = h("button.cl-fold#barFold", { type: "button", "aria-label": t("top.fold"), title: t("top.fold"), "aria-expanded": String(!folded), onclick: function () {
       var f = !c.classList.contains("folded"); c.classList.toggle("folded", f); U.prefSet("barFold", f ? "1" : "0"); fold.textContent = f ? "‹" : "›"; fold.setAttribute("aria-expanded", String(!f));
     } }, folded ? "‹" : "›");
-    var alertsN = ui.alerts().length;
+    var alertsN = ui.alerts().length + (E.rail && E.rail.dueCount ? E.rail.dueCount() : 0);
     var NEXT = { en: "fr", fr: "ht", ht: "en" }, next = NEXT[E.lang] || "fr";
     c.appendChild(fold);
     var me = B.user, sh = me ? B.openShift(me.id) : null, clockCls = sh ? (B.onBreak(sh) ? ".onbreak" : ".onclock") : "";
     var who = me ? me.name.split(" ")[0] : "";
     c.appendChild(h("button.cl-key#statusPill" + (practice ? ".practice" : "") + clockCls, { type: "button", title: (practice ? t("practice.pillTip") + " · " : "") + t("status.tip"), onclick: ui.statusPanel },
       [h("span.pdot", { "aria-hidden": "true" }), h("span.nm", null, practice ? (B.isOwner() ? t("practice.pill") : t("practice.pill") + " · " + who) : who || t("status.h"))]));
-    c.appendChild(h("button.cl-key#alertsBtn", { type: "button", title: t("top.alerts"), onclick: ui.alertsPanel }, [t("top.alerts"), alertsN ? h("span.cnt", { "aria-label": String(alertsN) }) : null]));
+    c.appendChild(h("button.cl-key#alertsBtn", { type: "button", title: t("top.alertsTip"), "aria-label": t("top.alerts") + (alertsN ? " (" + alertsN + ")" : ""), onclick: ui.alertsPanel },
+      [t("top.alerts"), alertsN ? h("span.cnt", { "aria-hidden": "true" }) : null]));
+    /* the calculator: it floats above the page and can be carried anywhere (20-rail.js) */
+    c.appendChild(h("button.cl-key.icon#calcBtn", { type: "button", title: t("rail.calc"), "aria-label": t("rail.calc"), onclick: function () { if (E.rail && E.rail.calc) E.rail.calc.toggle(); } },
+      h("span", { "aria-hidden": "true" }, "🧮")));
     c.appendChild(h("button.cl-key#displayBtn", { type: "button", title: t("top.display"), onclick: ui.displayPanel }, t("top.display")));
     c.appendChild(h("button.cl-key#guideBtn", { type: "button", title: t("room.guide"), onclick: function () { ui.go("guide"); } }, t("top.guide")));
     c.appendChild(h("button.cl-key#aboutBtn", { type: "button", title: t("top.about") + " " + E.appName(), onclick: ui.about }, t("top.about")));
@@ -341,16 +345,33 @@
   /* what needs the owner: items low on stock, a backup not saved for a week */
   ui.alerts = function () {
     var out = [], stock = B.stockSummary(), last = U.prefGet("lastBackup", "");
-    stock.low.slice(0, 12).forEach(function (it) { out.push({ emo: ui.catEmo(it.cat), text: it.name + " · " + t("inv.inStock", { n: it.stock }), go: "inventory", tone: it.stock <= 0 ? "bad" : "warn" }); });
+    stock.low.slice(0, 12).forEach(function (it) { out.push({ emo: ui.catEmo(it.cat), text: it.name + " · " + t("inv.inStock", { n: it.stock }), go: "inventory", item: it.id, tone: it.stock <= 0 ? "bad" : "warn" }); });
     if (B.mode !== "practice" && B.can("owner") && (!last || Date.now() - Date.parse(last) > 7 * 86400000)) out.push({ emo: "💾", text: t(last ? "alerts.backup" : "alerts.backupNever"), go: "settings", tone: "warn" });
     if (B.mode !== "practice" && B.user && B.user.role !== "owner" && !B.openShift(B.user.id)) out.unshift({ emo: "🕘", text: t("clock.notIn"), go: "team", tone: "warn" });
     return out;
   };
+  /* Alerts (Build 14): what needs seeing to, each low item with its Receive key, and the reminders, which used to have
+     keys of their own on the side rail. One panel, one key, so that the rail stays uncrowded. */
+  var alertsOpen = null;
   ui.alertsPanel = function () {
-    var list = ui.alerts();
-    var d = ui.dialog({ title: t("top.alerts"), emoji: "🔔", body: list.length ? h("ul.alert-list", null, list.map(function (a) {
-      return h("li", null, [ui.emo(a.emo), h("span", null, a.text), h("button.key.sm", { type: "button", onclick: function () { d.close(); ui.go(a.go); } }, t("alerts.open"))]);
-    })) : h("p", null, t("alerts.none")), actions: [{ label: t("close") }] });
+    if (alertsOpen) { try { alertsOpen.close(); } catch (e) { } alertsOpen = null; }
+    var body = h("div.alerts-body"), d;
+    function draw() {
+      U.clear(body);
+      var list = ui.alerts();
+      body.appendChild(h("section.alerts-sec#alertsNeeds", null, [h("h4.alerts-h", null, [ui.emo("📌"), t("alerts.needH")]),
+        list.length ? h("ul.alert-list", null, list.map(function (a) {
+          var receive = a.item && B.can("receive") ? h("button.key.sm.primary", { type: "button", title: t("low.receiveTip"), onclick: function () { d.close(); if (E.inventory && E.inventory.receive) E.inventory.receive(a.item); } }, t("low.receive")) : null;
+          return h("li" + (a.tone ? "." + a.tone : ""), null, [ui.emo(a.emo), h("span", null, a.text), receive,
+            h("button.key.sm", { type: "button", onclick: function () { d.close(); ui.go(a.go); } }, t("alerts.open"))]);
+        })) : h("p.hint", null, t("alerts.none"))]));
+      var rem = h("section.alerts-sec.rail-pop-in#alertsReminders");
+      if (E.rail && E.rail.reminders) E.rail.reminders(rem, function () { draw(); if (E.rail.badges) E.rail.badges(); });
+      body.appendChild(rem);
+    }
+    draw();
+    d = alertsOpen = ui.dialog({ title: t("top.alerts"), emoji: "🔔", body: body, actions: [{ label: t("close") }], onClose: function () { alertsOpen = null; } });
+    return d;
   };
   /* ---------- the status key: who is at the counter, on the clock or on a break, and signing out ---------- */
   ui.dur = function (ms) {

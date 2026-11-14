@@ -7,6 +7,7 @@ kept: the ready-made app in builds/, a READ ME FIRST for the device, a short REA
     python3 release/device_repos.py windows                  this repository's own README and READ ME FIRST
     python3 release/device_repos.py mac  <clone of Lakay-Mac>
     python3 release/device_repos.py apps <clone of Lakay-Apps>
+    python3 release/device_repos.py web  <clone of DevGroup2313.github.io>   the web app, at <site>/lakay/ (Build 14)
 
 A device repository is emptied first, except .git and builds/ (its ready-made apps, which GitHub replaces after each
 build). Nothing is committed here: look, then commit and push. Only files git tracks here are copied.
@@ -105,9 +106,33 @@ def make(kind, target):
     print("Made the %s repository in %s." % (kind, target))
 
 
+def make_web(target):
+    """The web app goes in the site's lakay/ folder, which is emptied first; the site's other folders are left alone.
+    The site's front page leads to it, and .nojekyll has GitHub Pages serve the files as they are."""
+    target = os.path.abspath(target)
+    if not os.path.isdir(os.path.join(target, ".git")):
+        sys.exit("%s is not a clone of the site's repository." % target)
+    web = os.path.join(ROOT, "web")
+    if not os.path.isfile(os.path.join(web, "index.html")):
+        sys.exit("Build first: web/index.html is missing.")
+    dst = os.path.join(target, "lakay")
+    if os.path.isdir(dst):
+        shutil.rmtree(dst)
+    shutil.copytree(web, dst)
+    for name in ("index.html", "README.md"):
+        fill(os.path.join(README, "site-%s" % name), os.path.join(target, name))
+    open(os.path.join(target, ".nojekyll"), "w").close()
+    shutil.copy2(os.path.join(ROOT, "LICENCE.txt"), os.path.join(target, "LICENCE.txt"))
+    print("Made the web app in %s/lakay." % target)
+
+
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("windows", "mac", "apps"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("windows", "mac", "apps", "web"):
         sys.exit(__doc__)
+    if sys.argv[1] == "web":
+        if len(sys.argv) < 3:
+            sys.exit(__doc__)
+        return make_web(sys.argv[2])
     if sys.argv[1] == "windows":
         fill(os.path.join(README, "README-windows.md"), os.path.join(ROOT, "README.md"))
         fill(os.path.join(README, "READ ME FIRST (Windows).txt"), os.path.join(ROOT, "READ ME FIRST (Windows).txt"))

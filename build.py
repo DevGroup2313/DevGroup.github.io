@@ -7,7 +7,7 @@
 The page refuses every script but its own: its Content Security Policy names the SHA-256 of the one script it carries.
 The build stops if the code reaches for anything that would weaken that (eval, new Function, innerHTML, document.write,
 a script or a style from the network)."""
-import base64, glob, hashlib, json, os, re, sys
+import base64, glob, hashlib, json, os, re, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "src")
@@ -63,6 +63,52 @@ def main():
     with open(path + ".sha256", "w", encoding="ascii", newline="\n") as f:
         f.write("%s  Lakay.html\n" % sha)
     print("Lakay build %s (%s): app/Lakay.html, %d bytes, SHA-256 %s" % (build, date, len(out.encode("utf-8")), sha))
+
+    # The web app (Build 14): the same page, for a website. Its address bar and tabs show the logo, and "Add to Home
+    # Screen" (iPhone, iPad, Android) or "Add to Dock" (a Mac) and a browser's "Install" make it an app with the logo.
+    # The page and its code are the same; only its policy names three more things, each from its own site only: the
+    # pictures beside it (img-src 'self'), its manifest (manifest-src 'self') and its service worker (worker-src 'self'),
+    # which keeps the page, the manifest and the icons so that Lakay opens with no connection. Scripts stay limited to
+    # the page's own, named by its hash; nothing reaches anywhere else (connect-src 'none').
+    web = out
+    for old_s, new_s in (("img-src data: blob:;", "img-src data: blob: 'self';"), ("manifest-src 'none';", "manifest-src 'self';"), ("worker-src 'none';", "worker-src 'self';"),
+                         ('<link rel="apple-touch-icon" sizes="180x180" href="' + touch + '">', '<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">'),
+                         ('<meta name="apple-mobile-web-app-title" content="Lakay">',
+                          '<meta name="apple-mobile-web-app-title" content="Lakay">\n<link rel="manifest" href="manifest.webmanifest">\n'
+                          '<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-capable" content="yes">\n'
+                          '<meta name="apple-mobile-web-app-status-bar-style" content="default">\n<meta name="lakay-web" content="1">')):
+        if web.count(old_s) != 1:
+            sys.exit("build stopped: the web page could not be made (%s)" % old_s[:40])
+        web = web.replace(old_s, new_s)
+    WEB = os.path.join(HERE, "web")
+    os.makedirs(WEB, exist_ok=True)
+    with open(os.path.join(WEB, "index.html"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(web)
+    icons = {"apple-touch-icon.png": "web-tile-180.png", "icon-192.png": "web-coin-192.png", "icon-512.png": "web-coin-512.png",
+             "icon-maskable-192.png": "web-maskable-192.png", "icon-maskable-512.png": "web-maskable-512.png", "favicon.ico": "web-favicon.ico"}
+    for dst, src in icons.items():
+        shutil.copyfile(os.path.join(MARK, src), os.path.join(WEB, dst))
+    manifest = {
+        "name": "Lakay", "short_name": "Lakay", "description": "The store's own books: the register, inventory, reports and the team, sealed on each device.",
+        "id": "./", "start_url": "./", "scope": "./", "display": "standalone", "orientation": "any", "lang": "en",
+        "background_color": "#f5f4f8", "theme_color": "#f5f4f8",
+        "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+                  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+                  {"src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
+                  {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]}
+    with open(os.path.join(WEB, "manifest.webmanifest"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False); f.write("\n")
+    kept = ["./", "index.html", "manifest.webmanifest"] + sorted(icons)
+    with open(os.path.join(SRC, "web", "sw.js"), encoding="utf-8") as f:
+        sw = f.read().replace('"/*@@CACHE@@*/"', json.dumps("lakay-web-" + build)).replace('"/*@@FILES@@*/"', json.dumps(kept))
+    if "@@" in sw:
+        sys.exit("build stopped: a placeholder was left in the service worker")
+    with open(os.path.join(WEB, "sw.js"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(sw)
+    wsha = hashlib.sha256(web.encode("utf-8")).hexdigest()
+    with open(os.path.join(WEB, "index.html.sha256"), "w", encoding="ascii", newline="\n") as f:
+        f.write("%s  index.html\n" % wsha)
+    print("Lakay web app %s: web/ (index.html %d bytes, SHA-256 %s; manifest, service worker, %d icons)" % (build, len(web.encode("utf-8")), wsha, len(icons)))
 
 
 if __name__ == "__main__":

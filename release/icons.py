@@ -13,8 +13,12 @@ Run from the repository's root: python3 -I release/icons.py
 It writes:
   src/brand/lakay-mark/web-coin-96.png, web-tile-192.png, web-tile-180.png
                                                              (put in the page by build.py: the tab, shortcuts, the iPhone)
-  app/apple-touch-icon.png, app/apple-touch-icon-precomposed.png, app/favicon.ico, app/icon-192.png, app/icon-512.png
-                                                             (beside the page, for a website: see README.md)
+  src/brand/lakay-mark/web-coin-192.png, web-coin-512.png    (the web app's icons for browsers and desktop docks: the coin alone)
+  src/brand/lakay-mark/web-maskable-192.png, web-maskable-512.png
+                                                             (for Android, which cuts its own shape: the coin inside the
+                                                              safe circle, on its own periwinkle)
+  src/brand/lakay-mark/web-favicon.ico                       (the coin at 16, 32 and 48 points)
+  build.py puts these in web/, the web app (Build 14), with apple-touch-icon.png made from web-tile-180.png.
   packages/ios/Shell/Icons/*.png                             (the iPhone and iPad app)
   packages/fire/res/mipmap-*/ic_launcher.png                 (the Fire tablet app)
 """
@@ -119,15 +123,14 @@ def main():
     save(small(96), "src", "brand", "lakay-mark", "web-coin-96.png")
     save(tile(coin, top, foot, 192), "src", "brand", "lakay-mark", "web-tile-192.png")
     save(tile(coin, top, foot, 180), "src", "brand", "lakay-mark", "web-tile-180.png")
-    # beside the page, for a website
-    t180 = tile(coin, top, foot, 180)
-    save(t180, "app", "apple-touch-icon.png")
-    save(t180, "app", "apple-touch-icon-precomposed.png")
-    save(tile(coin, top, foot, 192), "app", "icon-192.png")
-    save(tile(coin, top, foot, 512), "app", "icon-512.png")
-    ico = small(256)
-    ico.save(os.path.join(HERE, "app", "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
-    print("  app/favicon.ico 16, 32, 48")
+    # the web app (build.py copies these into web/): the coin alone for browsers and desktop docks, and, for Android,
+    # which cuts its own shape from a square, the coin inside the safe circle (four fifths of the side) on its periwinkle
+    save(small(192), "src", "brand", "lakay-mark", "web-coin-192.png")
+    save(small(512), "src", "brand", "lakay-mark", "web-coin-512.png")
+    save(tile(coin, top, foot, 192, share=0.76), "src", "brand", "lakay-mark", "web-maskable-192.png")
+    save(tile(coin, top, foot, 512, share=0.76), "src", "brand", "lakay-mark", "web-maskable-512.png")
+    small(256).save(os.path.join(HERE, "src", "brand", "lakay-mark", "web-favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
+    print("  src/brand/lakay-mark/web-favicon.ico 16, 32, 48")
     # the iPhone and iPad app: the system draws a rounded square and fills what is empty with black
     for name, n in (("AppIcon60x60@2x.png", 120), ("AppIcon60x60@3x.png", 180), ("AppIcon76x76@2x~ipad.png", 152), ("AppIcon83.5x83.5@2x~ipad.png", 167)):
         save(tile(coin, top, foot, n), "packages", "ios", "Shell", "Icons", name)

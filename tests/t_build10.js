@@ -78,7 +78,7 @@ const OWNER_PW = "kreyol and coffee 2026";
   await p.click('.hm-tile[data-room="reports"]'); await wait(p, 400);
   ok(await p.evaluate(() => E.ui.current) === "reports", "a tile opens its room");
   await home();
-  ok(await p.getAttribute(".hm-pv-ht", "lang") === "ht" && (await p.textContent(".hm-pv-ht")).length > 3, "the day's proverb is in Kreyòl, with its meaning");
+  ok(await p.locator(".hm-proverb, .ct-plaque").count() === 0 && await p.evaluate(() => document.querySelector(".hm").lastElementChild.classList.contains("hm-rooms")), "the Home ends with the rooms: the gold band is gone (Build 14, at the owner's request)");
 
   console.log("Night, an iPad and a phone");
   await p.evaluate(() => { E.util.prefSet("theme", "night"); E.ui.applyLook(); }); await wait(p, 300);

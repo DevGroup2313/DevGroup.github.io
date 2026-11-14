@@ -154,6 +154,14 @@ card company, as far as possible.
   Content Security Policy needed no change: it still allows pictures only from inside the page. A first try pointed the
   iPhone's icon at a file beside the page, and the policy rightly refused it; the test of Build 12 checks that the
   policy refuses nothing the page needs.
+- **The web app's policy** (Build 14). The web build (`web/index.html`) is the apps' page with three additions to its
+  Content Security Policy, all limited to its own address: `img-src 'self'` (the iPhone's home screen tile beside the
+  page), `manifest-src 'self'` (the manifest that names its icons) and `worker-src 'self'` (its service worker). Scripts
+  are still only its own, named by SHA-256; `connect-src` is still `'none'`, so the page can send nothing anywhere. The
+  service worker answers only for the site's own files, fetches the newest first, keeps the page, the manifest and the
+  icons for use with no connection, and never sees the books, which stay sealed in the browser's own store on each
+  device. It is registered only in the web build, and only over https or on this computer. The test of Build 14 serves
+  the site as GitHub Pages does and checks that the policy refuses nothing.
 
 ## 8. Honest limits
 
